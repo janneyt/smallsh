@@ -28,7 +28,7 @@ void variable_expansion(char *arg){
   int check = 1;
   printf("arg: %s", arg);
   while(check == 1){
-
+    printf("checking");
     // Extract pointer to beginning of $$
     char *discovery = strstr(arg, "$$");
     //printf("Discover: %s", discovery);
@@ -38,57 +38,75 @@ void variable_expansion(char *arg){
 
       // Get pid
       int pid = getpid();
-
-      // temporary strings to sew/append back in later
-      char *secondary = discovery + 2;
-      char *temporary;
-       char *initial = discovery;
-      // I started testing this with just ls $$ and thus I need to check if the secondary half of the original token exists
-      // I'm also checking to make sure it isn't empty as that will cause stpcpy to error
-      if(secondary && secondary[0]){
-        stpcpy(temporary, secondary);
-
-      } else {
-        // If the second half of the string doesn't exist, then we need temporary to simply be a null terminator
-        char end = '\0';
-        char temporary[2];
-        temporary[0] = end;
-        
+      if(pid < 0){
+        perror("Something went wrong with the fork");
       };
+     
 
       // I found these handy three lines on stackoverflow
       // The trick is that passing the NULL and 0 parameters gives you the length
       // of a potential integer you are about to convert to a string
       int length = snprintf( NULL, 0, "%d", pid);
+      if(length == 0){
+        perror("Could not find length of pid");
+      };
       char *buf = malloc(length + 1);
       snprintf( buf, length+1, "%d", pid);
-      //printf("stringified pid: %s", buf);
-     
-      // Now add the stringified pid by advancing discovery
-      // It's ok to overwrite the argument a little, we saved it temporaryily
-      for(int index = 0; index < length; index++){
-        *discovery = buf[index];
-        discovery++;
-      };
-
-      // If the length calculated above is shorter than $$ we need to edit out the final $
-      if(length == 1){
-        discovery++;
-      }
-
-      // This is really a form of error checking. Length == 0 means corrupted process id.
-      if(length == 0){
-        perror("Somehow the shell has no process id");
+      
+      // Need a temporary data member to save the soon to be overwritten data into
+      char *temporary = strdup(arg);
+      if(!temporary || !temporary[0]){
+        perror("Could not make temporary array");
         exit(EXIT_FAILURE);
-      }
-
-      // Finally, append the temporary array back onto the original
-      if(temporary[0] != '\0'){
-        strcat(initial, temporary);
       };
+
+      // I now have the length of the pid, it's stringified format, and the location it needs to be inserted
+      // All that's left is to insert it.
+      int buf_counter = 0 ;
+      int counter = 0;
+      int arg_len = strlen(arg);
+      while(*arg != '\0'){
+        counter++;
+        // Is it before the substring? Fill in with temporary
+        if(arg < discovery){
+          *arg++ = *temporary++;
+          counter++;
+        } else if(arg == discovery){
+          // This is the exact moment we begin insert the expanded variables 
+          for(; buf_counter < length; buf_counter++){
+            // Immediately insert pid
+            *arg++ = buf[buf_counter];
+        
+          };
+          
+          // Need to add white space for the tokenization later on
+          *arg++ = ' ';
+
+          // Make arg a separate string, so that strcat works with temporary
+          *arg++ = '\0';
+
+          // advance temporary two addresses so that the $$ is overwritten
+          temporary = temporary + 2;
+          
+          // Check if a newline character is at the end of temporary
+          int temp_len = strlen(temporary);
+          if(temporary[temp_len-1] == '\n'){
+            temporary[temp_len-1] = '\0';
+          };
+         
+          arg = arg-counter-2;                     // Go back to the beginning of arg
+          arg = strcat(arg, temporary);
+          arg_len = strlen(arg);
+          // Exit loop by setting arg to the null pointer
+          arg = arg+arg_len;
+          printf("arg %s",arg);
+          *arg = '\0';        
+        }      
+      }
 
       // Buf has to be dynamic, so we freed it
       free(buf);
+      printf("Leaving expansion");
     };
   }
 };
@@ -147,7 +165,8 @@ int thread_handling(struct Program_args current){
   
   pid_t pid, wpid;
   int status;
- 
+  int output_f;
+  int input_f;
 
 
   // Create a copy of the parent process
@@ -165,27 +184,34 @@ int thread_handling(struct Program_args current){
     // Redirection has to be done with open for the integer file description
     // Then fed to dup2, which requires an integer file description 
     // Then executed
-    if(current.input_file && current.output_file){
-      int input_f = open(current.input_file, O_RDONLY | O_CREAT, 0640);
+    if(current.input_file || current.output_file){
+      printf("\nInput file handling: %s\n", current.input_file);
+      if(current.input_file){
+        input_f = open(current.input_file, O_RDONLY | O_CREAT, 0644);
 
-      int output_f = open(current.output_file, O_RDWR | O_CREAT, 0640);
-      if(input_f != -1){
-        current.input_file_opened = input_f;
-        int input_result = dup2(input_f, 0); // stdin == 0 or FD 0
-        if(input_result == -1){
+        if(input_f != -1){
+          current.input_file_opened = input_f;
+          int input_result = dup2(input_f, 0); // stdin == 0 or FD 0
+          if(input_result == -1){
+            return EXIT_FAILURE;
+          };
+        } else{
+          return EXIT_FAILURE;
+          };
+      };
+      if(current.output_file){
+        output_f = open(current.output_file, O_RDWR | O_CREAT, 0644);
+
+        if(output_f != -1){
+          current.output_file_opened = output_f;
+          int output_result = dup2(output_f, 1); // stdout == 1 or FD 1
+          if(output_result == -1){
+            perror("Could not open or create output file");
+            return EXIT_FAILURE;
+          }
+        } else {
           return EXIT_FAILURE;
         };
-      } else{
-        return EXIT_FAILURE;
-      };
-      if(output_f != -1){
-        current.output_file_opened = output_f;
-        int output_result = dup2(output_f, 1); // stdout == 1 or FD 1
-        if(output_result == -1){
-          return EXIT_FAILURE;
-        }
-      } else {
-        return EXIT_FAILURE;
       };
     };
         // execv* allows the **char argument passing, which in turn means
@@ -194,9 +220,40 @@ int thread_handling(struct Program_args current){
     // Found this on a stackoverflow post
 
     if(execvp(current.arguments[0], current.arguments) == -1){
+      
+      if(output_f){
+          dup2(1, output_f);
+          if(close(output_f) == -1){
+            perror("Can't close output file, somehow.");
+            exit(EXIT_FAILURE);
+          };
+        };
+        if(input_f){
+          dup2(0, input_f);
+          if(close(input_f) == -1){
+            perror("Can't close input file, somehow.");
+          };
+        };
+     
+ 
       perror("Problem executing latest command. Please try again.");
       return EXIT_FAILURE;
     }
+
+      if(output_f){
+          dup2(1, output_f);
+          if(close(output_f) == -1){
+            perror("Can't close output file, somehow.");
+            exit(EXIT_FAILURE);
+          };
+        };
+        if(input_f){
+          dup2(0, input_f);
+          if(close(input_f) == -1){
+            perror("Can't close input file, somehow.");
+          };
+        };
+     
     
   }
   // And now deal with the parent
@@ -267,7 +324,13 @@ int command_loop(void){
       * */ 
      if(strcmp(args[index], ">")==0){
         
-        current.output_file = args[index];
+        // saving the current index in the output_file member will actually save ">". We want to save the file name, which is at
+        // index+1
+        current.output_file = args[index+1];
+        if(current.output_file == 0x0){
+          perror("Empty filename or corrupted command line arguments.");
+          return EXIT_FAILURE;
+        };
         in_args = 0;
       } else if(strcmp(args[index],"<")==0){
         current.input_file = args[index];
