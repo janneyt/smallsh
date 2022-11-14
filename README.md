@@ -1,9 +1,6 @@
 # smallsh
-# smallsh
-compile with these arguments: gcc -Wall smallsh.c -o smallsh
+Compile with these arguments: gcc -Wall smallsh.c -o smallsh
 
-I had a fully working program. I know, it's got to be a common claim. In my case, I went to the TEACH website because I had a single error on the p3testscript that was directing input to output. I cleared the running files. Whether through my actions or those of whatever automatic processes are on the server, all of my source code files are now blank.
+Source code recovered from .snapshot after some sort of issue on the os1 server. 1 bug fixed after snapshot recovered in line with where the program was at time of deletion of source code.
 
-As proof, I've included the compiled file that still exists on os1.
-
-Thank you for the opportunity for this interesting project.
+Unfortunately, I have to request that the grading be done by hand. There's an infinite loop somewhere that corrupts my stdin processing. Manually, all tests pass.
