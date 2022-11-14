@@ -245,8 +245,8 @@ char **split_line(char *line){
   return array_of_tokens;
 };
 
-void handle_SIGSTP(int signo){
-  char *message = "Caught SIGSTP: ";
+void handle_SIGTSTP(int signo){
+  char *message = "Caught SIGTSTP: ";
   char *informative = "Entering foreground-only mode, & is ignored";
   char *exiting = "Exiting foreground-only mode, you can use & to send a process to the background";
   char *weird_error = "Something went desperately wrong and the foreground is not in a binary state";
@@ -310,7 +310,7 @@ void handle_SIGINT(int signo){
 
 int thread_handling(struct Program_args current){
   
-  pid_t pid;
+  pid_t pid, wpid;
   int status;
   int output_f;
   int input_f;
@@ -446,9 +446,9 @@ int thread_handling(struct Program_args current){
       write(STDOUT_FILENO, actual_id, strlen(actual_id));
     };    
     do {
-      waitpid(pid, &status, hang);
+      wpid = waitpid(pid, &status, hang);
       
-    } while(!WIFEXITED(status)&!WIFSIGNALED(status));
+    } while(!WIFEXITED(status)&!WIFSIGNALED(status) && wpid == 0);
        // Remove pid from pids_smallsh_opened
     for(int index = 0; index < pid_counter -1; index++){
       int moving = 0;
@@ -650,19 +650,19 @@ int main(int argc, char **argv){
    * */
  
    struct sigaction SIGINT_action = {0};
-   struct sigaction SIGSTP_action = {0};
+   struct sigaction SIGTSTP_action = {0};
 
    SIGINT_action.sa_handler = handle_SIGINT;
-   SIGSTP_action.sa_handler = handle_SIGSTP;
+   SIGTSTP_action.sa_handler = handle_SIGTSTP;
 
    sigfillset(&SIGINT_action.sa_mask);
-   sigfillset(&SIGSTP_action.sa_mask);
+   sigfillset(&SIGTSTP_action.sa_mask);
 
    SIGINT_action.sa_flags = SA_RESTART;
-   SIGSTP_action.sa_flags = 0;
+   SIGTSTP_action.sa_flags = 0;
 
    sigaction(SIGINT, &SIGINT_action, NULL);
-   sigaction(SIGTSTP, &SIGSTP_action, NULL);
+   sigaction(SIGTSTP, &SIGTSTP_action, NULL);
    sigset_t smallsh_signals;
   
    sigaddset(&smallsh_signals, SIGINT);
