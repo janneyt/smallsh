@@ -1,0 +1,300 @@
+
+Test Case 1  		<single>
+   exit :  true
+
+
+Test Case 2  		<single>
+   EOF as input :  true
+
+
+Test Case 3  		<single>
+   $? as input :  true
+
+
+Test Case 4  		<single>
+   errored while inputting :  true
+
+
+Test Case 5  		<single>
+   errno is set before running :  true
+
+
+Test Case 6  		(Key = 0.0.0.0.1.1.2.1.0.0.1.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  true
+   child process stopped         :  false
+   child process signaled        :  true
+   getline interrupted by signal :  <n/a>
+   errno is set before running   :  <n/a>
+   user is root                  :  true
+
+
+Test Case 7  		(Key = 0.0.0.0.1.1.2.1.0.0.2.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  true
+   child process stopped         :  false
+   child process signaled        :  true
+   getline interrupted by signal :  <n/a>
+   errno is set before running   :  <n/a>
+   user is root                  :  false
+
+
+Test Case 8  		(Key = 0.0.0.0.1.1.2.2.1.0.1.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  true
+   child process stopped         :  false
+   child process signaled        :  false
+   getline interrupted by signal :  true
+   errno is set before running   :  <n/a>
+   user is root                  :  true
+
+
+Test Case 9  		(Key = 0.0.0.0.1.1.2.2.1.0.2.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  true
+   child process stopped         :  false
+   child process signaled        :  false
+   getline interrupted by signal :  true
+   errno is set before running   :  <n/a>
+   user is root                  :  false
+
+
+Test Case 10 		(Key = 0.0.0.0.1.1.2.2.2.0.1.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  true
+   child process stopped         :  false
+   child process signaled        :  false
+   getline interrupted by signal :  false
+   errno is set before running   :  <n/a>
+   user is root                  :  true
+
+
+Test Case 11 		(Key = 0.0.0.0.1.1.2.2.2.0.2.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  true
+   child process stopped         :  false
+   child process signaled        :  false
+   getline interrupted by signal :  false
+   errno is set before running   :  <n/a>
+   user is root                  :  false
+
+
+Test Case 12 		(Key = 0.0.0.0.1.2.1.2.1.0.1.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  false
+   child process stopped         :  true
+   child process signaled        :  false
+   getline interrupted by signal :  true
+   errno is set before running   :  <n/a>
+   user is root                  :  true
+
+
+Test Case 13 		(Key = 0.0.0.0.1.2.1.2.1.0.2.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  false
+   child process stopped         :  true
+   child process signaled        :  false
+   getline interrupted by signal :  true
+   errno is set before running   :  <n/a>
+   user is root                  :  false
+
+
+Test Case 14 		(Key = 0.0.0.0.1.2.1.2.2.0.1.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  false
+   child process stopped         :  true
+   child process signaled        :  false
+   getline interrupted by signal :  false
+   errno is set before running   :  <n/a>
+   user is root                  :  true
+
+
+Test Case 15 		(Key = 0.0.0.0.1.2.1.2.2.0.2.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  false
+   child process stopped         :  true
+   child process signaled        :  false
+   getline interrupted by signal :  false
+   errno is set before running   :  <n/a>
+   user is root                  :  false
+
+
+Test Case 16 		(Key = 0.0.0.0.1.2.2.1.0.0.1.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  false
+   child process stopped         :  false
+   child process signaled        :  true
+   getline interrupted by signal :  <n/a>
+   errno is set before running   :  <n/a>
+   user is root                  :  true
+
+
+Test Case 17 		(Key = 0.0.0.0.1.2.2.1.0.0.2.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  false
+   child process stopped         :  false
+   child process signaled        :  true
+   getline interrupted by signal :  <n/a>
+   errno is set before running   :  <n/a>
+   user is root                  :  false
+
+
+Test Case 18 		(Key = 0.0.0.0.1.2.2.2.1.0.1.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  false
+   child process stopped         :  false
+   child process signaled        :  false
+   getline interrupted by signal :  true
+   errno is set before running   :  <n/a>
+   user is root                  :  true
+
+
+Test Case 19 		(Key = 0.0.0.0.1.2.2.2.1.0.2.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  false
+   child process stopped         :  false
+   child process signaled        :  false
+   getline interrupted by signal :  true
+   errno is set before running   :  <n/a>
+   user is root                  :  false
+
+
+Test Case 20 		(Key = 0.0.0.0.1.2.2.2.2.0.1.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  false
+   child process stopped         :  false
+   child process signaled        :  false
+   getline interrupted by signal :  false
+   errno is set before running   :  <n/a>
+   user is root                  :  true
+
+
+Test Case 21 		(Key = 0.0.0.0.1.2.2.2.2.0.2.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  true
+   child process exited          :  false
+   child process stopped         :  false
+   child process signaled        :  false
+   getline interrupted by signal :  false
+   errno is set before running   :  <n/a>
+   user is root                  :  false
+
+
+Test Case 22 		(Key = 0.0.0.0.2.2.2.2.1.0.1.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  false
+   child process exited          :  false
+   child process stopped         :  false
+   child process signaled        :  false
+   getline interrupted by signal :  true
+   errno is set before running   :  <n/a>
+   user is root                  :  true
+
+
+Test Case 23 		(Key = 0.0.0.0.2.2.2.2.1.0.2.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  false
+   child process exited          :  false
+   child process stopped         :  false
+   child process signaled        :  false
+   getline interrupted by signal :  true
+   errno is set before running   :  <n/a>
+   user is root                  :  false
+
+
+Test Case 24 		(Key = 0.0.0.0.2.2.2.2.2.0.1.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  false
+   child process exited          :  false
+   child process stopped         :  false
+   child process signaled        :  false
+   getline interrupted by signal :  false
+   errno is set before running   :  <n/a>
+   user is root                  :  true
+
+
+Test Case 25 		(Key = 0.0.0.0.2.2.2.2.2.0.2.)
+   exit                          :  <n/a>
+   EOF as input                  :  <n/a>
+   $? as input                   :  <n/a>
+   errored while inputting       :  <n/a>
+   child process in background   :  false
+   child process exited          :  false
+   child process stopped         :  false
+   child process signaled        :  false
+   getline interrupted by signal :  false
+   errno is set before running   :  <n/a>
+   user is root                  :  false
+
