@@ -1,0 +1,68 @@
+
+Test Case 1  		<single>
+   IFS :  Not set
+
+
+Test Case 2  		<single>
+   IFS :  NULL
+
+
+Test Case 3  		(Key = 1.1.)
+   IFS    :  Set
+   Length :  512
+
+
+Test Case 4  		(Key = 1.2.)
+   IFS    :  Set
+   Length :  513
+
+
+Test Case 5  		(Key = 1.3.)
+   IFS    :  Set
+   Length :  511
+
+
+Test Case 6  		(Key = 1.4.)
+   IFS    :  Set
+   Length :  0
+
+
+Test Case 7  		(Key = 4.1.)
+   IFS    :  "\t\n"
+   Length :  512
+
+
+Test Case 8  		(Key = 4.2.)
+   IFS    :  "\t\n"
+   Length :  513
+
+
+Test Case 9  		(Key = 4.3.)
+   IFS    :  "\t\n"
+   Length :  511
+
+
+Test Case 10 		(Key = 4.4.)
+   IFS    :  "\t\n"
+   Length :  0
+
+
+Test Case 11 		(Key = 5.1.)
+   IFS    :  ""
+   Length :  512
+
+
+Test Case 12 		(Key = 5.2.)
+   IFS    :  ""
+   Length :  513
+
+
+Test Case 13 		(Key = 5.3.)
+   IFS    :  ""
+   Length :  511
+
+
+Test Case 14 		(Key = 5.4.)
+   IFS    :  ""
+   Length :  0
+
