@@ -11,6 +11,7 @@
 # include <stdlib.h>
 # include <assert.h>
 # include <stdint.h>
+
 # include <stdlib.h>
 # include <errno.h>
 
@@ -76,8 +77,6 @@ int util_int_to_string(int num, char* str, int size){
 	return EXIT_SUCCESS;
 }
 
-/* Specification Requirement Functions have spec_ prefix*/
-
 int spec_check_for_child_background_processes(int status, pid_t pid){
 	/**
 	 * \brief Checks if a pid in the same process group id has completed either normally or in various abnormal ways.
@@ -106,10 +105,14 @@ int spec_check_for_child_background_processes(int status, pid_t pid){
 			return EXIT_FAILURE;
 		};
 
+		
 	}
 	else if (WIFSTOPPED(status)) {
-		assert(!WIFEXITED(status) && !WIFSIGNALED(status));
-		
+		if(kill(pid, SIGCONT) != 0){
+			assert(!WIFEXITED(status) && !WIFSIGNALED(status));
+			perror("Kill didn't send a signal to continue, exiting");
+			exit(EXIT_FAILURE);
+		};
 		// kill() never returns above 0, so initializing it to 1 indicates kill has not run
 		int result = 1;
 		if((result = kill(pid, SIGCONT)) != 0){
@@ -117,7 +120,10 @@ int spec_check_for_child_background_processes(int status, pid_t pid){
 			errno = 0;
 			return EXIT_FAILURE;
 		}
-		assert(result == 0);
+		if(fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t) pid) < 0){
+			perror("Could not print");
+			assert(result == 0);
+		}
 		if(fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t) pid) < 0){
 			perror("Could not print error");
 			errno = 0;
