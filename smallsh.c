@@ -144,10 +144,18 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
 	 * in the passed input parameter
 	 *
 	 * */
-
+	
 	// input_length currently is zero, as nothing is entered. This would be the same as entering an empty string, so be careful
-	printf("$");
 	ssize_t input_length = 0;
+
+	// This program is constantly setting and resetting errno, so if errno has a value it hasn't been caught elsewhere
+	if(errno != 0){
+		errno = 0;
+	};
+	assert(errno == 0);
+
+	// PS1 print
+	printf("$");
 	if(( input_length = getline(&input, &input_size, stream)) < 0){
 		perror("Cannot fetch line from input");
 		clearerr(stream);
@@ -155,6 +163,32 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
 		return EXIT_FAILURE;
 	};
 	assert(input_length >= 0);
+	return EXIT_SUCCESS;
+}
+
+int test_input(){
+	// TODO: implement test case 1, where the exit command closes the shell
+
+	// TODO: implement test case 2, where EOF closes the shell
+	
+	// TODO: implement test case 4, where stdin is interrupted
+	
+	// TODO: setup and run child processes for test cases 6-21
+	
+	// TODO: interrupt spec_get_line with signal
+	
+	char input[LINESIZE];
+	size_t input_size = LINESIZE-1;
+
+	// Test Case 5: Errno is not zeroed out, make sure function can reset it
+	errno = -11;
+	spec_get_line(input, input_size, stdin);
+	if(errno != 0){
+		printf("\n***Failed test case 5: errno is set incorrectly before function is called***\n");		
+	};
+	errno = 0;
+
+	// Test Case 25: Send correct input with a file pointer and it returns the correct input
 	return EXIT_SUCCESS;
 }
 
@@ -170,7 +204,13 @@ int main(void){
 
 	// Variables needed for prompts declared outside the infinite loop to not create memory leaks
 	char line[LINESIZE];
-	size_t n = 0;
+	size_t line_size = LINESIZE-1;
+	
+	// Runtime debug testing to make sure functions act according to how I want
+	if(test_input() == EXIT_FAILURE){
+		printf("Input functions fail runtime tests\n");
+		exit(EXIT_FAILURE);
+	};	
 
 	for(;;){
 
@@ -191,9 +231,12 @@ int main(void){
 
 		// TODO: turn on a signal handler so that any signal prints a newline and for loop continues
 		// Print prompt TODO: change stdin to file stream variable when implemented
-		if(spec_get_line(line, n, stdin) == EXIT_SUCCESS){
+		if(spec_get_line(line, line_size, stdin) == EXIT_SUCCESS){
 			// Only in the singular case where we can verify input has succeeded are we heading out to any other function
 			
+		} else {
+			printf("error with spec_get_line");
+			exit(EXIT_FAILURE);
 		};
 		clearerr(stdin); //TODO: change stdin to the file stream variable when implemented
 		// TODO: turn off custom signal handler
