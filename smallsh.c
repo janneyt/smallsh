@@ -152,8 +152,8 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
 	 * */
 
 	// input_length currently is zero, as nothing is entered. This would be the same as entering an empty string, so be careful
-	printf("$");
 	ssize_t input_length = 0;
+	printf("$");
 	if(( input_length = getline(&input, &input_size, stream)) < 0){
 		perror("Cannot fetch line from input");
 		clearerr(stream);
