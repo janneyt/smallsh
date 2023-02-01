@@ -17,7 +17,8 @@
 # include <errno.h>
 
 # define STRINGSIZE 100
-# define LINESIZE   1000
+/** LINESIZE has to support 512 whitespace/character pairs */
+# define LINESIZE   1046
 
 /* Error Functions */
 
@@ -41,6 +42,39 @@ int err_child_error(char child_action[], char action_taken[]){
 }
 
 /* Utility functions */
+
+char* util_setenv(char* env_var, char* new_val){
+
+	// Save old IFS to restore later
+	char* old_var = getenv(env_var);
+	if(old_var == new_val){
+		return old_var;		
+	};
+	if(setenv(env_var,new_val, 1) != 0){
+		perror("Could not set env for %s to NULL. Shell needs to be restarted.");
+		exit(EXIT_FAILURE);
+	};
+	return getenv(env_var);
+
+
+}
+
+void util_reset_storage(char* storage[LINESIZE]){
+	/**
+	 * \brief resets a char** of size LINESIZE to a null terminated first byte
+	 *
+	 * @param storage is a char** with each memory address pointing to an array of size LINESIZE.
+	 *
+	 * *Memset does not return error codes*
+	 *
+	 * @return void as storage is released to calling function
+	 * */
+	printf("Resetting...");
+	for(int i = 0; i < LINESIZE; i++){
+
+		memset(storage[i], "\0", sizeof(char));
+	};
+}
 
 int util_int_to_string(int num, char* str, int size){
 	
@@ -173,17 +207,84 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
 	return EXIT_SUCCESS;
 }
 
+char** help_split_line(char** storage, char* line){
+	/**
+	 * \brief Helper function that tokenizes a line into an array of words
+	 *
+	 * @param line an array, with delimiters, of words needing to be tokenized
+	 * @param storage is an array of points needed to hold the tokenized words
+	 * @return an array of tokens
+	 * */
+	int 	bufsize = LINESIZE;
+	int 	position = 0;
+	char*	token;
+	char*	delim = getenv("IFS");
+	int	token_bufsize = 64;
+	char**  array_of_tokens = storage;
+
+	delim = (delim != 0x0) ? delim : "\t\n";
+	if(bufsize < 1){
+		printf("A buffer of 1 or more is needed for tokenization");
+		exit(EXIT_FAILURE);
+	};
+
+	// TODO: variable expansion needed here
+	
+	token = strtok(line, delim);
+	while(token != NULL){
+		array_of_tokens[position] = token;
+		position++;
+		if(position >= bufsize){
+			bufsize += token_bufsize;
+			if((array_of_tokens = realloc(array_of_tokens, bufsize * sizeof(char*))) == NULL){
+				perror("Cannot reallocate memory for array of tokens");
+				exit(EXIT_FAILURE);
+			};
+			
+		}
+		token = strtok(NULL, delim);
+	};
+
+	array_of_tokens[position] = NULL;
+	return array_of_tokens;
+
+} 
+
 int spec_word_splitting(char* storage[LINESIZE], char input[LINESIZE]){
 	/**
 	 * \brief Splits a word into tokens and fills a passed char** with each token
 	 *
 	 * @param storage is a char** with space to hold LINESIZE sized tokens
 	 * @param input is a char[LINESIZE] with @min an empty string and @max a single string of size LINESIZE
+	 * 
+	 * @return EXIT_SUCCESS if sentence can be tokenized, EXIT_FAILURE if it can't
 	 * */
+
+	if(strlen(input) < 1){
+		return EXIT_FAILURE;
+	};
+	storage = help_split_line(storage, input);
 	return EXIT_SUCCESS;
 }
 
 int test_input(){
+	char* storage[LINESIZE];
+	char* discardable;
+	char* IFS;
+	char* old_IFS;
+	char str[LINESIZE];
+
+	/** ### Utility Function Testing */
+
+	char* test_input[LINESIZE];
+	char* test_string = "Ted";
+	test_input[0] = test_string;
+	printf("Running test..");
+	fflush(stdout);
+	util_reset_storage(test_input);
+	assert(test_input == 0x0);
+	/** ### Spec Function Testing */
+
 	// TODO: implement test case 1, where the exit command closes the shell
 
 	// TODO: implement test case 2, where EOF closes the shell
@@ -207,11 +308,10 @@ int test_input(){
 
 	// Test Case 25: Send correct input with a file pointer and it returns the correct input
 	
-	// Word Splitting Test Case 1 and 2
-	if(setenv("IFS","\0", 1) != 0){
-		perror("Could not set env for IFS to NULL");
-	};
-	char *storage[LINESIZE];
+	// Word Splitting Test Case TODO: IFS is set to NULL
+	
+	// Save old IFS to restore later
+	old_IFS = util_setenv("IFS",NULL);
 	*storage = input;
 	strcat(input, "Ted is here");
 	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
@@ -219,7 +319,248 @@ int test_input(){
 	assert(storage[1] = "is");
 	assert(storage[2] = "here");
 
+	// Word Splitting Test Case 1: the length of the inputted string is zero
+	char* empty_str = "";
+	memset(input, strlen(input), sizeof(char));
+	strcat(input, empty_str);
+	assert(spec_word_splitting(storage, input) == EXIT_FAILURE);
+	
+	// Word Splitting Test Case 3: the inputted string is a null byte
+	strcat(input, "\0");
+	assert(spec_word_splitting(storage, input) == EXIT_FAILURE);
 
+	// Word Splitting Test Case 4: "EOF" as a string is passed as input
+	strcat(input, "EOF");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(*storage = "EOF");
+
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 5: EOF is passed as input
+	if(util_int_to_string(EOF, str, strlen("EOF")) == EXIT_FAILURE){
+		printf("Can't convert int EOF to string");
+		exit(EXIT_FAILURE);
+	};
+	strcat(input, str);
+	assert(spec_word_splitting(storage, input) == EXIT_FAILURE);
+
+	// Word Splitting Test Case 6: NULL is passed as input
+	strcat(input, "NULL");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(*storage = "NULL");
+	
+	util_reset_storage(storage);	
+
+	// Word Splitting Test Case 7: "NULL" is passed as input
+	assert(spec_word_splitting(storage, 0x0) == EXIT_FAILURE);
+	
+	
+	// Word Splitting Test Case 10: IFS is NULL, length of input is 512, LINESIZE is 0, input length array is size 1, the word passed is "Ted"
+	if((IFS = util_setenv("IFS", NULL)) == old_IFS){
+		printf("Can't set IFS from %s to %s", old_IFS, "NULL");
+
+	};
+	strcat(input, "Ted");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "Ted"));
+	assert(strcmp(storage[1], "\0"));
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 11: IFS is NULL, sentence passed is "Ted is"
+	strcat(input, "Ted is");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "Ted") == 0);
+	assert(strcmp(storage[1], "is") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 12: IFS is NULL, length is 512, sentence is a 512 character long word
+	strcat(input, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], input) == 0);
+	assert(strcmp(storage[1], "") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 13: IFS is NULL, length is 513 (above minimum required), sentence is a 513 character long word
+	strcat(input, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghaijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], input) == 0);
+	assert(strcmp(storage[1], "") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 14: IFS is NULL, length is 512, sentence is 512 words
+	strcat(input, "AA B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z ");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "AA") == 0);
+	assert(strcmp(storage[1], "B") == 0);
+	assert(strcmp(storage[512], "z") == 0);
+	util_reset_storage(storage);
+
+
+	// Word Splitting Test Case 15: IFS is NULL, length is 513 (more than required minimum), sentence is 513 words
+	strcat(input, "A A B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z ");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "A") == 0);
+	assert(strcmp(storage[1], "B") == 0);
+	assert(strcmp(storage[512], "z") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 16: IFS is NULL, length is 512, sentence is 512 words, no trailing whitespace
+	strcat(input, "AA B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "AA") == 0);
+	assert(strcmp(storage[1], "B") == 0);
+	assert(strcmp(storage[512], "z") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 17: IFS is NULL, length is 513, sentence is 513 words, no trailing whitespace
+	strcat(input, "A A B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "A") == 0);
+	assert(strcmp(storage[1], "B") == 0);
+	assert(strcmp(storage[512], "z") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 18: IFS is \t\n, length is 512, sentence is 512 words, no trailing whitespace
+	
+	if((discardable = util_setenv("IFS", "\t\n")) == NULL){
+		printf("Cannot set IFS from %s to %s. Restart shell.", "NULL", "\t\n");
+		exit(EXIT_FAILURE);
+	};
+
+	// Word Splitting Test Case 12b: IFS is \t\n, length is 512, sentence is a 512 character long word
+	strcat(input, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], input) == 0);
+	assert(strcmp(storage[1], "") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 13b: IFS is \t\n, length is 513 (above minimum required), sentence is a 513 character long word
+	strcat(input, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghaijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], input) == 0);
+	assert(strcmp(storage[1], "") == 0);
+	util_reset_storage(storage);
+
+
+	strcat(input, "AA B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "AA") == 0);
+	assert(strcmp(storage[1], "B") == 0);
+	assert(strcmp(storage[512], "z") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 19: IFS is \t\n, length is 512, sentence is 512 words, trailing whitespace
+	strcat(input, "AA B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z ");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "AA") == 0);
+	assert(strcmp(storage[1], "B") == 0);
+	assert(strcmp(storage[512], "z") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 20: IFS is \t\n, length is 513, sentence is 513 words, trailing whitespace
+	strcat(input, "A A B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z ");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "A A") == 0);
+	assert(strcmp(storage[1], "B") == 0);
+	assert(strcmp(storage[512], "z") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 21: IFS is \t\n, length is 513, sentence is 513 words, trailing whitespace
+	strcat(input, "A A B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z ");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "A A") == 0);
+	assert(strcmp(storage[1], "B") == 0);
+	assert(strcmp(storage[512], "z") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 22: IFS is \t\n, length is 1, sentence is 1 word, no trailing whitespace
+	strcat(input, "i");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "i") == 0);
+	assert(strcmp(storage[1], "\0") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 23: IFS is \t\n, length is 2, sentence is 1 word, trailing whitespace
+	strcat(input, "i ");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "i") == 0);
+	assert(strcmp(storage[1], "\0") == 0);
+	util_reset_storage(storage);
+
+
+	// Word Splitting Test Case 24: IFS is " ", length is 512, sentence is 512 words, no trailing whitespace
+	if((discardable = util_setenv("IFS", " ")) == old_IFS){
+		printf("Can't set IFS from %s to empty strings", old_IFS);
+		exit(EXIT_FAILURE);
+	};
+
+	// Word Splitting Test Case 12c: IFS is " ", length is 512, sentence is a 512 character long word
+	strcat(input, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], input) == 0);
+	assert(strcmp(storage[1], "") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 13c: IFS is " ", length is 513 (above minimum required), sentence is a 513 character long word
+	strcat(input, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghaijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], input) == 0);
+	assert(strcmp(storage[1], "") == 0);
+	util_reset_storage(storage);
+
+
+	strcat(input, "AA B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "AA") == 0);
+	assert(strcmp(storage[1], "B") == 0);
+	assert(strcmp(storage[512], "z") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 19: IFS is " ", length is 512, sentence is 512 words, trailing whitespace
+	strcat(input, "AA B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z ");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "AA") == 0);
+	assert(strcmp(storage[1], "B") == 0);	
+	assert(strcmp(storage[512], "z") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 20: IFS is " ", length is 513, sentence is 513 words, trailing whitespace
+	strcat(input, "A A B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z ");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "A A") == 0);
+	assert(strcmp(storage[1], "B") == 0);
+	assert(strcmp(storage[512], "z") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 21: IFS is " ", length is 513, sentence is 513 words, trailing whitespace
+	strcat(input, "A A B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z ");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "A A") == 0);
+	assert(strcmp(storage[1], "B") == 0);
+	assert(strcmp(storage[512], "z") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 22: IFS is " ", length is 1, sentence is 1 word, no trailing whitespace
+	strcat(input, "i");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "i") == 0);
+	assert(strcmp(storage[1], "\0") == 0);
+	util_reset_storage(storage);
+
+	// Word Splitting Test Case 23: IFS is " ", length is 2, sentence is 1 word, trailing whitespace
+	strcat(input, "i ");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(strcmp(storage[0], "i") == 0);
+	assert(strcmp(storage[1], "\0") == 0);
+	util_reset_storage(storage);
+
+
+
+	char* reset_IFS = util_setenv("IFS", old_IFS);
+	if(reset_IFS != old_IFS){
+		printf("Something went wrong resetting the IFS, verify it is only stored once in the old_IFS variable");
+		exit(EXIT_FAILURE);
+	};
 	return EXIT_SUCCESS;
 }
 
@@ -241,7 +582,7 @@ int main(void){
 	if(test_input() == EXIT_FAILURE){
 		printf("Input functions fail runtime tests\n");
 		exit(EXIT_FAILURE);
-	};	
+	};
 
 	for(;;){
 
