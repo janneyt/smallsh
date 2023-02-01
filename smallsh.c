@@ -1,6 +1,7 @@
 /**\brief Need this to compile with kill() and -std=c99 */
 # define _POSIX_SOURCE
-# define  _GNU_SOURCE
+# define _GNU_SOURCE
+# define _POSIC_C_SOURCE >= 200112L
 
 # include <stdio.h>
 # include <sys/types.h>
@@ -172,6 +173,16 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
 	return EXIT_SUCCESS;
 }
 
+int spec_word_splitting(char* storage[LINESIZE], char input[LINESIZE]){
+	/**
+	 * \brief Splits a word into tokens and fills a passed char** with each token
+	 *
+	 * @param storage is a char** with space to hold LINESIZE sized tokens
+	 * @param input is a char[LINESIZE] with @min an empty string and @max a single string of size LINESIZE
+	 * */
+	return EXIT_SUCCESS;
+}
+
 int test_input(){
 	// TODO: implement test case 1, where the exit command closes the shell
 
@@ -195,6 +206,20 @@ int test_input(){
 	errno = 0;
 
 	// Test Case 25: Send correct input with a file pointer and it returns the correct input
+	
+	// Word Splitting Test Case 1 and 2
+	if(setenv("IFS","\0", 1) != 0){
+		perror("Could not set env for IFS to NULL");
+	};
+	char *storage[LINESIZE];
+	*storage = input;
+	strcat(input, "Ted is here");
+	assert(spec_word_splitting(storage, input) == EXIT_SUCCESS);
+	assert(*storage = "Ted" );
+	assert(storage[1] = "is");
+	assert(storage[2] = "here");
+
+
 	return EXIT_SUCCESS;
 }
 
