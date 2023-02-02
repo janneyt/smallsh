@@ -12,6 +12,7 @@
 # include <stdlib.h>
 # include <assert.h>
 # include <stdint.h>
+# include "utilities/utilities.h"
 
 # include <stdlib.h>
 # include <errno.h>
