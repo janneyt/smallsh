@@ -1,0 +1,384 @@
+
+Test Case 1  		(Key = 1.1.1.1.1.)
+   ~/  :  At beginning
+   $$  :  Present
+   $?  :  Present
+   $!  :  Present
+   IFS :  Set
+
+
+Test Case 2  		(Key = 1.1.1.1.2.)
+   ~/  :  At beginning
+   $$  :  Present
+   $?  :  Present
+   $!  :  Present
+   IFS :  Unset
+
+
+Test Case 3  		(Key = 1.1.1.2.1.)
+   ~/  :  At beginning
+   $$  :  Present
+   $?  :  Present
+   $!  :  Not present
+   IFS :  Set
+
+
+Test Case 4  		(Key = 1.1.1.2.2.)
+   ~/  :  At beginning
+   $$  :  Present
+   $?  :  Present
+   $!  :  Not present
+   IFS :  Unset
+
+
+Test Case 5  		(Key = 1.1.2.1.1.)
+   ~/  :  At beginning
+   $$  :  Present
+   $?  :  Not present
+   $!  :  Present
+   IFS :  Set
+
+
+Test Case 6  		(Key = 1.1.2.1.2.)
+   ~/  :  At beginning
+   $$  :  Present
+   $?  :  Not present
+   $!  :  Present
+   IFS :  Unset
+
+
+Test Case 7  		(Key = 1.1.2.2.1.)
+   ~/  :  At beginning
+   $$  :  Present
+   $?  :  Not present
+   $!  :  Not present
+   IFS :  Set
+
+
+Test Case 8  		(Key = 1.1.2.2.2.)
+   ~/  :  At beginning
+   $$  :  Present
+   $?  :  Not present
+   $!  :  Not present
+   IFS :  Unset
+
+
+Test Case 9  		(Key = 1.2.1.1.1.)
+   ~/  :  At beginning
+   $$  :  Not present
+   $?  :  Present
+   $!  :  Present
+   IFS :  Set
+
+
+Test Case 10 		(Key = 1.2.1.1.2.)
+   ~/  :  At beginning
+   $$  :  Not present
+   $?  :  Present
+   $!  :  Present
+   IFS :  Unset
+
+
+Test Case 11 		(Key = 1.2.1.2.1.)
+   ~/  :  At beginning
+   $$  :  Not present
+   $?  :  Present
+   $!  :  Not present
+   IFS :  Set
+
+
+Test Case 12 		(Key = 1.2.1.2.2.)
+   ~/  :  At beginning
+   $$  :  Not present
+   $?  :  Present
+   $!  :  Not present
+   IFS :  Unset
+
+
+Test Case 13 		(Key = 1.2.2.1.1.)
+   ~/  :  At beginning
+   $$  :  Not present
+   $?  :  Not present
+   $!  :  Present
+   IFS :  Set
+
+
+Test Case 14 		(Key = 1.2.2.1.2.)
+   ~/  :  At beginning
+   $$  :  Not present
+   $?  :  Not present
+   $!  :  Present
+   IFS :  Unset
+
+
+Test Case 15 		(Key = 1.2.2.2.1.)
+   ~/  :  At beginning
+   $$  :  Not present
+   $?  :  Not present
+   $!  :  Not present
+   IFS :  Set
+
+
+Test Case 16 		(Key = 1.2.2.2.2.)
+   ~/  :  At beginning
+   $$  :  Not present
+   $?  :  Not present
+   $!  :  Not present
+   IFS :  Unset
+
+
+Test Case 17 		(Key = 2.1.1.1.1.)
+   ~/  :  Anywhere else
+   $$  :  Present
+   $?  :  Present
+   $!  :  Present
+   IFS :  Set
+
+
+Test Case 18 		(Key = 2.1.1.1.2.)
+   ~/  :  Anywhere else
+   $$  :  Present
+   $?  :  Present
+   $!  :  Present
+   IFS :  Unset
+
+
+Test Case 19 		(Key = 2.1.1.2.1.)
+   ~/  :  Anywhere else
+   $$  :  Present
+   $?  :  Present
+   $!  :  Not present
+   IFS :  Set
+
+
+Test Case 20 		(Key = 2.1.1.2.2.)
+   ~/  :  Anywhere else
+   $$  :  Present
+   $?  :  Present
+   $!  :  Not present
+   IFS :  Unset
+
+
+Test Case 21 		(Key = 2.1.2.1.1.)
+   ~/  :  Anywhere else
+   $$  :  Present
+   $?  :  Not present
+   $!  :  Present
+   IFS :  Set
+
+
+Test Case 22 		(Key = 2.1.2.1.2.)
+   ~/  :  Anywhere else
+   $$  :  Present
+   $?  :  Not present
+   $!  :  Present
+   IFS :  Unset
+
+
+Test Case 23 		(Key = 2.1.2.2.1.)
+   ~/  :  Anywhere else
+   $$  :  Present
+   $?  :  Not present
+   $!  :  Not present
+   IFS :  Set
+
+
+Test Case 24 		(Key = 2.1.2.2.2.)
+   ~/  :  Anywhere else
+   $$  :  Present
+   $?  :  Not present
+   $!  :  Not present
+   IFS :  Unset
+
+
+Test Case 25 		(Key = 2.2.1.1.1.)
+   ~/  :  Anywhere else
+   $$  :  Not present
+   $?  :  Present
+   $!  :  Present
+   IFS :  Set
+
+
+Test Case 26 		(Key = 2.2.1.1.2.)
+   ~/  :  Anywhere else
+   $$  :  Not present
+   $?  :  Present
+   $!  :  Present
+   IFS :  Unset
+
+
+Test Case 27 		(Key = 2.2.1.2.1.)
+   ~/  :  Anywhere else
+   $$  :  Not present
+   $?  :  Present
+   $!  :  Not present
+   IFS :  Set
+
+
+Test Case 28 		(Key = 2.2.1.2.2.)
+   ~/  :  Anywhere else
+   $$  :  Not present
+   $?  :  Present
+   $!  :  Not present
+   IFS :  Unset
+
+
+Test Case 29 		(Key = 2.2.2.1.1.)
+   ~/  :  Anywhere else
+   $$  :  Not present
+   $?  :  Not present
+   $!  :  Present
+   IFS :  Set
+
+
+Test Case 30 		(Key = 2.2.2.1.2.)
+   ~/  :  Anywhere else
+   $$  :  Not present
+   $?  :  Not present
+   $!  :  Present
+   IFS :  Unset
+
+
+Test Case 31 		(Key = 2.2.2.2.1.)
+   ~/  :  Anywhere else
+   $$  :  Not present
+   $?  :  Not present
+   $!  :  Not present
+   IFS :  Set
+
+
+Test Case 32 		(Key = 2.2.2.2.2.)
+   ~/  :  Anywhere else
+   $$  :  Not present
+   $?  :  Not present
+   $!  :  Not present
+   IFS :  Unset
+
+
+Test Case 33 		(Key = 3.1.1.1.1.)
+   ~/  :  Not present
+   $$  :  Present
+   $?  :  Present
+   $!  :  Present
+   IFS :  Set
+
+
+Test Case 34 		(Key = 3.1.1.1.2.)
+   ~/  :  Not present
+   $$  :  Present
+   $?  :  Present
+   $!  :  Present
+   IFS :  Unset
+
+
+Test Case 35 		(Key = 3.1.1.2.1.)
+   ~/  :  Not present
+   $$  :  Present
+   $?  :  Present
+   $!  :  Not present
+   IFS :  Set
+
+
+Test Case 36 		(Key = 3.1.1.2.2.)
+   ~/  :  Not present
+   $$  :  Present
+   $?  :  Present
+   $!  :  Not present
+   IFS :  Unset
+
+
+Test Case 37 		(Key = 3.1.2.1.1.)
+   ~/  :  Not present
+   $$  :  Present
+   $?  :  Not present
+   $!  :  Present
+   IFS :  Set
+
+
+Test Case 38 		(Key = 3.1.2.1.2.)
+   ~/  :  Not present
+   $$  :  Present
+   $?  :  Not present
+   $!  :  Present
+   IFS :  Unset
+
+
+Test Case 39 		(Key = 3.1.2.2.1.)
+   ~/  :  Not present
+   $$  :  Present
+   $?  :  Not present
+   $!  :  Not present
+   IFS :  Set
+
+
+Test Case 40 		(Key = 3.1.2.2.2.)
+   ~/  :  Not present
+   $$  :  Present
+   $?  :  Not present
+   $!  :  Not present
+   IFS :  Unset
+
+
+Test Case 41 		(Key = 3.2.1.1.1.)
+   ~/  :  Not present
+   $$  :  Not present
+   $?  :  Present
+   $!  :  Present
+   IFS :  Set
+
+
+Test Case 42 		(Key = 3.2.1.1.2.)
+   ~/  :  Not present
+   $$  :  Not present
+   $?  :  Present
+   $!  :  Present
+   IFS :  Unset
+
+
+Test Case 43 		(Key = 3.2.1.2.1.)
+   ~/  :  Not present
+   $$  :  Not present
+   $?  :  Present
+   $!  :  Not present
+   IFS :  Set
+
+
+Test Case 44 		(Key = 3.2.1.2.2.)
+   ~/  :  Not present
+   $$  :  Not present
+   $?  :  Present
+   $!  :  Not present
+   IFS :  Unset
+
+
+Test Case 45 		(Key = 3.2.2.1.1.)
+   ~/  :  Not present
+   $$  :  Not present
+   $?  :  Not present
+   $!  :  Present
+   IFS :  Set
+
+
+Test Case 46 		(Key = 3.2.2.1.2.)
+   ~/  :  Not present
+   $$  :  Not present
+   $?  :  Not present
+   $!  :  Present
+   IFS :  Unset
+
+
+Test Case 47 		(Key = 3.2.2.2.1.)
+   ~/  :  Not present
+   $$  :  Not present
+   $?  :  Not present
+   $!  :  Not present
+   IFS :  Set
+
+
+Test Case 48 		(Key = 3.2.2.2.2.)
+   ~/  :  Not present
+   $$  :  Not present
+   $?  :  Not present
+   $!  :  Not present
+   IFS :  Unset
+

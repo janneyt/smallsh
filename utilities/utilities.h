@@ -1,7 +1,4 @@
 /**\brief Need this to compile with kill() and -std=c99 */
-# define _POSIX_SOURCE
-# define _GNU_SOURCE
-# define _POSIC_C_SOURCE >= 200112L
 
 # include <stdio.h>
 # include <sys/types.h>
@@ -21,7 +18,7 @@
 # define LINESIZE   1046
 # define DELIMITER  " \t\n"
 
-char* util_setenv(char* env_var, char* new_val)
+char* util_setenv(char* env_var, char* new_val);
 	/**
 	 * \brief Sets the environment variable *with error checking*
 	 *
@@ -31,7 +28,7 @@ char* util_setenv(char* env_var, char* new_val)
 	 * @return Returns the old variable if it is identical to the new value, returns the new variable if setting the variable was successful, and exits entirely if writing to the environment fails
 	 * */
 
-void util_reset_storage(char* storage[LINESIZE]){
+void util_reset_storage(char* storage[LINESIZE]);
 	/**
 	 * \brief resets a char** of size LINESIZE to a null terminated first byte
 	 *
@@ -41,10 +38,8 @@ void util_reset_storage(char* storage[LINESIZE]){
 	 *
 	 * @return void as storage is released to calling function
 	 * */
-}
 
-int util_int_to_string(int num, char* str, int size){
-	
+int util_int_to_string(int num, char* str, int size);	
 	/**
 	 * \brief Converts an integer to its strings representation
 	 *
@@ -55,4 +50,3 @@ int util_int_to_string(int num, char* str, int size){
 	 * string, EXIT_FAILURE if integer cannot be convered to string
 	 *
 	 */
-}
