@@ -620,7 +620,7 @@ int test_input(){
 	util_reset_storage(storage);
 
 	// Word Splitting Test Case 23: IFS is " ", length is 2, sentence is 1 word, trailing whitespace
-	printf("Test case 23");
+	printf("Test case 23\n");
 	fflush(stdout);
 	fflush(stderr);
 	strcpy(input, "i ");
@@ -630,10 +630,16 @@ int test_input(){
 	util_reset_storage(storage);
 
 
+	if(old_IFS == 0x0){
+		old_IFS = " ";
+	};
+	if(setenv("IFS", old_IFS, 0) != 0){
+		perror("Setting IFS failed");
+		exit(EXIT_FAILURE);
+	};
+	if(strcmp(getenv("IFS"),old_IFS) != 0){
 
-	char* reset_IFS = util_setenv("IFS", old_IFS);
-	if(reset_IFS != old_IFS){
-		printf("Something went wrong resetting the IFS, verify it is only stored once in the old_IFS variable");
+		printf("Something went wrong resetting the IFS:*%s*, verify it is only stored once in the old_IFS:*%s* variable",getenv("IFS"), old_IFS);
 		exit(EXIT_FAILURE);
 	};
 	return EXIT_SUCCESS;
