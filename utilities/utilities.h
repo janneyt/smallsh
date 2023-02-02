@@ -13,10 +13,14 @@
 # include <stdlib.h>
 # include <errno.h>
 
-# define STRINGSIZE 100
-/** LINESIZE has to support 512 whitespace/character pairs */
-# define LINESIZE   1046
-# define DELIMITER  " \t\n"
+# include "constants/constants.h"
+
+char* util_envi_var_to_fixed_array(char env_var[LINESIZE], char fixed_array){
+	if(env_var == NULL){
+		perror("environment variable has errored");
+		return EXIT_FAILURE;
+	};
+};
 
 char* util_setenv(char* env_var, char* new_val);
 	/**

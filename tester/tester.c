@@ -1,8 +1,3 @@
-/**\brief Need this to compile with kill() and -std=c99 */
-# define _POSIX_SOURCE
-# define _GNU_SOURCE
-# define _POSIC_C_SOURCE >= 200112L
-
 # include <stdio.h>
 # include <sys/types.h>
 # include <signal.h>
@@ -12,269 +7,16 @@
 # include <stdlib.h>
 # include <assert.h>
 # include <stdint.h>
+# include "../constants/constants.h"
+# include "../utilities/utilities.h"
+# include "../error/error.h"
+# include "../input/input.h"
+# include "../expansion/expansion.h"
 
 # include <stdlib.h>
 # include <errno.h>
 
-# define STRINGSIZE 100
-/** LINESIZE has to support 512 whitespace/character pairs */
-# define LINESIZE   1046
-# define DELIMITER  " \t\n"
-
-/* Error Functions */
-
-int err_child_error(char child_action[], char action_taken[]){
-	/**
-	 * \brief Produces an error because a child process has completed in a systematic way.
-	 *
-	 * @param child_action is a string of arbitrary size that represents *what* caused completion
-	 * @param action_taken is a string of arbtrary size that represents *what was the result* such as continuing or exiting.
-	 *
-	 * *Writes to stderr*
-	 *
-	 * @return EXIT_SUCCESS if process successfully writes to stderr, EXIT_FAILURE if there was an error while writing
-	 */
-	if(fprintf(stderr, "Child process %s. %s.", child_action, action_taken) < 0){
-		perror("Could not print error");
-		errno = 0;
-		return EXIT_FAILURE;
-	};
-	return (EXIT_SUCCESS);
-}
-
-/* Utility functions */
-
-char* util_setenv(char* env_var, char* new_val){
-
-	// Save old IFS to restore later
-	char* old_var = getenv(env_var);
-	if(old_var == new_val){
-		return old_var;		
-	};
-	if(setenv(env_var,new_val, 1) != 0){
-		perror("Could not set env for %s to NULL. Shell needs to be restarted.");
-		exit(EXIT_FAILURE);
-	};
-	return getenv(env_var);
-
-
-}
-
-void util_reset_storage(char* storage[LINESIZE]){
-	/**
-	 * \brief resets a char** of size LINESIZE to a null terminated first byte
-	 *
-	 * @param storage is a char** with each memory address pointing to an array of size LINESIZE.
-	 *
-	 * *Memset does not return error codes*
-	 *
-	 * @return void as storage is released to calling function
-	 * */
-	for(int i = 0; i < LINESIZE; i++){
-		memset(&storage[i], '\0',1);	
-	};
-}
-
-int util_int_to_string(int num, char* str, int size){
-	
-	/**
-	 * \brief Converts an integer to its strings representation
-	 *
-	 * @param num is the integer that needs to be converted to a string
-	 * @param str is the holder string that stores the integer representation
-	 * @param size is the maximum length possible to store in str, including \0
-	 * @return EXIT_SUCCESS if integer has been entirely converted to 
-	 * string, EXIT_FAILURE if integer cannot be convered to string
-	 *
-	 */
-	
-
-	char *temp = malloc(size);
-	
-	memset(str, 0, sizeof(*str));
-	if(sprintf(temp, "%d", num) < 0){
-		perror("Could not convert integer to string");
-		errno = 0;
-		free(temp);
-		return EXIT_FAILURE;
-	};
-	assert(atoi(temp) == num);
-	if(strlen(str) > strlen(temp)){
-		perror("Input string was too small to hold integer to string conversion value");
-		errno = 0;
-		free(temp);
-		return EXIT_FAILURE;
-	};
-	assert(strlen(str) <= strlen(temp));
-	if(strcat(str, temp) == NULL){
-		perror("Could not convert integer to string");
-		errno = 0;
-		free(temp);
-		return EXIT_FAILURE;
-	};
-	assert(atoi(str) == num);
-	free(temp);
-	return EXIT_SUCCESS;
-}
-
-int spec_check_for_child_background_processes(int status, pid_t pid){
-	/**
-	 * \brief Checks if a pid in the same process group id has completed either normally or in various abnormal ways.
-	 * 
-	 * @param status is the status of the pid in question
-	 * @param pid is the process id of the process in question
-	 *
-	 * *Writes to stderr*
-	 *
-	 * `check_for_child_background_processes` is required to meet a specification requirement
-	 *
-	 * @return EXIT_FAILURE if printing to stderr didn't work, EXIT_SUCCESS if printing to stderr works.
-	 */
-	if (WIFEXITED(status)){
-		if(fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) pid, WEXITSTATUS(status)) < 0){
-			perror("Could not print error");
-			errno = 0;
-			return EXIT_FAILURE;
-		};
-	}
-	else if (WIFSIGNALED(status)){
-		assert(!WIFEXITED(status));
-		if(fprintf(stderr, "Child process %jd done. Signaled %d.\n", (intmax_t) pid, WTERMSIG(status)) < 0){
-			perror("Could not print error");
-			errno = 0;
-			return EXIT_FAILURE;
-		};
-
-		
-	}
-	else if (WIFSTOPPED(status)) {
-		if(kill(pid, SIGCONT) != 0){
-			assert(!WIFEXITED(status) && !WIFSIGNALED(status));
-			perror("Kill didn't send a signal to continue, exiting");
-			exit(EXIT_FAILURE);
-		};
-		// kill() never returns above 0, so initializing it to 1 indicates kill has not run
-		int result = 1;
-		if((result = kill(pid, SIGCONT)) != 0){
-			perror("Kill didn't work");
-			errno = 0;
-			return EXIT_FAILURE;
-		}
-		if(fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t) pid) < 0){
-			perror("Could not print");
-			assert(result == 0);
-		}
-		if(fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t) pid) < 0){
-			perror("Could not print error");
-			errno = 0;
-			return EXIT_FAILURE;
-		};
-
-	}
-	assert(!WIFSTOPPED(status) && !WIFEXITED(status) && !WIFSIGNALED(status));
-	return EXIT_SUCCESS;
-}
-
-int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
-	/**
-	 * \brief Gets the input and returns it. Has it's own signal handling.
-	 * 
-	 * @param input[] a character array 
-	 * @param input_size is the size of the input *array*
-	 * @param stream is a FILE* file pointer and allows for redirection.
-	 *
-	 * *Be careful to not overrun input*
-	 *
-	 * *This is a specification requirement function*
-	 * @return EXIT_FAILURE if any part of the function errors, EXIT_SUCCESS if there's a valid input (and the full input) 
-	 * in the passed input parameter
-	 *
-	 * */
-	
-	// input_length currently is zero, as nothing is entered. This would be the same as entering an empty string, so be careful
-	ssize_t input_length = 0;
-
-	// This program is constantly setting and resetting errno, so if errno has a value it hasn't been caught elsewhere
-	if(errno != 0){
-		errno = 0;
-	};
-	assert(errno == 0);
-
-	// PS1 print
-	printf("$");
-	if(( input_length = getline(&input, &input_size, stream)) < 0){
-		perror("Cannot fetch line from input");
-		clearerr(stream);
-		errno = 0;
-		return EXIT_FAILURE;
-	};
-	assert(input_length >= 0);
-	return EXIT_SUCCESS;
-}
-
-char** help_split_line(char** storage, char* line){
-	/**
-	 * \brief Helper function that tokenizes a line into an array of words
-	 *
-	 * @param line an array, with delimiters, of words needing to be tokenized
-	 * @param storage is an array of points needed to hold the tokenized words
-	 * @return an array of tokens
-	 * */
-	int 	bufsize = LINESIZE;
-	int 	position = 0;
-	char*	token;
-	char*	delim = getenv("IFS");
-	int	token_bufsize = 64;
-	char**  array_of_tokens = storage;
-
-	delim = (delim != 0x0) ? delim : DELIMITER;
-	
-	if(bufsize < 1){
-		printf("A buffer of 1 or more is needed for tokenization");
-		exit(EXIT_FAILURE);
-	};
-
-	// TODO: variable expansion needed here
-	
-	token = strtok(line, delim);
-	while(token != NULL){
-		array_of_tokens[position] = token;
-		position++;
-		if(position >= bufsize){
-			bufsize += token_bufsize;
-			if((array_of_tokens = realloc(array_of_tokens, bufsize * sizeof(char*))) == NULL){
-				perror("Cannot reallocate memory for array of tokens");
-				exit(EXIT_FAILURE);
-			};
-			
-		}
-		token = strtok(NULL, delim);
-	};
-
-	array_of_tokens[position] = NULL;
-	return array_of_tokens;
-
-} 
-
-int spec_word_splitting(char* storage[LINESIZE], char input[LINESIZE]){
-	/**
-	 * \brief Splits a word into tokens and fills a passed char** with each token
-	 *
-	 * @param storage is a char** with space to hold LINESIZE sized tokens
-	 * @param input is a char[LINESIZE] with @min an empty string and @max a single string of size LINESIZE
-	 * 
-	 * @return EXIT_SUCCESS if sentence can be tokenized, EXIT_FAILURE if it can't
-	 * */
-
-	if(strlen(input) < 1){
-		fprintf(stderr, "1.\n%s\n", input);
-		return EXIT_FAILURE;
-	};
-	storage = help_split_line(storage, input);
-	return EXIT_SUCCESS;
-}
-
-int test_input(){
+int test_input(void){
 	char* storage[LINESIZE];
 	char* discardable;
 	char* old_IFS;
@@ -288,12 +30,23 @@ int test_input(){
 
 	// Test the utility function for int to string
 	char tester[100];
-	assert(util_int_to_string(1,tester,3) == "3");
-	assert(util_int_to_string(-1, tester, 3) == "-1");
-	assert(util_int_to_string(0, tester, 3) == "0");
-	assert(util_int_to_string(100, tester, 3) == "100");
-	assert(util_int_to_string(100, tester, 2) == NULL);
-	assert(util_int_to_string(1, tester, 101) == NULL);
+	util_int_to_string(1,tester,3);
+	assert(strcmp(tester,"3") == 0);
+	strcpy(tester, "");
+	util_int_to_string(-1, tester, 3);
+	assert(strcmp(tester,"-1") == 0);
+	strcpy(tester, "");
+	util_int_to_string(0, tester, 3);
+	assert(strcmp(tester,"0") == 0);
+	strcpy(tester, "");
+	util_int_to_string(100, tester, 3);
+	assert(strcmp(tester,"100") == 0);
+	strcpy(tester, "");
+	util_int_to_string(100, tester, 2);
+	assert(strcmp( tester, "NULL") == 0);
+	strcpy(tester, "");
+	util_int_to_string(1, tester, 101);
+	assert(strcmp( tester, "NULL") == 0);
 
 
 	/** ### Spec Function Testing */
@@ -655,27 +408,6 @@ int test_input(){
 	};
 	return EXIT_SUCCESS;
 }
-
-int spec_expansion(char string[LINESIZE]){
-	/**
-	 * \brief Expands four variables based on the specifications.
-	 *
-	 * @param string is the string that needs to be scanned for expansion variables
-	 *
-	 * @return EXIT_SUCCESS for a successful scan and replace, EXIT_FAILURE
-	 * for an unsuccessful scan or replace
-	 * */
-
-	int length = strlen(string);
-	if(length < 1 || length > LINESIZE){
-		fprintf(stderr, "The length is not in the range 1 and %d inclusive", LINESIZE);
-		return EXIT_FAILURE;
-	};
-	
-
-
-};
-
 int test_expansion(void){
 	/**
 	 * \brief Tests the expansion portion of the specifications
@@ -684,8 +416,13 @@ int test_expansion(void){
 	 * */
 
 	// Test Case 1: ~/ at beginning, $$ is present, $? is present, $! is present, IFS is set (not null)
-	char string[LiNESIZE] = "~/$$$?$!";
-	char home[10] = getenv("HOME");
+	char string[LINESIZE] = "~/$$$?$!";
+	char home[100];
+	strcat(home, getenv("HOME"));
+	if(home == NULL){
+		perror("There's been an issue get the home environment variable");
+		exit(EXIT_FAILURE);
+	};
 	char result[LINESIZE] = "";
 	strcat(result, home);
 	strcat(result, util_int_to_string(getpid()));
@@ -704,7 +441,7 @@ int test_expansion(void){
 	char string7[LINESIZE] = "~/Ted$$";
 	char string7b[LINESIZE] = "~/$$Ted";
 	char result7_pid[LINESIZE];
-	char result7_home = getenv("HOME");
+	char result7_home[LINESIZE] = getenv("HOME");
 	char result7b_home = getenv("HOME");
 
 	util_int_to_string(getpid(), result7_pid, 10);
@@ -865,59 +602,4 @@ int test_expansion(void){
 	};
 	assert(spec_expansion(string) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
-}
-
-int main(void){
-	/**
-	 * \brief Main calling function that exclusively calls other functions *required to meet specifications*
-	 *
-	 * @return Exits to EXIT_FAILURE if utility functions such as print fails, otherwise exits to EXIT_SUCCESS when appropriate signal is sent
-	 */
-
-	pid_t pid;
-	int status;
-
-	// Variables needed for prompts declared outside the infinite loop to not create memory leaks
-	char line[LINESIZE];
-	size_t line_size = LINESIZE-1;
-	
-	// Runtime debug testing to make sure functions act according to how I want
-	if(test_input() == EXIT_FAILURE){
-		printf("Input functions fail runtime tests\n");
-		exit(EXIT_FAILURE);
-	};
-
-	for(;;){
-
-		// Specification requirement to identify child processes potentially exiting between loops
-		while((pid = waitpid(0, &status, WNOHANG)) > 0) /** Waitpid set to 0 to make parent wait for child sharing the process group id */ {
-			if(spec_check_for_child_background_processes(status, pid) != EXIT_SUCCESS){
-				exit(EXIT_FAILURE);
-			}
-		}
-
-		if(pid == 0){
-			printf("Children exist but have not yet completed");
-		} else if(pid < 0){
-			perror("Error looking for children");
-		};
-
-		assert(pid < 1);
-
-		// TODO: turn on a signal handler so that any signal prints a newline and for loop continues
-		// Print prompt TODO: change stdin to file stream variable when implemented
-		if(spec_get_line(line, line_size, stdin) == EXIT_SUCCESS){
-			// Only in the singular case where we can verify input has succeeded are we heading out to any other function
-			
-		} else {
-			printf("error with spec_get_line");
-			exit(EXIT_FAILURE);
-		};
-		clearerr(stdin); //TODO: change stdin to the file stream variable when implemented
-		// TODO: turn off custom signal handler
-		// Nothing goes below this line. Without input, there's no point in continuing processing. Instead, start the infinite loop again.
-	}
-
-
-	exit(EXIT_SUCCESS);
 }
