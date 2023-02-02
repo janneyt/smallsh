@@ -1,714 +1,714 @@
 \hypertarget{tester_8h_source}{}\doxysection{tester.\+h}
 \mbox{\hyperlink{tester_8h}{Go to the documentation of this file.}}
 \begin{DoxyCode}{0}
-\DoxyCodeLine{1 }
-\DoxyCodeLine{2 \textcolor{preprocessor}{\# define \_POSIX\_SOURCE}}
-\DoxyCodeLine{3 \textcolor{preprocessor}{\# define \_GNU\_SOURCE}}
-\DoxyCodeLine{4 \textcolor{preprocessor}{\# define \_POSIC\_C\_SOURCE >= 200112L}}
-\DoxyCodeLine{5 }
-\DoxyCodeLine{6 \textcolor{preprocessor}{\# include <stdio.h>}}
-\DoxyCodeLine{7 \textcolor{preprocessor}{\# include <sys/types.h>}}
-\DoxyCodeLine{8 \textcolor{preprocessor}{\# include <signal.h>}}
-\DoxyCodeLine{9 \textcolor{preprocessor}{\# include <unistd.h>}}
-\DoxyCodeLine{10 \textcolor{preprocessor}{\# include <sys/wait.h>}}
-\DoxyCodeLine{11 \textcolor{preprocessor}{\# include <string.h>}}
-\DoxyCodeLine{12 \textcolor{preprocessor}{\# include <stdlib.h>}}
-\DoxyCodeLine{13 \textcolor{preprocessor}{\# include <assert.h>}}
-\DoxyCodeLine{14 \textcolor{preprocessor}{\# include <stdint.h>}}
-\DoxyCodeLine{15 }
-\DoxyCodeLine{16 \textcolor{preprocessor}{\# include <stdlib.h>}}
-\DoxyCodeLine{17 \textcolor{preprocessor}{\# include <errno.h>}}
-\DoxyCodeLine{18 }
-\DoxyCodeLine{19 \textcolor{preprocessor}{\# define STRINGSIZE 100}}
-\DoxyCodeLine{21 \textcolor{preprocessor}{\# define LINESIZE   1046}}
-\DoxyCodeLine{22 \textcolor{preprocessor}{\# define DELIMITER  "{} \(\backslash\)t\(\backslash\)n"{}}}
-\DoxyCodeLine{23 }
-\DoxyCodeLine{24 \textcolor{comment}{/* Error Functions */}}
-\DoxyCodeLine{25 }
-\DoxyCodeLine{26 \textcolor{keywordtype}{int} \mbox{\hyperlink{tester_8h_a263aba6b2412ede62ca2b906fffeda8e}{err\_child\_error}}(\textcolor{keywordtype}{char} child\_action[], \textcolor{keywordtype}{char} action\_taken[])\{}
-\DoxyCodeLine{37     \textcolor{keywordflow}{if}(fprintf(stderr, \textcolor{stringliteral}{"{}Child process \%s. \%s."{}}, child\_action, action\_taken) < 0)\{}
-\DoxyCodeLine{38         perror(\textcolor{stringliteral}{"{}Could not print error"{}});}
-\DoxyCodeLine{39         errno = 0;}
-\DoxyCodeLine{40         \textcolor{keywordflow}{return} EXIT\_FAILURE;}
-\DoxyCodeLine{41     \};}
-\DoxyCodeLine{42     \textcolor{keywordflow}{return} (EXIT\_SUCCESS);}
-\DoxyCodeLine{43 \}}
-\DoxyCodeLine{44 }
-\DoxyCodeLine{45 \textcolor{comment}{/* Utility functions */}}
-\DoxyCodeLine{46 }
-\DoxyCodeLine{47 \textcolor{keywordtype}{char}* \mbox{\hyperlink{tester_8h_a3a3d8ea9836c11a16cab31d6695843d6}{util\_setenv}}(\textcolor{keywordtype}{char}* env\_var, \textcolor{keywordtype}{char}* new\_val)\{}
-\DoxyCodeLine{48 }
-\DoxyCodeLine{49     \textcolor{comment}{// Save old IFS to restore later}}
-\DoxyCodeLine{50     \textcolor{keywordtype}{char}* old\_var = getenv(env\_var);}
-\DoxyCodeLine{51     \textcolor{keywordflow}{if}(old\_var == new\_val)\{}
-\DoxyCodeLine{52         \textcolor{keywordflow}{return} old\_var;     }
-\DoxyCodeLine{53     \};}
-\DoxyCodeLine{54     \textcolor{keywordflow}{if}(setenv(env\_var,new\_val, 1) != 0)\{}
-\DoxyCodeLine{55         perror(\textcolor{stringliteral}{"{}Could not set env for \%s to NULL. Shell needs to be restarted."{}});}
-\DoxyCodeLine{56         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{57     \};}
-\DoxyCodeLine{58     \textcolor{keywordflow}{return} getenv(env\_var);}
-\DoxyCodeLine{59 }
-\DoxyCodeLine{60 }
-\DoxyCodeLine{61 \}}
-\DoxyCodeLine{62 }
-\DoxyCodeLine{63 \textcolor{keywordtype}{void} \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(\textcolor{keywordtype}{char}* storage[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}])\{}
-\DoxyCodeLine{73     \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int} i = 0; i < \mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}; i++)\{}
-\DoxyCodeLine{74         memset(\&storage[i], \textcolor{charliteral}{'\(\backslash\)0'},1);    }
-\DoxyCodeLine{75     \};}
-\DoxyCodeLine{76 \}}
-\DoxyCodeLine{77 }
-\DoxyCodeLine{78 \textcolor{keywordtype}{int} \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(\textcolor{keywordtype}{int} num, \textcolor{keywordtype}{char}* str, \textcolor{keywordtype}{int} size)\{}
-\DoxyCodeLine{79     }
-\DoxyCodeLine{92     \textcolor{keywordtype}{char} *temp = malloc(size);}
-\DoxyCodeLine{93     }
-\DoxyCodeLine{94     memset(str, 0, \textcolor{keyword}{sizeof}(*str));}
-\DoxyCodeLine{95     \textcolor{keywordflow}{if}(sprintf(temp, \textcolor{stringliteral}{"{}\%d"{}}, num) < 0)\{}
-\DoxyCodeLine{96         perror(\textcolor{stringliteral}{"{}Could not convert integer to string"{}});}
-\DoxyCodeLine{97         errno = 0;}
-\DoxyCodeLine{98         free(temp);}
-\DoxyCodeLine{99         \textcolor{keywordflow}{return} EXIT\_FAILURE;}
-\DoxyCodeLine{100     \};}
-\DoxyCodeLine{101     assert(atoi(temp) == num);}
-\DoxyCodeLine{102     \textcolor{keywordflow}{if}(strlen(str) > strlen(temp))\{}
-\DoxyCodeLine{103         perror(\textcolor{stringliteral}{"{}Input string was too small to hold integer to string conversion value"{}});}
-\DoxyCodeLine{104         errno = 0;}
-\DoxyCodeLine{105         free(temp);}
-\DoxyCodeLine{106         \textcolor{keywordflow}{return} EXIT\_FAILURE;}
-\DoxyCodeLine{107     \};}
-\DoxyCodeLine{108     assert(strlen(str) <= strlen(temp));}
-\DoxyCodeLine{109     \textcolor{keywordflow}{if}(strcat(str, temp) == NULL)\{}
-\DoxyCodeLine{110         perror(\textcolor{stringliteral}{"{}Could not convert integer to string"{}});}
-\DoxyCodeLine{111         errno = 0;}
-\DoxyCodeLine{112         free(temp);}
-\DoxyCodeLine{113         \textcolor{keywordflow}{return} EXIT\_FAILURE;}
-\DoxyCodeLine{114     \};}
-\DoxyCodeLine{115     assert(atoi(str) == num);}
-\DoxyCodeLine{116     free(temp);}
-\DoxyCodeLine{117     \textcolor{keywordflow}{return} EXIT\_SUCCESS;}
-\DoxyCodeLine{118 \}}
-\DoxyCodeLine{119 }
-\DoxyCodeLine{120 \textcolor{keywordtype}{int} \mbox{\hyperlink{tester_8h_a1d06ff09876d5a3f4d79a3b87b63cbd8}{test\_input}}()\{}
-\DoxyCodeLine{121     \textcolor{keywordtype}{char}* storage[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
-\DoxyCodeLine{122     \textcolor{keywordtype}{char}* discardable;}
-\DoxyCodeLine{123     \textcolor{keywordtype}{char}* old\_IFS;}
-\DoxyCodeLine{124     \textcolor{comment}{//char  str[LINESIZE];}}
-\DoxyCodeLine{125 }
-\DoxyCodeLine{128     \textcolor{keywordtype}{char}* \mbox{\hyperlink{tester_8h_a1d06ff09876d5a3f4d79a3b87b63cbd8}{test\_input}}[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
-\DoxyCodeLine{129     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(\mbox{\hyperlink{tester_8h_a1d06ff09876d5a3f4d79a3b87b63cbd8}{test\_input}});}
-\DoxyCodeLine{130     assert(\mbox{\hyperlink{tester_8h_a1d06ff09876d5a3f4d79a3b87b63cbd8}{test\_input}}[0] == NULL);}
-\DoxyCodeLine{131 }
-\DoxyCodeLine{132     \textcolor{comment}{// Test the utility function for int to string}}
-\DoxyCodeLine{133     \textcolor{keywordtype}{char} tester[100];}
-\DoxyCodeLine{134     assert(\mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(1,tester,3) == \textcolor{stringliteral}{"{}3"{}});}
-\DoxyCodeLine{135     assert(\mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(-\/1, tester, 3) == \textcolor{stringliteral}{"{}-\/1"{}});}
-\DoxyCodeLine{136     assert(\mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(0, tester, 3) == \textcolor{stringliteral}{"{}0"{}});}
-\DoxyCodeLine{137     assert(\mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(100, tester, 3) == \textcolor{stringliteral}{"{}100"{}});}
-\DoxyCodeLine{138     assert(\mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(100, tester, 2) == NULL);}
-\DoxyCodeLine{139     assert(\mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(1, tester, 101) == NULL);}
-\DoxyCodeLine{140 }
-\DoxyCodeLine{141 }
-\DoxyCodeLine{144     \textcolor{comment}{// TODO: implement test case 1, where the exit command closes the shell}}
-\DoxyCodeLine{145 }
-\DoxyCodeLine{146     \textcolor{comment}{// TODO: implement test case 2, where EOF closes the shell}}
-\DoxyCodeLine{147     }
-\DoxyCodeLine{148     \textcolor{comment}{// TODO: implement test case 4, where stdin is interrupted}}
-\DoxyCodeLine{149     }
-\DoxyCodeLine{150     \textcolor{comment}{// TODO: setup and run child processes for test cases 6-\/21}}
-\DoxyCodeLine{151     }
-\DoxyCodeLine{152     \textcolor{comment}{// TODO: interrupt spec\_get\_line with signal}}
-\DoxyCodeLine{153     }
-\DoxyCodeLine{154     \textcolor{keywordtype}{char} input[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
-\DoxyCodeLine{155     \textcolor{keywordtype}{size\_t} input\_size = \mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}-\/1;}
-\DoxyCodeLine{156 }
-\DoxyCodeLine{157     \textcolor{comment}{// Test Case 5: Errno is not zeroed out, make sure function can reset it}}
-\DoxyCodeLine{158     errno = -\/11;}
-\DoxyCodeLine{159     \mbox{\hyperlink{smallsh_8c_a60d3ad2c41bae9aefb988318b561633e}{spec\_get\_line}}(input, input\_size, stdin);}
-\DoxyCodeLine{160     \textcolor{keywordflow}{if}(errno != 0)\{}
-\DoxyCodeLine{161         printf(\textcolor{stringliteral}{"{}\(\backslash\)n***Failed test case 5: errno is set incorrectly before function is called***\(\backslash\)n"{}});     }
-\DoxyCodeLine{162     \};}
-\DoxyCodeLine{163     errno = 0;}
-\DoxyCodeLine{164 }
-\DoxyCodeLine{165     \textcolor{comment}{// Test Case 25: Send correct input with a file pointer and it returns the correct input}}
-\DoxyCodeLine{166     }
-\DoxyCodeLine{167     \textcolor{comment}{// Word Splitting Test Case TODO: IFS is set to NULL}}
-\DoxyCodeLine{168     }
-\DoxyCodeLine{169     \textcolor{comment}{// Save old IFS to restore later}}
-\DoxyCodeLine{170     old\_IFS = \mbox{\hyperlink{tester_8h_a3a3d8ea9836c11a16cab31d6695843d6}{util\_setenv}}(\textcolor{stringliteral}{"{}IFS"{}},NULL);}
-\DoxyCodeLine{171     *storage = input;}
-\DoxyCodeLine{172     strcpy(input, \textcolor{stringliteral}{"{}Ted is here"{}});}
-\DoxyCodeLine{173     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{174     assert(strcmp(*storage, \textcolor{stringliteral}{"{}Ted"{}}) == 0 );}
-\DoxyCodeLine{175     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}is"{}}) == 0);}
-\DoxyCodeLine{176     assert(strcmp(storage[2], \textcolor{stringliteral}{"{}here"{}}) == 0);}
-\DoxyCodeLine{177 }
-\DoxyCodeLine{178     \textcolor{comment}{// Word Splitting Test Case 1: the length of the inputted string is zero}}
-\DoxyCodeLine{179     \textcolor{keywordtype}{char}* empty\_str = \textcolor{stringliteral}{"{}"{}};}
-\DoxyCodeLine{180     memset(input, \textcolor{charliteral}{'\(\backslash\)0'}, 1);}
-\DoxyCodeLine{181     strcat(input, empty\_str);}
-\DoxyCodeLine{182     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_FAILURE);}
-\DoxyCodeLine{183     }
-\DoxyCodeLine{184     \textcolor{comment}{// Word Splitting Test Case 3: the inputted string is a null byte}}
-\DoxyCodeLine{185     printf(\textcolor{stringliteral}{"{}Test case 3\(\backslash\)n"{}});}
-\DoxyCodeLine{186     strcat(input, \textcolor{stringliteral}{"{}\(\backslash\)0"{}});}
-\DoxyCodeLine{187     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_FAILURE);}
-\DoxyCodeLine{188 }
-\DoxyCodeLine{189     \textcolor{comment}{// Word Splitting Test Case 4: "{}EOF"{} as a string is passed as input}}
-\DoxyCodeLine{190     printf(\textcolor{stringliteral}{"{}Test case 4\(\backslash\)n"{}});}
-\DoxyCodeLine{191     strcat(input, \textcolor{stringliteral}{"{}EOF"{}});}
-\DoxyCodeLine{192     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{193     assert(strcmp(*storage, \textcolor{stringliteral}{"{}EOF"{}}) == 0);}
-\DoxyCodeLine{194 }
-\DoxyCodeLine{195     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{196 }
-\DoxyCodeLine{197     \textcolor{comment}{// Word Splitting Test Case 6: "{}NULL"{} is passed as input}}
-\DoxyCodeLine{198     printf(\textcolor{stringliteral}{"{}Test case 6\(\backslash\)n"{}});}
-\DoxyCodeLine{199     strcpy(input, \textcolor{stringliteral}{"{}NULL"{}});}
-\DoxyCodeLine{200     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{201     assert(strcmp(*storage, \textcolor{stringliteral}{"{}NULL"{}}) == 0);}
-\DoxyCodeLine{202     }
-\DoxyCodeLine{203     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);      }
-\DoxyCodeLine{204     }
-\DoxyCodeLine{205     \textcolor{comment}{// Word Splitting Test Case 10: IFS is NULL, length of input is 512, LINESIZE is 0, input length array is size 1, the word passed is "{}Ted"{}}}
-\DoxyCodeLine{206     printf(\textcolor{stringliteral}{"{}Test case 10\(\backslash\)n"{}});}
-\DoxyCodeLine{207     fflush(stdout);}
-\DoxyCodeLine{208     fflush(stderr);}
-\DoxyCodeLine{209 }
-\DoxyCodeLine{210     strcpy(input, \textcolor{stringliteral}{"{}Ted"{}});}
-\DoxyCodeLine{211     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{212     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}Ted"{}}) == 0);}
-\DoxyCodeLine{213     assert(storage[1] == 0x0);}
-\DoxyCodeLine{214     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{215 }
-\DoxyCodeLine{216     \textcolor{comment}{// Word Splitting Test Case 11: IFS is NULL, sentence passed is "{}Ted is"{}}}
-\DoxyCodeLine{217     printf(\textcolor{stringliteral}{"{}Test case 11\(\backslash\)n"{}});}
-\DoxyCodeLine{218     fflush(stdout);}
-\DoxyCodeLine{219     fflush(stderr);}
-\DoxyCodeLine{220     strcpy(input, \textcolor{stringliteral}{"{}Ted is"{}});}
-\DoxyCodeLine{221     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{222     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}Ted"{}}) == 0);}
-\DoxyCodeLine{223     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}is"{}}) == 0);}
-\DoxyCodeLine{224     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{225 }
-\DoxyCodeLine{226     \textcolor{comment}{// Word Splitting Test Case 12: IFS is NULL, length is 512, sentence is a 512 character long word}}
-\DoxyCodeLine{227     printf(\textcolor{stringliteral}{"{}Test case 12\(\backslash\)n"{}});}
-\DoxyCodeLine{228     fflush(stdout);}
-\DoxyCodeLine{229     fflush(stderr);}
-\DoxyCodeLine{230     strcpy(input, \textcolor{stringliteral}{"{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr"{}});}
-\DoxyCodeLine{231     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{232     assert(strcmp(storage[0], input) == 0);}
-\DoxyCodeLine{233     assert(storage[1] == 0x0);}
-\DoxyCodeLine{234     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{235 }
-\DoxyCodeLine{236     \textcolor{comment}{// Word Splitting Test Case 13: IFS is NULL, length is 513 (above minimum required), sentence is a 513 character long word}}
-\DoxyCodeLine{237     printf(\textcolor{stringliteral}{"{}Test case 13\(\backslash\)n"{}});}
-\DoxyCodeLine{238     fflush(stdout);}
-\DoxyCodeLine{239     fflush(stderr);}
-\DoxyCodeLine{240     strcpy(input, \textcolor{stringliteral}{"{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghaijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr"{}});}
-\DoxyCodeLine{241     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{242     assert(strcmp(storage[0], input) == 0);}
-\DoxyCodeLine{243     assert(storage[0][512] == \textcolor{charliteral}{'r'});}
-\DoxyCodeLine{244     assert(storage[1] == 0x0);}
-\DoxyCodeLine{245     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{246 }
-\DoxyCodeLine{247     \textcolor{comment}{// Word Splitting Test Case 14: IFS is NULL, length is 512, sentence is 512 words}}
-\DoxyCodeLine{248     printf(\textcolor{stringliteral}{"{}Test case 14\(\backslash\)n"{}});}
-\DoxyCodeLine{249     fflush(stdout);}
-\DoxyCodeLine{250     fflush(stderr);}
-\DoxyCodeLine{251     strcpy(input, \textcolor{stringliteral}{"{}AA B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z "{}});}
-\DoxyCodeLine{252     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{253     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}AA"{}}) == 0);}
-\DoxyCodeLine{254     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}B"{}}) == 0);}
-\DoxyCodeLine{255     assert(strcmp(storage[512], \textcolor{stringliteral}{"{}r"{}}) == 0);}
-\DoxyCodeLine{256     assert(strcmp(storage[520], \textcolor{stringliteral}{"{}z"{}}) == 0);}
-\DoxyCodeLine{257     assert(storage[521] == 0x0);}
-\DoxyCodeLine{258     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{259 }
-\DoxyCodeLine{260 }
-\DoxyCodeLine{261     \textcolor{comment}{// Word Splitting Test Case 15: IFS is NULL, length is 513 (more than required minimum), sentence is 513 words}}
-\DoxyCodeLine{262     printf(\textcolor{stringliteral}{"{}Test case 15\(\backslash\)n"{}});}
-\DoxyCodeLine{263     fflush(stdout);}
-\DoxyCodeLine{264     fflush(stderr);}
-\DoxyCodeLine{265     strcpy(input, \textcolor{stringliteral}{"{}A A B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z "{}});}
-\DoxyCodeLine{266     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{267     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}A"{}}) == 0);}
-\DoxyCodeLine{268     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}A"{}}) == 0);}
-\DoxyCodeLine{269     assert(strcmp(storage[521], \textcolor{stringliteral}{"{}z"{}}) == 0);}
-\DoxyCodeLine{270     assert(storage[522] == 0x0);}
-\DoxyCodeLine{271     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{272 }
-\DoxyCodeLine{273     \textcolor{comment}{// Word Splitting Test Case 16: IFS is NULL, length is 512, sentence is 512 words, no trailing whitespace}}
-\DoxyCodeLine{274     printf(\textcolor{stringliteral}{"{}Test case 16\(\backslash\)n"{}});}
-\DoxyCodeLine{275     fflush(stdout);}
-\DoxyCodeLine{276     fflush(stderr);}
-\DoxyCodeLine{277     strcpy(input, \textcolor{stringliteral}{"{}AA B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z"{}});}
-\DoxyCodeLine{278     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{279     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}AA"{}}) == 0);}
-\DoxyCodeLine{280     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}B"{}}) == 0);}
-\DoxyCodeLine{281     assert(strcmp(storage[520], \textcolor{stringliteral}{"{}z"{}}) == 0);}
-\DoxyCodeLine{282     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{283 }
-\DoxyCodeLine{284     \textcolor{comment}{// Word Splitting Test Case 17: IFS is NULL, length is 513, sentence is 513 words, no trailing whitespace}}
-\DoxyCodeLine{285     }
-\DoxyCodeLine{286     printf(\textcolor{stringliteral}{"{}Test case 17\(\backslash\)n"{}});}
-\DoxyCodeLine{287     fflush(stdout);}
-\DoxyCodeLine{288     fflush(stderr);}
-\DoxyCodeLine{289     strcpy(input, \textcolor{stringliteral}{"{}A A B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z"{}});}
-\DoxyCodeLine{290     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{291     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}A"{}}) == 0);}
-\DoxyCodeLine{292     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}A"{}}) == 0);}
-\DoxyCodeLine{293     assert(strcmp(storage[521], \textcolor{stringliteral}{"{}z"{}}) == 0);}
-\DoxyCodeLine{294     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{295 }
-\DoxyCodeLine{296     \textcolor{comment}{// Word Splitting Test Case 18: IFS is \(\backslash\)t\(\backslash\)n, length is 512, sentence is 512 words, no trailing whitespace}}
-\DoxyCodeLine{297     }
-\DoxyCodeLine{298     \textcolor{keywordflow}{if}((discardable = \mbox{\hyperlink{tester_8h_a3a3d8ea9836c11a16cab31d6695843d6}{util\_setenv}}(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{} \(\backslash\)t\(\backslash\)n"{}})) == NULL)\{}
-\DoxyCodeLine{299         printf(\textcolor{stringliteral}{"{}Cannot set IFS from \%s to \%s. Restart shell."{}}, \textcolor{stringliteral}{"{}NULL"{}}, \textcolor{stringliteral}{"{}\(\backslash\)t\(\backslash\)n"{}});}
-\DoxyCodeLine{300         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{301     \};}
-\DoxyCodeLine{302 }
-\DoxyCodeLine{303     \textcolor{comment}{// Word Splitting Test Case 12b: IFS is \(\backslash\)t\(\backslash\)n, length is 512, sentence is a 512 character long word}}
-\DoxyCodeLine{304     printf(\textcolor{stringliteral}{"{}Test case 12b\(\backslash\)n"{}});}
-\DoxyCodeLine{305     fflush(stdout);}
-\DoxyCodeLine{306     fflush(stderr);}
-\DoxyCodeLine{307     strcpy(input, \textcolor{stringliteral}{"{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr"{}});}
-\DoxyCodeLine{308     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{309     assert(strcmp(storage[0], input) == 0);}
-\DoxyCodeLine{310     assert(storage[1] == 0x0 );}
-\DoxyCodeLine{311     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{312 }
-\DoxyCodeLine{313     \textcolor{comment}{// Word Splitting Test Case 13b: IFS is \(\backslash\)t\(\backslash\)n, length is 513 (above minimum required), sentence is a 513 character long word}}
-\DoxyCodeLine{314     printf(\textcolor{stringliteral}{"{}Test case 13b\(\backslash\)n"{}});}
-\DoxyCodeLine{315     fflush(stdout);}
-\DoxyCodeLine{316     fflush(stderr);}
-\DoxyCodeLine{317     strcpy(input, \textcolor{stringliteral}{"{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghaijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr"{}});}
-\DoxyCodeLine{318     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{319     assert(strcmp(storage[0], input) == 0);}
-\DoxyCodeLine{320     assert(storage[1] == 0x0);}
-\DoxyCodeLine{321     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{322 }
-\DoxyCodeLine{323     \textcolor{comment}{// Word Splitting Test Case 18}}
-\DoxyCodeLine{324     printf(\textcolor{stringliteral}{"{}Test case 18\(\backslash\)n"{}});}
-\DoxyCodeLine{325     fflush(stdout);}
-\DoxyCodeLine{326     fflush(stderr);}
-\DoxyCodeLine{327     strcpy(input, \textcolor{stringliteral}{"{}AA B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z"{}});}
-\DoxyCodeLine{328     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{329     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}AA"{}}) == 0);}
-\DoxyCodeLine{330     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}B"{}}) == 0);}
-\DoxyCodeLine{331     assert(strcmp(storage[520], \textcolor{stringliteral}{"{}z"{}}) == 0);}
-\DoxyCodeLine{332     assert(storage[521] == 0x0);}
-\DoxyCodeLine{333     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{334     }
-\DoxyCodeLine{335     \textcolor{comment}{// Word Splitting Test Case 19: IFS is \(\backslash\)t\(\backslash\)n, length is 512, sentence is 512 words, trailing whitespace}}
-\DoxyCodeLine{336     printf(\textcolor{stringliteral}{"{}Test case 19\(\backslash\)n"{}});}
-\DoxyCodeLine{337     fflush(stdout);}
-\DoxyCodeLine{338     fflush(stderr);}
-\DoxyCodeLine{339     strcpy(input, \textcolor{stringliteral}{"{}AA B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z "{}});}
-\DoxyCodeLine{340     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{341     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}AA"{}}) == 0);}
-\DoxyCodeLine{342     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}B"{}}) == 0);}
-\DoxyCodeLine{343     assert(strcmp(storage[520], \textcolor{stringliteral}{"{}z"{}}) == 0);}
-\DoxyCodeLine{344     assert(storage[521] == 0x0);}
-\DoxyCodeLine{345     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{346 }
-\DoxyCodeLine{347     \textcolor{comment}{// Word Splitting Test Case 20: IFS is \(\backslash\)t\(\backslash\)n, length is 513, sentence is 513 words, trailing whitespace}}
-\DoxyCodeLine{348     printf(\textcolor{stringliteral}{"{}Test case 20\(\backslash\)n"{}});}
-\DoxyCodeLine{349     fflush(stdout);}
-\DoxyCodeLine{350     fflush(stderr);}
-\DoxyCodeLine{351     strcpy(input, \textcolor{stringliteral}{"{}A A B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z "{}});}
-\DoxyCodeLine{352     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{353     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}A"{}}) == 0);}
-\DoxyCodeLine{354     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}A"{}}) == 0);}
-\DoxyCodeLine{355     assert(strcmp(storage[521], \textcolor{stringliteral}{"{}z"{}}) == 0);}
-\DoxyCodeLine{356     assert(storage[522] == 0x0);}
-\DoxyCodeLine{357     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{358 }
-\DoxyCodeLine{359     \textcolor{comment}{// Word Splitting Test Case 21: IFS is \(\backslash\)t\(\backslash\)n, length is 513, sentence is 513 words, trailing whitespace}}
-\DoxyCodeLine{360     printf(\textcolor{stringliteral}{"{}Test case 21\(\backslash\)n"{}});}
-\DoxyCodeLine{361     fflush(stdout);}
-\DoxyCodeLine{362     fflush(stderr);}
-\DoxyCodeLine{363     strcpy(input, \textcolor{stringliteral}{"{}A A B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z "{}});}
-\DoxyCodeLine{364     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{365     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}A"{}}) == 0);}
-\DoxyCodeLine{366     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}A"{}}) == 0);}
-\DoxyCodeLine{367     assert(strcmp(storage[521], \textcolor{stringliteral}{"{}z"{}}) == 0);}
-\DoxyCodeLine{368     assert(storage[522] == 0x0);}
-\DoxyCodeLine{369     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{370 }
-\DoxyCodeLine{371     \textcolor{comment}{// Word Splitting Test Case 22: IFS is \(\backslash\)t\(\backslash\)n, length is 1, sentence is 1 word, no trailing whitespace}}
-\DoxyCodeLine{372     printf(\textcolor{stringliteral}{"{}Test case 22\(\backslash\)n"{}});}
-\DoxyCodeLine{373     fflush(stdout);}
-\DoxyCodeLine{374     fflush(stderr);}
-\DoxyCodeLine{375     strcpy(input, \textcolor{stringliteral}{"{}i"{}});}
-\DoxyCodeLine{376     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{377     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}i"{}}) == 0);}
-\DoxyCodeLine{378     assert(storage[1] == 0x0);}
-\DoxyCodeLine{379     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{380 }
-\DoxyCodeLine{381     \textcolor{comment}{// Word Splitting Test Case 23: IFS is \(\backslash\)t\(\backslash\)n, length is 2, sentence is 1 word, trailing whitespace}}
-\DoxyCodeLine{382     printf(\textcolor{stringliteral}{"{}Test case 23\(\backslash\)n"{}});}
-\DoxyCodeLine{383     fflush(stdout);}
-\DoxyCodeLine{384     fflush(stderr);}
-\DoxyCodeLine{385     strcpy(input, \textcolor{stringliteral}{"{}i "{}});}
-\DoxyCodeLine{386     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{387     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}i"{}}) == 0);}
-\DoxyCodeLine{388     assert(storage[1] == 0x0);}
-\DoxyCodeLine{389     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{390 }
-\DoxyCodeLine{391 }
-\DoxyCodeLine{392     \textcolor{comment}{// Word Splitting Test Case 24: IFS is "{} "{}, length is 512, sentence is 512 words, no trailing whitespace}}
-\DoxyCodeLine{393     \textcolor{keywordflow}{if}((discardable = \mbox{\hyperlink{tester_8h_a3a3d8ea9836c11a16cab31d6695843d6}{util\_setenv}}(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{} "{}})) == old\_IFS)\{}
-\DoxyCodeLine{394         printf(\textcolor{stringliteral}{"{}Can't set IFS from \%s to empty strings"{}}, old\_IFS);}
-\DoxyCodeLine{395         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{396     \};}
-\DoxyCodeLine{397 }
-\DoxyCodeLine{398     \textcolor{comment}{// Word Splitting Test Case 12c: IFS is "{} "{}, length is 512, sentence is a 512 character long word}}
-\DoxyCodeLine{399     printf(\textcolor{stringliteral}{"{}Test case 12c\(\backslash\)n"{}});}
-\DoxyCodeLine{400     fflush(stdout);}
-\DoxyCodeLine{401     fflush(stderr);}
-\DoxyCodeLine{402     strcpy(input, \textcolor{stringliteral}{"{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr"{}});}
-\DoxyCodeLine{403     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{404     assert(strcmp(storage[0], input) == 0);}
-\DoxyCodeLine{405     assert(storage[1] == 0x0);}
-\DoxyCodeLine{406     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{407 }
-\DoxyCodeLine{408     \textcolor{comment}{// Word Splitting Test Case 13c: IFS is "{} "{}, length is 513 (above minimum required), sentence is a 513 character long word}}
-\DoxyCodeLine{409     printf(\textcolor{stringliteral}{"{}Test case 13c\(\backslash\)n"{}});}
-\DoxyCodeLine{410     fflush(stdout);}
-\DoxyCodeLine{411     fflush(stderr);}
-\DoxyCodeLine{412     strcpy(input, \textcolor{stringliteral}{"{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghaijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr"{}});}
-\DoxyCodeLine{413     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{414     assert(strcmp(storage[0], input) == 0);}
-\DoxyCodeLine{415     assert(storage[1] == 0x0);}
-\DoxyCodeLine{416     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{417 }
-\DoxyCodeLine{418     \textcolor{comment}{// Test Case 24}}
-\DoxyCodeLine{419     printf(\textcolor{stringliteral}{"{}Test case 24\(\backslash\)n"{}});}
-\DoxyCodeLine{420     fflush(stdout);}
-\DoxyCodeLine{421     fflush(stderr);}
-\DoxyCodeLine{422     strcpy(input, \textcolor{stringliteral}{"{}AA B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z"{}});}
-\DoxyCodeLine{423     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{424     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}AA"{}}) == 0);}
-\DoxyCodeLine{425     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}B"{}}) == 0);}
-\DoxyCodeLine{426     assert(strcmp(storage[520], \textcolor{stringliteral}{"{}z"{}}) == 0);}
-\DoxyCodeLine{427     assert(storage[521] == 0x0);}
-\DoxyCodeLine{428     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{429 }
-\DoxyCodeLine{430     \textcolor{comment}{// Word Splitting Test Case 19: IFS is "{} "{}, length is 512, sentence is 512 words, trailing whitespace}}
-\DoxyCodeLine{431     printf(\textcolor{stringliteral}{"{}Test case 19\(\backslash\)n"{}});}
-\DoxyCodeLine{432     fflush(stdout);}
-\DoxyCodeLine{433     fflush(stderr);}
-\DoxyCodeLine{434     strcpy(input, \textcolor{stringliteral}{"{}AA B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z "{}});}
-\DoxyCodeLine{435     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{436     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}AA"{}}) == 0);}
-\DoxyCodeLine{437     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}B"{}}) == 0);   }
-\DoxyCodeLine{438     assert(strcmp(storage[520], \textcolor{stringliteral}{"{}z"{}}) == 0);}
-\DoxyCodeLine{439     assert(storage[521] == 0x0);}
-\DoxyCodeLine{440     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{441 }
-\DoxyCodeLine{442     \textcolor{comment}{// Word Splitting Test Case 20: IFS is "{} "{}, length is 513, sentence is 513 words, trailing whitespace}}
-\DoxyCodeLine{443     printf(\textcolor{stringliteral}{"{}Test case 20\(\backslash\)n"{}});}
-\DoxyCodeLine{444     fflush(stdout);}
-\DoxyCodeLine{445     fflush(stderr);}
-\DoxyCodeLine{446     strcpy(input, \textcolor{stringliteral}{"{}A A B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z "{}});}
-\DoxyCodeLine{447     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{448     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}A"{}}) == 0);}
-\DoxyCodeLine{449     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}A"{}}) == 0);}
-\DoxyCodeLine{450     assert(strcmp(storage[521], \textcolor{stringliteral}{"{}z"{}}) == 0);}
-\DoxyCodeLine{451     assert(storage[522] == 0x0);}
-\DoxyCodeLine{452     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{453 }
-\DoxyCodeLine{454     \textcolor{comment}{// Word Splitting Test Case 21: IFS is "{} "{}, length is 513, sentence is 513 words, trailing whitespace}}
-\DoxyCodeLine{455     printf(\textcolor{stringliteral}{"{}Test case 21\(\backslash\)n"{}});}
-\DoxyCodeLine{456     fflush(stdout);}
-\DoxyCodeLine{457     fflush(stderr);}
-\DoxyCodeLine{458     strcpy(input, \textcolor{stringliteral}{"{}A A B C D E F G H I J K L M N W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h a i j k l m n o p q r s t u v w x y z "{}});}
-\DoxyCodeLine{459     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{460     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}A"{}}) == 0);}
-\DoxyCodeLine{461     assert(strcmp(storage[1], \textcolor{stringliteral}{"{}A"{}}) == 0);}
-\DoxyCodeLine{462     assert(strcmp(storage[521], \textcolor{stringliteral}{"{}z"{}}) == 0);}
-\DoxyCodeLine{463     assert(storage[522] == 0x0);}
-\DoxyCodeLine{464     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{465 }
-\DoxyCodeLine{466     \textcolor{comment}{// Word Splitting Test Case 22: IFS is "{} "{}, length is 1, sentence is 1 word, no trailing whitespace}}
-\DoxyCodeLine{467     printf(\textcolor{stringliteral}{"{}Test case 22\(\backslash\)n"{}});}
-\DoxyCodeLine{468     fflush(stdout);}
-\DoxyCodeLine{469     fflush(stderr);}
-\DoxyCodeLine{470     strcpy(input, \textcolor{stringliteral}{"{}i"{}});}
-\DoxyCodeLine{471     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{472     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}i"{}}) == 0);}
-\DoxyCodeLine{473     assert(storage[1] == 0x0);}
-\DoxyCodeLine{474     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{475 }
-\DoxyCodeLine{476     \textcolor{comment}{// Word Splitting Test Case 23: IFS is "{} "{}, length is 2, sentence is 1 word, trailing whitespace}}
-\DoxyCodeLine{477     printf(\textcolor{stringliteral}{"{}Test case 23\(\backslash\)n"{}});}
-\DoxyCodeLine{478     fflush(stdout);}
-\DoxyCodeLine{479     fflush(stderr);}
-\DoxyCodeLine{480     strcpy(input, \textcolor{stringliteral}{"{}i "{}});}
-\DoxyCodeLine{481     assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage, input) == EXIT\_SUCCESS);}
-\DoxyCodeLine{482     assert(strcmp(storage[0], \textcolor{stringliteral}{"{}i"{}}) == 0);}
-\DoxyCodeLine{483     assert(storage[1] == 0x0);}
-\DoxyCodeLine{484     \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
-\DoxyCodeLine{485 }
-\DoxyCodeLine{486 }
-\DoxyCodeLine{487     \textcolor{keywordflow}{if}(old\_IFS == 0x0)\{}
-\DoxyCodeLine{488         old\_IFS = \textcolor{stringliteral}{"{} "{}};}
-\DoxyCodeLine{489     \};}
-\DoxyCodeLine{490     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, old\_IFS, 0) != 0)\{}
-\DoxyCodeLine{491         perror(\textcolor{stringliteral}{"{}Setting IFS failed"{}});}
-\DoxyCodeLine{492         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{493     \};}
-\DoxyCodeLine{494     \textcolor{keywordflow}{if}(strcmp(getenv(\textcolor{stringliteral}{"{}IFS"{}}),old\_IFS) != 0)\{}
-\DoxyCodeLine{495 }
-\DoxyCodeLine{496         printf(\textcolor{stringliteral}{"{}Something went wrong resetting the IFS:*\%s*, verify it is only stored once in the old\_IFS:*\%s* variable"{}},getenv(\textcolor{stringliteral}{"{}IFS"{}}), old\_IFS);}
-\DoxyCodeLine{497         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{498     \};}
-\DoxyCodeLine{499     \textcolor{keywordflow}{return} EXIT\_SUCCESS;}
-\DoxyCodeLine{500 \}}
-\DoxyCodeLine{501 }
-\DoxyCodeLine{502 \textcolor{keywordtype}{int} \mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(\textcolor{keywordtype}{char} \textcolor{keywordtype}{string}[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}])\{}
-\DoxyCodeLine{512     \textcolor{keywordtype}{int} length = strlen(\textcolor{keywordtype}{string});}
-\DoxyCodeLine{513     \textcolor{keywordflow}{if}(length < 1 || length > \mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}})\{}
-\DoxyCodeLine{514         fprintf(stderr, \textcolor{stringliteral}{"{}The length is not in the range 1 and \%d inclusive"{}}, \mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}});}
-\DoxyCodeLine{515         \textcolor{keywordflow}{return} EXIT\_FAILURE;}
-\DoxyCodeLine{516     \};}
-\DoxyCodeLine{517     }
-\DoxyCodeLine{518 }
-\DoxyCodeLine{519 }
-\DoxyCodeLine{520 \};}
-\DoxyCodeLine{521 }
-\DoxyCodeLine{522 \textcolor{keywordtype}{int} \mbox{\hyperlink{tester_8h_a40ab51c1432c06798dd25e53faaaf9cd}{test\_expansion}}(\textcolor{keywordtype}{void})\{}
-\DoxyCodeLine{529     \textcolor{comment}{// Test Case 1: \string~/ at beginning, \$\$ is present, \$? is present, \$! is present, IFS is set (not null)}}
-\DoxyCodeLine{530     \textcolor{keywordtype}{char} \textcolor{keywordtype}{string}[LiNESIZE] = \textcolor{stringliteral}{"{}\string~/\$\$\$?\$!"{}};}
-\DoxyCodeLine{531     \textcolor{keywordtype}{char} home[10] = getenv(\textcolor{stringliteral}{"{}HOME"{}});}
-\DoxyCodeLine{532     \textcolor{keywordtype}{char} result[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}"{}};}
-\DoxyCodeLine{533     strcat(result, home);}
-\DoxyCodeLine{534     strcat(result, \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(getpid()));}
-\DoxyCodeLine{535     \textcolor{comment}{// TODO: strcat(result, ); need to setup foreground and background processes}}
-\DoxyCodeLine{536     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{} \(\backslash\)t\(\backslash\)n"{}}, 1) != 0)\{}
-\DoxyCodeLine{537         perror(\textcolor{stringliteral}{"{}Can't set IFS to neutral delimiter"{}});}
-\DoxyCodeLine{538         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{539     \};}
-\DoxyCodeLine{540 }
-\DoxyCodeLine{541     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(\textcolor{keywordtype}{string}) == EXIT\_SUCCESS);}
-\DoxyCodeLine{542     \textcolor{comment}{// TODO: need to setup foreground and background processes assert(strcmp(string, ));}}
-\DoxyCodeLine{543     }
-\DoxyCodeLine{544     \textcolor{comment}{// Test Case 2 -\/ 6 need foreground and background processes}}
-\DoxyCodeLine{545     }
-\DoxyCodeLine{546     \textcolor{comment}{// Test Case 7: \string~/ at beginning, \$\$ present, IFS set }}
-\DoxyCodeLine{547     \textcolor{keywordtype}{char} string7[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}\string~/Ted\$\$"{}};}
-\DoxyCodeLine{548     \textcolor{keywordtype}{char} string7b[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}\string~/\$\$Ted"{}};}
-\DoxyCodeLine{549     \textcolor{keywordtype}{char} result7\_pid[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
-\DoxyCodeLine{550     \textcolor{keywordtype}{char} result7\_home = getenv(\textcolor{stringliteral}{"{}HOME"{}});}
-\DoxyCodeLine{551     \textcolor{keywordtype}{char} result7b\_home = getenv(\textcolor{stringliteral}{"{}HOME"{}});}
-\DoxyCodeLine{552 }
-\DoxyCodeLine{553     \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(getpid(), result7\_pid, 10);}
-\DoxyCodeLine{554     strcat(result7\_home, \textcolor{stringliteral}{"{}Ted"{}});}
-\DoxyCodeLine{555     strcat(result7\_home, result7\_pid);}
-\DoxyCodeLine{556     strcat(result7b\_home, result7\_pid);}
-\DoxyCodeLine{557     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{} \(\backslash\)t\(\backslash\)n"{}}, 1) != 0)\{}
-\DoxyCodeLine{558         perror(\textcolor{stringliteral}{"{}Can't set IFS to neutral delimiter"{}});}
-\DoxyCodeLine{559         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{560     \};}
-\DoxyCodeLine{561     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string7) == EXIT\_SUCCESS);}
-\DoxyCodeLine{562     assert(strcmp(string7, result7\_home));}
-\DoxyCodeLine{563     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string7b) == EXIT\_SUCCESS);}
-\DoxyCodeLine{564     assert(strcmp(string7b, result7b\_home));}
-\DoxyCodeLine{565 }
-\DoxyCodeLine{566     \textcolor{comment}{// Test Case 8: \string~/ at beginning, \$\$ present, IFS unset}}
-\DoxyCodeLine{567     \textcolor{keywordtype}{char} string8[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}\string~/Ted\$\$"{}};}
-\DoxyCodeLine{568     \textcolor{keywordtype}{char} string8b[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}`/\$\$Ted"{}};}
-\DoxyCodeLine{569     \textcolor{keywordtype}{char} result8\_pid[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
-\DoxyCodeLine{570     \textcolor{keywordtype}{char} result8\_home = getenv(\textcolor{stringliteral}{"{}HOME"{}});}
-\DoxyCodeLine{571     \textcolor{keywordtype}{char} result8b\_home = getenv(\textcolor{stringliteral}{"{}HOME"{}});}
-\DoxyCodeLine{572 }
-\DoxyCodeLine{573     \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(getpid(), result8\_pid, 10);}
-\DoxyCodeLine{574     strcat(result8\_home, \textcolor{stringliteral}{"{}Ted"{}});}
-\DoxyCodeLine{575     strcat(result8\_home, result8\_pid);}
-\DoxyCodeLine{576     strcat(result8b\_home, result8\_pid);}
-\DoxyCodeLine{577     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{}NULL"{}}, 1) != 0)\{}
-\DoxyCodeLine{578         perror(\textcolor{stringliteral}{"{}Can't set IFS to neutral delimiter"{}});}
-\DoxyCodeLine{579         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{580     \};}
-\DoxyCodeLine{581     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string8) == EXIT\_SUCCESS);}
-\DoxyCodeLine{582     assert(strcmp(string8, result8\_home) == 0);}
-\DoxyCodeLine{583     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string8b) == EXIT\_SUCCESS);}
-\DoxyCodeLine{584     assert(strcmp(string8b, result8b\_home) == 0);}
-\DoxyCodeLine{585 }
-\DoxyCodeLine{586     \textcolor{comment}{// TODO: Test Cases 9-\/14 need foreground and background processes implemented}}
-\DoxyCodeLine{587     }
-\DoxyCodeLine{588     \textcolor{comment}{// Test Case 15: \string~/ at beginning, \$\$, \$?, \$! are not present, IFS set}}
-\DoxyCodeLine{589     \textcolor{keywordtype}{char} string15[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}\string~/"{}};}
-\DoxyCodeLine{590     \textcolor{keywordtype}{char} string15b[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}\string~/Ted"{}};}
-\DoxyCodeLine{591     \textcolor{keywordtype}{char} result15[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = getenv(\textcolor{stringliteral}{"{}HOME"{}});}
-\DoxyCodeLine{592     \textcolor{keywordtype}{char} result15b[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}"{}};}
-\DoxyCodeLine{593     strcat(result15b, result15);}
-\DoxyCodeLine{594     strcat(result15b, \textcolor{stringliteral}{"{}/Ted"{}});}
-\DoxyCodeLine{595     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{} \(\backslash\)t\(\backslash\)n"{}}, 1) != 0)\{}
-\DoxyCodeLine{596         perror(\textcolor{stringliteral}{"{}Can't set IFS to neutral delimiter"{}});}
-\DoxyCodeLine{597         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{598     \};}
-\DoxyCodeLine{599     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string15) == EXIT\_SUCCESS);}
-\DoxyCodeLine{600     assert(strcmp(string15, result15) == 0);}
-\DoxyCodeLine{601     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string15b) == EXIT\_SUCCESS);}
-\DoxyCodeLine{602     assert(strcmp(string15b, result15b) == 0);}
-\DoxyCodeLine{603 }
-\DoxyCodeLine{604     \textcolor{comment}{// Test Case 16: \string~/ at beginning, \$\$, \$?, \$! are not present, IFS not set}}
-\DoxyCodeLine{605     \textcolor{keywordtype}{char} string16[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}\string~/"{}};}
-\DoxyCodeLine{606     \textcolor{keywordtype}{char} string16b[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}\string~/Ted"{}};}
-\DoxyCodeLine{607     \textcolor{keywordtype}{char} result16[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = getenv(\textcolor{stringliteral}{"{}HOME"{}});}
-\DoxyCodeLine{608     \textcolor{keywordtype}{char} result16b[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}"{}};}
-\DoxyCodeLine{609     strcat(result16b, result15);}
-\DoxyCodeLine{610     strcat(result16b, \textcolor{stringliteral}{"{}/Ted"{}});}
-\DoxyCodeLine{611     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{}NULL"{}}, 1) != 0)\{}
-\DoxyCodeLine{612         perror(\textcolor{stringliteral}{"{}Can't set IFS to neutral delimiter"{}});}
-\DoxyCodeLine{613         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{614     \};}
-\DoxyCodeLine{615     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string16) == EXIT\_SUCCESS);}
-\DoxyCodeLine{616     assert(strcmp(string16, result16) == 0);}
-\DoxyCodeLine{617     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string16b) == EXIT\_SUCCESS);}
-\DoxyCodeLine{618     assert(strcmp(string16b, result16b) == 0);}
-\DoxyCodeLine{619 }
-\DoxyCodeLine{620     \textcolor{comment}{// TODO: 17-\/22 need foreground and background processes implemented}}
-\DoxyCodeLine{621     }
-\DoxyCodeLine{622     \textcolor{comment}{// Test Case 23: \string~/ not front, \$\$ present, S? and S! not present, IFS set}}
-\DoxyCodeLine{623     \textcolor{keywordtype}{char} string23[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}\$\$Ted\string~/"{}};}
-\DoxyCodeLine{624     \textcolor{keywordtype}{char} result23[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
-\DoxyCodeLine{625     \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(getpid(), result23, 10);}
-\DoxyCodeLine{626     strcat(result23, \textcolor{stringliteral}{"{}Ted\string~/"{}});}
-\DoxyCodeLine{627     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{} \(\backslash\)t\(\backslash\)n"{}}, 1) != 0)\{}
-\DoxyCodeLine{628         perror(\textcolor{stringliteral}{"{}Can't set IFS to neutral delimiter"{}});}
-\DoxyCodeLine{629         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{630     \};}
-\DoxyCodeLine{631     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string23) == EXIT\_SUCCESS);}
-\DoxyCodeLine{632     assert(strcmp(result23, string23) == 0);}
-\DoxyCodeLine{633 }
-\DoxyCodeLine{634     \textcolor{comment}{// Test Case 24: \string~/ not at front, \$\$ present, S? and \$! not present, IFS not set}}
-\DoxyCodeLine{635     \textcolor{keywordtype}{char} string24[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}Ted\string~/\$\$"{}};}
-\DoxyCodeLine{636     \textcolor{keywordtype}{char} result24[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}Ted\string~/"{}};}
-\DoxyCodeLine{637     \textcolor{keywordtype}{char} holder[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
-\DoxyCodeLine{638     \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(getpid(), holder, 10);}
-\DoxyCodeLine{639     strcat(result24, holder);}
-\DoxyCodeLine{640     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{}NULL"{}}, 1) != 0)\{}
-\DoxyCodeLine{641         perror(\textcolor{stringliteral}{"{}Can't set IFS to neutral delimiter"{}});}
-\DoxyCodeLine{642         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{643     \};}
-\DoxyCodeLine{644     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string24) == EXIT\_SUCCESS);}
-\DoxyCodeLine{645     assert(strcmp(result24, string24) == 0);}
-\DoxyCodeLine{646 }
-\DoxyCodeLine{647 }
-\DoxyCodeLine{648     \textcolor{comment}{// TODO: Test cases 25-\/30 need foreground and background processes implemented}}
-\DoxyCodeLine{649     }
-\DoxyCodeLine{650     \textcolor{comment}{// Test Case 31: \string~/ is not at front, \$* are all not present, IFS is set}}
-\DoxyCodeLine{651     \textcolor{keywordtype}{char} string31[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}Ted\string~/"{}};}
-\DoxyCodeLine{652     \textcolor{keywordtype}{char} result31[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}Ted\string~/"{}};}
-\DoxyCodeLine{653     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{} \(\backslash\)t\(\backslash\)n"{}}, 1) != 0)\{}
-\DoxyCodeLine{654         perror(\textcolor{stringliteral}{"{}Can't set IFS"{}});}
-\DoxyCodeLine{655         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{656     \};}
-\DoxyCodeLine{657     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string31) == EXIT\_SUCCESS);}
-\DoxyCodeLine{658     assert(strcmp(result31, string31) == 0);}
-\DoxyCodeLine{659 }
-\DoxyCodeLine{660     \textcolor{comment}{// Test Case 32: \string~/ is not at front, \$* are all not present, IFS is not set}}
-\DoxyCodeLine{661     \textcolor{keywordtype}{char} string32[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}How?\string~/"{}};}
-\DoxyCodeLine{662     \textcolor{keywordtype}{char} result32[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}] = \textcolor{stringliteral}{"{}How?\string~/"{}};}
-\DoxyCodeLine{663     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{}NULL"{}}, 1) != 0)\{}
-\DoxyCodeLine{664         perror(\textcolor{stringliteral}{"{}Can't set IFS"{}});}
-\DoxyCodeLine{665         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{666     \};}
-\DoxyCodeLine{667     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string32) == EXIT\_SUCCESS);}
-\DoxyCodeLine{668     assert(strcmp(result32, string32) == 0);}
-\DoxyCodeLine{669 }
-\DoxyCodeLine{670     \textcolor{comment}{// TODO: Test cases 33-\/38 need foreground and background processes implemented}}
-\DoxyCodeLine{671     }
-\DoxyCodeLine{672     \textcolor{comment}{// Test Case 39: \string~/ does not occur at all, \$\$ present, IFS set}}
-\DoxyCodeLine{673     strcpy(\textcolor{keywordtype}{string}, \textcolor{stringliteral}{"{}Ted\$\$"{}});}
-\DoxyCodeLine{674     strcpy(result, \textcolor{stringliteral}{"{}Ted"{}});}
-\DoxyCodeLine{675     strcpy(holder, \textcolor{stringliteral}{"{}"{}});}
-\DoxyCodeLine{676     strcat(result, \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(getpid(), holder, 10));}
-\DoxyCodeLine{677     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{} \(\backslash\)t\(\backslash\)n"{}}, 1) != 0)\{}
-\DoxyCodeLine{678         perror(\textcolor{stringliteral}{"{}Can't set IFS"{}});}
-\DoxyCodeLine{679         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{680     \};}
-\DoxyCodeLine{681     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(\textcolor{keywordtype}{string}) == EXIT\_SUCCESS);}
-\DoxyCodeLine{682     assert(strcmp(result, \textcolor{keywordtype}{string}) == 0);}
-\DoxyCodeLine{683 }
-\DoxyCodeLine{684     \textcolor{comment}{// Test Case 40: \string~/ does not occur at all, \$\$ present, IFS not set}}
-\DoxyCodeLine{685     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{}NULL"{}}, 1) != 0)\{}
-\DoxyCodeLine{686         perror(\textcolor{stringliteral}{"{}Can't set IFS"{}});}
-\DoxyCodeLine{687         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{688     \};}
-\DoxyCodeLine{689     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(\textcolor{keywordtype}{string}) == EXIT\_SUCCESS);}
-\DoxyCodeLine{690     assert(strcmp(result, \textcolor{keywordtype}{string}) == 0);}
-\DoxyCodeLine{691 }
-\DoxyCodeLine{692     \textcolor{comment}{// TODO: Test cases 41-\/46 need foreground and background processes implemented}}
-\DoxyCodeLine{693     }
-\DoxyCodeLine{694     \textcolor{comment}{// Test Case 47: No variables need expanding, IFS set}}
-\DoxyCodeLine{695     strcpy(\textcolor{keywordtype}{string}, \textcolor{stringliteral}{"{}Ted"{}});}
-\DoxyCodeLine{696     strcpy(result, \textcolor{stringliteral}{"{}Ted"{}});}
-\DoxyCodeLine{697     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{} \(\backslash\)t\(\backslash\)n"{}}, 1) != 0)\{}
-\DoxyCodeLine{698         perror(\textcolor{stringliteral}{"{}Can't set IFS"{}});}
-\DoxyCodeLine{699         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{700     \};}
-\DoxyCodeLine{701     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(\textcolor{keywordtype}{string}) == EXIT\_SUCCESS);}
-\DoxyCodeLine{702     assert(strcmp(result, \textcolor{keywordtype}{string}) == 0);}
-\DoxyCodeLine{703 }
-\DoxyCodeLine{704     \textcolor{comment}{// Test Case 48: No variables need expanding, IFS set}}
-\DoxyCodeLine{705     \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}}, \textcolor{stringliteral}{"{}NULL"{}}, 1) != 0)\{}
-\DoxyCodeLine{706         perror(\textcolor{stringliteral}{"{}Can't set IFS"{}});}
-\DoxyCodeLine{707         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{708     \};}
-\DoxyCodeLine{709     assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(\textcolor{keywordtype}{string}) == EXIT\_SUCCESS);}
-\DoxyCodeLine{710     assert(strcmp(result, \textcolor{keywordtype}{string}) == 0);}
-\DoxyCodeLine{711 \}}
-\DoxyCodeLine{712 }
-\DoxyCodeLine{713 \textcolor{keywordtype}{int} \mbox{\hyperlink{tester_8h_a840291bc02cba5474a4cb46a9b9566fe}{main}}(\textcolor{keywordtype}{void})\{}
-\DoxyCodeLine{720     pid\_t pid;}
-\DoxyCodeLine{721     \textcolor{keywordtype}{int} status;}
-\DoxyCodeLine{722 }
-\DoxyCodeLine{723     \textcolor{comment}{// Variables needed for prompts declared outside the infinite loop to not create memory leaks}}
-\DoxyCodeLine{724     \textcolor{keywordtype}{char} line[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
-\DoxyCodeLine{725     \textcolor{keywordtype}{size\_t} line\_size = \mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}-\/1;}
-\DoxyCodeLine{726     }
-\DoxyCodeLine{727     \textcolor{comment}{// Runtime debug testing to make sure functions act according to how I want}}
-\DoxyCodeLine{728     \textcolor{keywordflow}{if}(\mbox{\hyperlink{tester_8h_a1d06ff09876d5a3f4d79a3b87b63cbd8}{test\_input}}() == EXIT\_FAILURE)\{}
-\DoxyCodeLine{729         printf(\textcolor{stringliteral}{"{}Input functions fail runtime tests\(\backslash\)n"{}});}
-\DoxyCodeLine{730         exit(EXIT\_FAILURE);}
-\DoxyCodeLine{731     \};}
-\DoxyCodeLine{732 }
-\DoxyCodeLine{733     \textcolor{keywordflow}{for}(;;)\{}
-\DoxyCodeLine{734 }
-\DoxyCodeLine{735         \textcolor{comment}{// Specification requirement to identify child processes potentially exiting between loops}}
-\DoxyCodeLine{736         \textcolor{keywordflow}{while}((pid = waitpid(0, \&status, WNOHANG)) > 0)  \{}
-\DoxyCodeLine{737             \textcolor{keywordflow}{if}(\mbox{\hyperlink{smallsh_8c_a175a4a384e4085a18752c7fa657b7083}{spec\_check\_for\_child\_background\_processes}}(status, pid) != EXIT\_SUCCESS)\{}
-\DoxyCodeLine{738                 exit(EXIT\_FAILURE);}
-\DoxyCodeLine{739             \}}
-\DoxyCodeLine{740         \}}
-\DoxyCodeLine{741 }
-\DoxyCodeLine{742         \textcolor{keywordflow}{if}(pid == 0)\{}
-\DoxyCodeLine{743             printf(\textcolor{stringliteral}{"{}Children exist but have not yet completed"{}});}
-\DoxyCodeLine{744         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if}(pid < 0)\{}
-\DoxyCodeLine{745             perror(\textcolor{stringliteral}{"{}Error looking for children"{}});}
-\DoxyCodeLine{746         \};}
-\DoxyCodeLine{747 }
-\DoxyCodeLine{748         assert(pid < 1);}
-\DoxyCodeLine{749 }
-\DoxyCodeLine{750         \textcolor{comment}{// TODO: turn on a signal handler so that any signal prints a newline and for loop continues}}
-\DoxyCodeLine{751         \textcolor{comment}{// Print prompt TODO: change stdin to file stream variable when implemented}}
-\DoxyCodeLine{752         \textcolor{keywordflow}{if}(\mbox{\hyperlink{smallsh_8c_a60d3ad2c41bae9aefb988318b561633e}{spec\_get\_line}}(line, line\_size, stdin) == EXIT\_SUCCESS)\{}
-\DoxyCodeLine{753             \textcolor{comment}{// Only in the singular case where we can verify input has succeeded are we heading out to any other function}}
-\DoxyCodeLine{754             }
-\DoxyCodeLine{755         \} \textcolor{keywordflow}{else} \{}
-\DoxyCodeLine{756             printf(\textcolor{stringliteral}{"{}error with spec\_get\_line"{}});}
-\DoxyCodeLine{757             exit(EXIT\_FAILURE);}
-\DoxyCodeLine{758         \};}
-\DoxyCodeLine{759         clearerr(stdin); \textcolor{comment}{//TODO: change stdin to the file stream variable when implemented}}
-\DoxyCodeLine{760         \textcolor{comment}{// TODO: turn off custom signal handler}}
-\DoxyCodeLine{761         \textcolor{comment}{// Nothing goes below this line. Without input, there's no point in continuing processing. Instead, start the infinite loop again.}}
-\DoxyCodeLine{762     \}}
-\DoxyCodeLine{763 }
-\DoxyCodeLine{764 }
-\DoxyCodeLine{765     exit(EXIT\_SUCCESS);}
-\DoxyCodeLine{766 \}}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#\ define\ \_POSIX\_SOURCE}}
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#\ define\ \_GNU\_SOURCE}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#\ define\ \_POSIC\_C\_SOURCE\ >=\ 200112L}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#\ include\ <stdio.h>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#\ include\ <sys/types.h>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#\ include\ <signal.h>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#\ include\ <unistd.h>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#\ include\ <sys/wait.h>}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#\ include\ <string.h>}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#\ include\ <stdlib.h>}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#\ include\ <assert.h>}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#\ include\ <stdint.h>}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#\ include\ <stdlib.h>}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#\ include\ <errno.h>}}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \textcolor{preprocessor}{\#\ define\ STRINGSIZE\ 100}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#\ define\ LINESIZE\ \ \ 1046}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#\ define\ DELIMITER\ \ "{}\ \(\backslash\)t\(\backslash\)n"{}}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{comment}{/*\ Error\ Functions\ */}}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{tester_8h_a263aba6b2412ede62ca2b906fffeda8e}{err\_child\_error}}(\textcolor{keywordtype}{char}\ child\_action[],\ \textcolor{keywordtype}{char}\ action\_taken[])\{}
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keywordflow}{if}(fprintf(stderr,\ \textcolor{stringliteral}{"{}Child\ process\ \%s.\ \%s."{}},\ child\_action,\ action\_taken)\ <\ 0)\{}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Could\ not\ print\ error"{}});}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ errno\ =\ 0;}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ EXIT\_FAILURE;}
+\DoxyCodeLine{00041\ \ \ \ \ \};}
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keywordflow}{return}\ (EXIT\_SUCCESS);}
+\DoxyCodeLine{00043\ \}}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \textcolor{comment}{/*\ Utility\ functions\ */}}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ \textcolor{keywordtype}{char}*\ \mbox{\hyperlink{tester_8h_a3a3d8ea9836c11a16cab31d6695843d6}{util\_setenv}}(\textcolor{keywordtype}{char}*\ env\_var,\ \textcolor{keywordtype}{char}*\ new\_val)\{}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{comment}{//\ Save\ old\ IFS\ to\ restore\ later}}
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keywordtype}{char}*\ old\_var\ =\ getenv(env\_var);}
+\DoxyCodeLine{00051\ \ \ \ \ \textcolor{keywordflow}{if}(old\_var\ ==\ new\_val)\{}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ old\_var;\ \ \ \ \ }
+\DoxyCodeLine{00053\ \ \ \ \ \};}
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(env\_var,new\_val,\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Could\ not\ set\ env\ for\ \%s\ to\ NULL.\ Shell\ needs\ to\ be\ restarted."{}});}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00057\ \ \ \ \ \};}
+\DoxyCodeLine{00058\ \ \ \ \ \textcolor{keywordflow}{return}\ getenv(env\_var);}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \}}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(\textcolor{keywordtype}{char}*\ storage[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}])\{}
+\DoxyCodeLine{00073\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}};\ i++)\{}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ memset(\&storage[i],\ \textcolor{charliteral}{'\(\backslash\)0'},1);\ \ \ \ }
+\DoxyCodeLine{00075\ \ \ \ \ \};}
+\DoxyCodeLine{00076\ \}}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(\textcolor{keywordtype}{int}\ num,\ \textcolor{keywordtype}{char}*\ str,\ \textcolor{keywordtype}{int}\ size)\{}
+\DoxyCodeLine{00079\ \ \ \ \ }
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{keywordtype}{char}\ *temp\ =\ malloc(size);}
+\DoxyCodeLine{00093\ \ \ \ \ }
+\DoxyCodeLine{00094\ \ \ \ \ memset(str,\ 0,\ \textcolor{keyword}{sizeof}(*str));}
+\DoxyCodeLine{00095\ \ \ \ \ \textcolor{keywordflow}{if}(sprintf(temp,\ \textcolor{stringliteral}{"{}\%d"{}},\ num)\ <\ 0)\{}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Could\ not\ convert\ integer\ to\ string"{}});}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ errno\ =\ 0;}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ free(temp);}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ EXIT\_FAILURE;}
+\DoxyCodeLine{00100\ \ \ \ \ \};}
+\DoxyCodeLine{00101\ \ \ \ \ assert(atoi(temp)\ ==\ num);}
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{keywordflow}{if}(strlen(str)\ >\ strlen(temp))\{}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Input\ string\ was\ too\ small\ to\ hold\ integer\ to\ string\ conversion\ value"{}});}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ errno\ =\ 0;}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ free(temp);}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ EXIT\_FAILURE;}
+\DoxyCodeLine{00107\ \ \ \ \ \};}
+\DoxyCodeLine{00108\ \ \ \ \ assert(strlen(str)\ <=\ strlen(temp));}
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{keywordflow}{if}(strcat(str,\ temp)\ ==\ NULL)\{}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Could\ not\ convert\ integer\ to\ string"{}});}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ errno\ =\ 0;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ free(temp);}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ EXIT\_FAILURE;}
+\DoxyCodeLine{00114\ \ \ \ \ \};}
+\DoxyCodeLine{00115\ \ \ \ \ assert(atoi(str)\ ==\ num);}
+\DoxyCodeLine{00116\ \ \ \ \ free(temp);}
+\DoxyCodeLine{00117\ \ \ \ \ \textcolor{keywordflow}{return}\ EXIT\_SUCCESS;}
+\DoxyCodeLine{00118\ \}}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{tester_8h_a1d06ff09876d5a3f4d79a3b87b63cbd8}{test\_input}}()\{}
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{keywordtype}{char}*\ storage[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
+\DoxyCodeLine{00122\ \ \ \ \ \textcolor{keywordtype}{char}*\ discardable;}
+\DoxyCodeLine{00123\ \ \ \ \ \textcolor{keywordtype}{char}*\ old\_IFS;}
+\DoxyCodeLine{00124\ \ \ \ \ \textcolor{comment}{//char\ \ str[LINESIZE];}}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00128\ \ \ \ \ \textcolor{keywordtype}{char}*\ \mbox{\hyperlink{tester_8h_a1d06ff09876d5a3f4d79a3b87b63cbd8}{test\_input}}[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
+\DoxyCodeLine{00129\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(\mbox{\hyperlink{tester_8h_a1d06ff09876d5a3f4d79a3b87b63cbd8}{test\_input}});}
+\DoxyCodeLine{00130\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a1d06ff09876d5a3f4d79a3b87b63cbd8}{test\_input}}[0]\ ==\ NULL);}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ \textcolor{comment}{//\ Test\ the\ utility\ function\ for\ int\ to\ string}}
+\DoxyCodeLine{00133\ \ \ \ \ \textcolor{keywordtype}{char}\ tester[100];}
+\DoxyCodeLine{00134\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(1,tester,3)\ ==\ \textcolor{stringliteral}{"{}3"{}});}
+\DoxyCodeLine{00135\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(-\/1,\ tester,\ 3)\ ==\ \textcolor{stringliteral}{"{}-\/1"{}});}
+\DoxyCodeLine{00136\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(0,\ tester,\ 3)\ ==\ \textcolor{stringliteral}{"{}0"{}});}
+\DoxyCodeLine{00137\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(100,\ tester,\ 3)\ ==\ \textcolor{stringliteral}{"{}100"{}});}
+\DoxyCodeLine{00138\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(100,\ tester,\ 2)\ ==\ NULL);}
+\DoxyCodeLine{00139\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(1,\ tester,\ 101)\ ==\ NULL);}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00144\ \ \ \ \ \textcolor{comment}{//\ TODO:\ implement\ test\ case\ 1,\ where\ the\ exit\ command\ closes\ the\ shell}}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \ \ \ \ \textcolor{comment}{//\ TODO:\ implement\ test\ case\ 2,\ where\ EOF\ closes\ the\ shell}}
+\DoxyCodeLine{00147\ \ \ \ \ }
+\DoxyCodeLine{00148\ \ \ \ \ \textcolor{comment}{//\ TODO:\ implement\ test\ case\ 4,\ where\ stdin\ is\ interrupted}}
+\DoxyCodeLine{00149\ \ \ \ \ }
+\DoxyCodeLine{00150\ \ \ \ \ \textcolor{comment}{//\ TODO:\ setup\ and\ run\ child\ processes\ for\ test\ cases\ 6-\/21}}
+\DoxyCodeLine{00151\ \ \ \ \ }
+\DoxyCodeLine{00152\ \ \ \ \ \textcolor{comment}{//\ TODO:\ interrupt\ spec\_get\_line\ with\ signal}}
+\DoxyCodeLine{00153\ \ \ \ \ }
+\DoxyCodeLine{00154\ \ \ \ \ \textcolor{keywordtype}{char}\ input[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
+\DoxyCodeLine{00155\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ input\_size\ =\ \mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}-\/1;}
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00157\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 5:\ Errno\ is\ not\ zeroed\ out,\ make\ sure\ function\ can\ reset\ it}}
+\DoxyCodeLine{00158\ \ \ \ \ errno\ =\ -\/11;}
+\DoxyCodeLine{00159\ \ \ \ \ \mbox{\hyperlink{smallsh_8c_a60d3ad2c41bae9aefb988318b561633e}{spec\_get\_line}}(input,\ input\_size,\ stdin);}
+\DoxyCodeLine{00160\ \ \ \ \ \textcolor{keywordflow}{if}(errno\ !=\ 0)\{}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n***Failed\ test\ case\ 5:\ errno\ is\ set\ incorrectly\ before\ function\ is\ called***\(\backslash\)n"{}});\ \ \ \ \ }
+\DoxyCodeLine{00162\ \ \ \ \ \};}
+\DoxyCodeLine{00163\ \ \ \ \ errno\ =\ 0;}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 25:\ Send\ correct\ input\ with\ a\ file\ pointer\ and\ it\ returns\ the\ correct\ input}}
+\DoxyCodeLine{00166\ \ \ \ \ }
+\DoxyCodeLine{00167\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ TODO:\ IFS\ is\ set\ to\ NULL}}
+\DoxyCodeLine{00168\ \ \ \ \ }
+\DoxyCodeLine{00169\ \ \ \ \ \textcolor{comment}{//\ Save\ old\ IFS\ to\ restore\ later}}
+\DoxyCodeLine{00170\ \ \ \ \ old\_IFS\ =\ \mbox{\hyperlink{tester_8h_a3a3d8ea9836c11a16cab31d6695843d6}{util\_setenv}}(\textcolor{stringliteral}{"{}IFS"{}},NULL);}
+\DoxyCodeLine{00171\ \ \ \ \ *storage\ =\ input;}
+\DoxyCodeLine{00172\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}Ted\ is\ here"{}});}
+\DoxyCodeLine{00173\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00174\ \ \ \ \ assert(strcmp(*storage,\ \textcolor{stringliteral}{"{}Ted"{}})\ ==\ 0\ );}
+\DoxyCodeLine{00175\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}is"{}})\ ==\ 0);}
+\DoxyCodeLine{00176\ \ \ \ \ assert(strcmp(storage[2],\ \textcolor{stringliteral}{"{}here"{}})\ ==\ 0);}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 1:\ the\ length\ of\ the\ inputted\ string\ is\ zero}}
+\DoxyCodeLine{00179\ \ \ \ \ \textcolor{keywordtype}{char}*\ empty\_str\ =\ \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{00180\ \ \ \ \ memset(input,\ \textcolor{charliteral}{'\(\backslash\)0'},\ 1);}
+\DoxyCodeLine{00181\ \ \ \ \ strcat(input,\ empty\_str);}
+\DoxyCodeLine{00182\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_FAILURE);}
+\DoxyCodeLine{00183\ \ \ \ \ }
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 3:\ the\ inputted\ string\ is\ a\ null\ byte}}
+\DoxyCodeLine{00185\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 3\(\backslash\)n"{}});}
+\DoxyCodeLine{00186\ \ \ \ \ strcat(input,\ \textcolor{stringliteral}{"{}\(\backslash\)0"{}});}
+\DoxyCodeLine{00187\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_FAILURE);}
+\DoxyCodeLine{00188\ }
+\DoxyCodeLine{00189\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 4:\ "{}EOF"{}\ as\ a\ string\ is\ passed\ as\ input}}
+\DoxyCodeLine{00190\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 4\(\backslash\)n"{}});}
+\DoxyCodeLine{00191\ \ \ \ \ strcat(input,\ \textcolor{stringliteral}{"{}EOF"{}});}
+\DoxyCodeLine{00192\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00193\ \ \ \ \ assert(strcmp(*storage,\ \textcolor{stringliteral}{"{}EOF"{}})\ ==\ 0);}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00196\ }
+\DoxyCodeLine{00197\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 6:\ "{}NULL"{}\ is\ passed\ as\ input}}
+\DoxyCodeLine{00198\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 6\(\backslash\)n"{}});}
+\DoxyCodeLine{00199\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}NULL"{}});}
+\DoxyCodeLine{00200\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00201\ \ \ \ \ assert(strcmp(*storage,\ \textcolor{stringliteral}{"{}NULL"{}})\ ==\ 0);}
+\DoxyCodeLine{00202\ \ \ \ \ }
+\DoxyCodeLine{00203\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);\ \ \ \ \ \ }
+\DoxyCodeLine{00204\ \ \ \ \ }
+\DoxyCodeLine{00205\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 10:\ IFS\ is\ NULL,\ length\ of\ input\ is\ 512,\ LINESIZE\ is\ 0,\ input\ length\ array\ is\ size\ 1,\ the\ word\ passed\ is\ "{}Ted"{}}}
+\DoxyCodeLine{00206\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 10\(\backslash\)n"{}});}
+\DoxyCodeLine{00207\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00208\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00209\ }
+\DoxyCodeLine{00210\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}Ted"{}});}
+\DoxyCodeLine{00211\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00212\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}Ted"{}})\ ==\ 0);}
+\DoxyCodeLine{00213\ \ \ \ \ assert(storage[1]\ ==\ 0x0);}
+\DoxyCodeLine{00214\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 11:\ IFS\ is\ NULL,\ sentence\ passed\ is\ "{}Ted\ is"{}}}
+\DoxyCodeLine{00217\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 11\(\backslash\)n"{}});}
+\DoxyCodeLine{00218\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00219\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00220\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}Ted\ is"{}});}
+\DoxyCodeLine{00221\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00222\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}Ted"{}})\ ==\ 0);}
+\DoxyCodeLine{00223\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}is"{}})\ ==\ 0);}
+\DoxyCodeLine{00224\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 12:\ IFS\ is\ NULL,\ length\ is\ 512,\ sentence\ is\ a\ 512\ character\ long\ word}}
+\DoxyCodeLine{00227\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 12\(\backslash\)n"{}});}
+\DoxyCodeLine{00228\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00229\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00230\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr"{}});}
+\DoxyCodeLine{00231\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00232\ \ \ \ \ assert(strcmp(storage[0],\ input)\ ==\ 0);}
+\DoxyCodeLine{00233\ \ \ \ \ assert(storage[1]\ ==\ 0x0);}
+\DoxyCodeLine{00234\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 13:\ IFS\ is\ NULL,\ length\ is\ 513\ (above\ minimum\ required),\ sentence\ is\ a\ 513\ character\ long\ word}}
+\DoxyCodeLine{00237\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 13\(\backslash\)n"{}});}
+\DoxyCodeLine{00238\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00239\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00240\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghaijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr"{}});}
+\DoxyCodeLine{00241\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00242\ \ \ \ \ assert(strcmp(storage[0],\ input)\ ==\ 0);}
+\DoxyCodeLine{00243\ \ \ \ \ assert(storage[0][512]\ ==\ \textcolor{charliteral}{'r'});}
+\DoxyCodeLine{00244\ \ \ \ \ assert(storage[1]\ ==\ 0x0);}
+\DoxyCodeLine{00245\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00247\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 14:\ IFS\ is\ NULL,\ length\ is\ 512,\ sentence\ is\ 512\ words}}
+\DoxyCodeLine{00248\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 14\(\backslash\)n"{}});}
+\DoxyCodeLine{00249\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00250\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00251\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}AA\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ "{}});}
+\DoxyCodeLine{00252\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00253\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}AA"{}})\ ==\ 0);}
+\DoxyCodeLine{00254\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}B"{}})\ ==\ 0);}
+\DoxyCodeLine{00255\ \ \ \ \ assert(strcmp(storage[512],\ \textcolor{stringliteral}{"{}r"{}})\ ==\ 0);}
+\DoxyCodeLine{00256\ \ \ \ \ assert(strcmp(storage[520],\ \textcolor{stringliteral}{"{}z"{}})\ ==\ 0);}
+\DoxyCodeLine{00257\ \ \ \ \ assert(storage[521]\ ==\ 0x0);}
+\DoxyCodeLine{00258\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00261\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 15:\ IFS\ is\ NULL,\ length\ is\ 513\ (more\ than\ required\ minimum),\ sentence\ is\ 513\ words}}
+\DoxyCodeLine{00262\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 15\(\backslash\)n"{}});}
+\DoxyCodeLine{00263\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00264\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00265\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}A\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ "{}});}
+\DoxyCodeLine{00266\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00267\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}A"{}})\ ==\ 0);}
+\DoxyCodeLine{00268\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}A"{}})\ ==\ 0);}
+\DoxyCodeLine{00269\ \ \ \ \ assert(strcmp(storage[521],\ \textcolor{stringliteral}{"{}z"{}})\ ==\ 0);}
+\DoxyCodeLine{00270\ \ \ \ \ assert(storage[522]\ ==\ 0x0);}
+\DoxyCodeLine{00271\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00272\ }
+\DoxyCodeLine{00273\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 16:\ IFS\ is\ NULL,\ length\ is\ 512,\ sentence\ is\ 512\ words,\ no\ trailing\ whitespace}}
+\DoxyCodeLine{00274\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 16\(\backslash\)n"{}});}
+\DoxyCodeLine{00275\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00276\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00277\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}AA\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z"{}});}
+\DoxyCodeLine{00278\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00279\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}AA"{}})\ ==\ 0);}
+\DoxyCodeLine{00280\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}B"{}})\ ==\ 0);}
+\DoxyCodeLine{00281\ \ \ \ \ assert(strcmp(storage[520],\ \textcolor{stringliteral}{"{}z"{}})\ ==\ 0);}
+\DoxyCodeLine{00282\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00283\ }
+\DoxyCodeLine{00284\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 17:\ IFS\ is\ NULL,\ length\ is\ 513,\ sentence\ is\ 513\ words,\ no\ trailing\ whitespace}}
+\DoxyCodeLine{00285\ \ \ \ \ }
+\DoxyCodeLine{00286\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 17\(\backslash\)n"{}});}
+\DoxyCodeLine{00287\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00288\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00289\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}A\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z"{}});}
+\DoxyCodeLine{00290\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00291\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}A"{}})\ ==\ 0);}
+\DoxyCodeLine{00292\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}A"{}})\ ==\ 0);}
+\DoxyCodeLine{00293\ \ \ \ \ assert(strcmp(storage[521],\ \textcolor{stringliteral}{"{}z"{}})\ ==\ 0);}
+\DoxyCodeLine{00294\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00295\ }
+\DoxyCodeLine{00296\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 18:\ IFS\ is\ \(\backslash\)t\(\backslash\)n,\ length\ is\ 512,\ sentence\ is\ 512\ words,\ no\ trailing\ whitespace}}
+\DoxyCodeLine{00297\ \ \ \ \ }
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{keywordflow}{if}((discardable\ =\ \mbox{\hyperlink{tester_8h_a3a3d8ea9836c11a16cab31d6695843d6}{util\_setenv}}(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}\ \(\backslash\)t\(\backslash\)n"{}}))\ ==\ NULL)\{}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Cannot\ set\ IFS\ from\ \%s\ to\ \%s.\ Restart\ shell."{}},\ \textcolor{stringliteral}{"{}NULL"{}},\ \textcolor{stringliteral}{"{}\(\backslash\)t\(\backslash\)n"{}});}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00301\ \ \ \ \ \};}
+\DoxyCodeLine{00302\ }
+\DoxyCodeLine{00303\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 12b:\ IFS\ is\ \(\backslash\)t\(\backslash\)n,\ length\ is\ 512,\ sentence\ is\ a\ 512\ character\ long\ word}}
+\DoxyCodeLine{00304\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 12b\(\backslash\)n"{}});}
+\DoxyCodeLine{00305\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00306\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00307\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr"{}});}
+\DoxyCodeLine{00308\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00309\ \ \ \ \ assert(strcmp(storage[0],\ input)\ ==\ 0);}
+\DoxyCodeLine{00310\ \ \ \ \ assert(storage[1]\ ==\ 0x0\ );}
+\DoxyCodeLine{00311\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00312\ }
+\DoxyCodeLine{00313\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 13b:\ IFS\ is\ \(\backslash\)t\(\backslash\)n,\ length\ is\ 513\ (above\ minimum\ required),\ sentence\ is\ a\ 513\ character\ long\ word}}
+\DoxyCodeLine{00314\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 13b\(\backslash\)n"{}});}
+\DoxyCodeLine{00315\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00316\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00317\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghaijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr"{}});}
+\DoxyCodeLine{00318\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00319\ \ \ \ \ assert(strcmp(storage[0],\ input)\ ==\ 0);}
+\DoxyCodeLine{00320\ \ \ \ \ assert(storage[1]\ ==\ 0x0);}
+\DoxyCodeLine{00321\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00322\ }
+\DoxyCodeLine{00323\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 18}}
+\DoxyCodeLine{00324\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 18\(\backslash\)n"{}});}
+\DoxyCodeLine{00325\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00326\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00327\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}AA\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z"{}});}
+\DoxyCodeLine{00328\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00329\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}AA"{}})\ ==\ 0);}
+\DoxyCodeLine{00330\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}B"{}})\ ==\ 0);}
+\DoxyCodeLine{00331\ \ \ \ \ assert(strcmp(storage[520],\ \textcolor{stringliteral}{"{}z"{}})\ ==\ 0);}
+\DoxyCodeLine{00332\ \ \ \ \ assert(storage[521]\ ==\ 0x0);}
+\DoxyCodeLine{00333\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00334\ \ \ \ \ }
+\DoxyCodeLine{00335\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 19:\ IFS\ is\ \(\backslash\)t\(\backslash\)n,\ length\ is\ 512,\ sentence\ is\ 512\ words,\ trailing\ whitespace}}
+\DoxyCodeLine{00336\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 19\(\backslash\)n"{}});}
+\DoxyCodeLine{00337\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00338\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00339\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}AA\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ "{}});}
+\DoxyCodeLine{00340\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00341\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}AA"{}})\ ==\ 0);}
+\DoxyCodeLine{00342\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}B"{}})\ ==\ 0);}
+\DoxyCodeLine{00343\ \ \ \ \ assert(strcmp(storage[520],\ \textcolor{stringliteral}{"{}z"{}})\ ==\ 0);}
+\DoxyCodeLine{00344\ \ \ \ \ assert(storage[521]\ ==\ 0x0);}
+\DoxyCodeLine{00345\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00346\ }
+\DoxyCodeLine{00347\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 20:\ IFS\ is\ \(\backslash\)t\(\backslash\)n,\ length\ is\ 513,\ sentence\ is\ 513\ words,\ trailing\ whitespace}}
+\DoxyCodeLine{00348\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 20\(\backslash\)n"{}});}
+\DoxyCodeLine{00349\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00350\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00351\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}A\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ "{}});}
+\DoxyCodeLine{00352\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00353\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}A"{}})\ ==\ 0);}
+\DoxyCodeLine{00354\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}A"{}})\ ==\ 0);}
+\DoxyCodeLine{00355\ \ \ \ \ assert(strcmp(storage[521],\ \textcolor{stringliteral}{"{}z"{}})\ ==\ 0);}
+\DoxyCodeLine{00356\ \ \ \ \ assert(storage[522]\ ==\ 0x0);}
+\DoxyCodeLine{00357\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00358\ }
+\DoxyCodeLine{00359\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 21:\ IFS\ is\ \(\backslash\)t\(\backslash\)n,\ length\ is\ 513,\ sentence\ is\ 513\ words,\ trailing\ whitespace}}
+\DoxyCodeLine{00360\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 21\(\backslash\)n"{}});}
+\DoxyCodeLine{00361\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00362\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00363\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}A\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ "{}});}
+\DoxyCodeLine{00364\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00365\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}A"{}})\ ==\ 0);}
+\DoxyCodeLine{00366\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}A"{}})\ ==\ 0);}
+\DoxyCodeLine{00367\ \ \ \ \ assert(strcmp(storage[521],\ \textcolor{stringliteral}{"{}z"{}})\ ==\ 0);}
+\DoxyCodeLine{00368\ \ \ \ \ assert(storage[522]\ ==\ 0x0);}
+\DoxyCodeLine{00369\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00370\ }
+\DoxyCodeLine{00371\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 22:\ IFS\ is\ \(\backslash\)t\(\backslash\)n,\ length\ is\ 1,\ sentence\ is\ 1\ word,\ no\ trailing\ whitespace}}
+\DoxyCodeLine{00372\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 22\(\backslash\)n"{}});}
+\DoxyCodeLine{00373\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00374\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00375\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}i"{}});}
+\DoxyCodeLine{00376\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00377\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}i"{}})\ ==\ 0);}
+\DoxyCodeLine{00378\ \ \ \ \ assert(storage[1]\ ==\ 0x0);}
+\DoxyCodeLine{00379\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00380\ }
+\DoxyCodeLine{00381\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 23:\ IFS\ is\ \(\backslash\)t\(\backslash\)n,\ length\ is\ 2,\ sentence\ is\ 1\ word,\ trailing\ whitespace}}
+\DoxyCodeLine{00382\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 23\(\backslash\)n"{}});}
+\DoxyCodeLine{00383\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00384\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00385\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}i\ "{}});}
+\DoxyCodeLine{00386\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00387\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}i"{}})\ ==\ 0);}
+\DoxyCodeLine{00388\ \ \ \ \ assert(storage[1]\ ==\ 0x0);}
+\DoxyCodeLine{00389\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00390\ }
+\DoxyCodeLine{00391\ }
+\DoxyCodeLine{00392\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 24:\ IFS\ is\ "{}\ "{},\ length\ is\ 512,\ sentence\ is\ 512\ words,\ no\ trailing\ whitespace}}
+\DoxyCodeLine{00393\ \ \ \ \ \textcolor{keywordflow}{if}((discardable\ =\ \mbox{\hyperlink{tester_8h_a3a3d8ea9836c11a16cab31d6695843d6}{util\_setenv}}(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}\ "{}}))\ ==\ old\_IFS)\{}
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Can't\ set\ IFS\ from\ \%s\ to\ empty\ strings"{}},\ old\_IFS);}
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00396\ \ \ \ \ \};}
+\DoxyCodeLine{00397\ }
+\DoxyCodeLine{00398\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 12c:\ IFS\ is\ "{}\ "{},\ length\ is\ 512,\ sentence\ is\ a\ 512\ character\ long\ word}}
+\DoxyCodeLine{00399\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 12c\(\backslash\)n"{}});}
+\DoxyCodeLine{00400\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00401\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00402\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr"{}});}
+\DoxyCodeLine{00403\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00404\ \ \ \ \ assert(strcmp(storage[0],\ input)\ ==\ 0);}
+\DoxyCodeLine{00405\ \ \ \ \ assert(storage[1]\ ==\ 0x0);}
+\DoxyCodeLine{00406\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00407\ }
+\DoxyCodeLine{00408\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 13c:\ IFS\ is\ "{}\ "{},\ length\ is\ 513\ (above\ minimum\ required),\ sentence\ is\ a\ 513\ character\ long\ word}}
+\DoxyCodeLine{00409\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 13c\(\backslash\)n"{}});}
+\DoxyCodeLine{00410\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00411\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00412\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghaijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr"{}});}
+\DoxyCodeLine{00413\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00414\ \ \ \ \ assert(strcmp(storage[0],\ input)\ ==\ 0);}
+\DoxyCodeLine{00415\ \ \ \ \ assert(storage[1]\ ==\ 0x0);}
+\DoxyCodeLine{00416\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00417\ }
+\DoxyCodeLine{00418\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 24}}
+\DoxyCodeLine{00419\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 24\(\backslash\)n"{}});}
+\DoxyCodeLine{00420\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00421\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00422\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}AA\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z"{}});}
+\DoxyCodeLine{00423\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00424\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}AA"{}})\ ==\ 0);}
+\DoxyCodeLine{00425\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}B"{}})\ ==\ 0);}
+\DoxyCodeLine{00426\ \ \ \ \ assert(strcmp(storage[520],\ \textcolor{stringliteral}{"{}z"{}})\ ==\ 0);}
+\DoxyCodeLine{00427\ \ \ \ \ assert(storage[521]\ ==\ 0x0);}
+\DoxyCodeLine{00428\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00429\ }
+\DoxyCodeLine{00430\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 19:\ IFS\ is\ "{}\ "{},\ length\ is\ 512,\ sentence\ is\ 512\ words,\ trailing\ whitespace}}
+\DoxyCodeLine{00431\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 19\(\backslash\)n"{}});}
+\DoxyCodeLine{00432\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00433\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00434\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}AA\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ "{}});}
+\DoxyCodeLine{00435\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00436\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}AA"{}})\ ==\ 0);}
+\DoxyCodeLine{00437\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}B"{}})\ ==\ 0);\ \ \ }
+\DoxyCodeLine{00438\ \ \ \ \ assert(strcmp(storage[520],\ \textcolor{stringliteral}{"{}z"{}})\ ==\ 0);}
+\DoxyCodeLine{00439\ \ \ \ \ assert(storage[521]\ ==\ 0x0);}
+\DoxyCodeLine{00440\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00441\ }
+\DoxyCodeLine{00442\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 20:\ IFS\ is\ "{}\ "{},\ length\ is\ 513,\ sentence\ is\ 513\ words,\ trailing\ whitespace}}
+\DoxyCodeLine{00443\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 20\(\backslash\)n"{}});}
+\DoxyCodeLine{00444\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00445\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00446\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}A\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ "{}});}
+\DoxyCodeLine{00447\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00448\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}A"{}})\ ==\ 0);}
+\DoxyCodeLine{00449\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}A"{}})\ ==\ 0);}
+\DoxyCodeLine{00450\ \ \ \ \ assert(strcmp(storage[521],\ \textcolor{stringliteral}{"{}z"{}})\ ==\ 0);}
+\DoxyCodeLine{00451\ \ \ \ \ assert(storage[522]\ ==\ 0x0);}
+\DoxyCodeLine{00452\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00453\ }
+\DoxyCodeLine{00454\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 21:\ IFS\ is\ "{}\ "{},\ length\ is\ 513,\ sentence\ is\ 513\ words,\ trailing\ whitespace}}
+\DoxyCodeLine{00455\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 21\(\backslash\)n"{}});}
+\DoxyCodeLine{00456\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00457\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00458\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}A\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ A\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ B\ C\ D\ E\ F\ G\ H\ I\ J\ K\ L\ M\ N\ O\ P\ Q\ R\ S\ T\ U\ V\ W\ X\ Y\ Z\ a\ b\ c\ d\ e\ f\ g\ h\ a\ i\ j\ k\ l\ m\ n\ o\ p\ q\ r\ s\ t\ u\ v\ w\ x\ y\ z\ "{}});}
+\DoxyCodeLine{00459\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00460\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}A"{}})\ ==\ 0);}
+\DoxyCodeLine{00461\ \ \ \ \ assert(strcmp(storage[1],\ \textcolor{stringliteral}{"{}A"{}})\ ==\ 0);}
+\DoxyCodeLine{00462\ \ \ \ \ assert(strcmp(storage[521],\ \textcolor{stringliteral}{"{}z"{}})\ ==\ 0);}
+\DoxyCodeLine{00463\ \ \ \ \ assert(storage[522]\ ==\ 0x0);}
+\DoxyCodeLine{00464\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00465\ }
+\DoxyCodeLine{00466\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 22:\ IFS\ is\ "{}\ "{},\ length\ is\ 1,\ sentence\ is\ 1\ word,\ no\ trailing\ whitespace}}
+\DoxyCodeLine{00467\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 22\(\backslash\)n"{}});}
+\DoxyCodeLine{00468\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00469\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00470\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}i"{}});}
+\DoxyCodeLine{00471\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00472\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}i"{}})\ ==\ 0);}
+\DoxyCodeLine{00473\ \ \ \ \ assert(storage[1]\ ==\ 0x0);}
+\DoxyCodeLine{00474\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00475\ }
+\DoxyCodeLine{00476\ \ \ \ \ \textcolor{comment}{//\ Word\ Splitting\ Test\ Case\ 23:\ IFS\ is\ "{}\ "{},\ length\ is\ 2,\ sentence\ is\ 1\ word,\ trailing\ whitespace}}
+\DoxyCodeLine{00477\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Test\ case\ 23\(\backslash\)n"{}});}
+\DoxyCodeLine{00478\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{00479\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{00480\ \ \ \ \ strcpy(input,\ \textcolor{stringliteral}{"{}i\ "{}});}
+\DoxyCodeLine{00481\ \ \ \ \ assert(\mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\_word\_splitting}}(storage,\ input)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00482\ \ \ \ \ assert(strcmp(storage[0],\ \textcolor{stringliteral}{"{}i"{}})\ ==\ 0);}
+\DoxyCodeLine{00483\ \ \ \ \ assert(storage[1]\ ==\ 0x0);}
+\DoxyCodeLine{00484\ \ \ \ \ \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\_reset\_storage}}(storage);}
+\DoxyCodeLine{00485\ }
+\DoxyCodeLine{00486\ }
+\DoxyCodeLine{00487\ \ \ \ \ \textcolor{keywordflow}{if}(old\_IFS\ ==\ 0x0)\{}
+\DoxyCodeLine{00488\ \ \ \ \ \ \ \ \ old\_IFS\ =\ \textcolor{stringliteral}{"{}\ "{}};}
+\DoxyCodeLine{00489\ \ \ \ \ \};}
+\DoxyCodeLine{00490\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ old\_IFS,\ 0)\ !=\ 0)\{}
+\DoxyCodeLine{00491\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Setting\ IFS\ failed"{}});}
+\DoxyCodeLine{00492\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00493\ \ \ \ \ \};}
+\DoxyCodeLine{00494\ \ \ \ \ \textcolor{keywordflow}{if}(strcmp(getenv(\textcolor{stringliteral}{"{}IFS"{}}),old\_IFS)\ !=\ 0)\{}
+\DoxyCodeLine{00495\ }
+\DoxyCodeLine{00496\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Something\ went\ wrong\ resetting\ the\ IFS:*\%s*,\ verify\ it\ is\ only\ stored\ once\ in\ the\ old\_IFS:*\%s*\ variable"{}},getenv(\textcolor{stringliteral}{"{}IFS"{}}),\ old\_IFS);}
+\DoxyCodeLine{00497\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00498\ \ \ \ \ \};}
+\DoxyCodeLine{00499\ \ \ \ \ \textcolor{keywordflow}{return}\ EXIT\_SUCCESS;}
+\DoxyCodeLine{00500\ \}}
+\DoxyCodeLine{00501\ }
+\DoxyCodeLine{00502\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(\textcolor{keywordtype}{char}\ \textcolor{keywordtype}{string}[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}])\{}
+\DoxyCodeLine{00512\ \ \ \ \ \textcolor{keywordtype}{int}\ length\ =\ strlen(\textcolor{keywordtype}{string});}
+\DoxyCodeLine{00513\ \ \ \ \ \textcolor{keywordflow}{if}(length\ <\ 1\ ||\ length\ >\ \mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}})\{}
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}The\ length\ is\ not\ in\ the\ range\ 1\ and\ \%d\ inclusive"{}},\ \mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}});}
+\DoxyCodeLine{00515\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ EXIT\_FAILURE;}
+\DoxyCodeLine{00516\ \ \ \ \ \};}
+\DoxyCodeLine{00517\ \ \ \ \ }
+\DoxyCodeLine{00518\ }
+\DoxyCodeLine{00519\ }
+\DoxyCodeLine{00520\ \};}
+\DoxyCodeLine{00521\ }
+\DoxyCodeLine{00522\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{tester_8h_a40ab51c1432c06798dd25e53faaaf9cd}{test\_expansion}}(\textcolor{keywordtype}{void})\{}
+\DoxyCodeLine{00529\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 1:\ \string~/\ at\ beginning,\ \$\$\ is\ present,\ \$?\ is\ present,\ \$!\ is\ present,\ IFS\ is\ set\ (not\ null)}}
+\DoxyCodeLine{00530\ \ \ \ \ \textcolor{keywordtype}{char}\ \textcolor{keywordtype}{string}[LiNESIZE]\ =\ \textcolor{stringliteral}{"{}\string~/\$\$\$?\$!"{}};}
+\DoxyCodeLine{00531\ \ \ \ \ \textcolor{keywordtype}{char}\ home[10]\ =\ getenv(\textcolor{stringliteral}{"{}HOME"{}});}
+\DoxyCodeLine{00532\ \ \ \ \ \textcolor{keywordtype}{char}\ result[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{00533\ \ \ \ \ strcat(result,\ home);}
+\DoxyCodeLine{00534\ \ \ \ \ strcat(result,\ \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(getpid()));}
+\DoxyCodeLine{00535\ \ \ \ \ \textcolor{comment}{//\ TODO:\ strcat(result,\ );\ need\ to\ setup\ foreground\ and\ background\ processes}}
+\DoxyCodeLine{00536\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}\ \(\backslash\)t\(\backslash\)n"{}},\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00537\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Can't\ set\ IFS\ to\ neutral\ delimiter"{}});}
+\DoxyCodeLine{00538\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00539\ \ \ \ \ \};}
+\DoxyCodeLine{00540\ }
+\DoxyCodeLine{00541\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(\textcolor{keywordtype}{string})\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00542\ \ \ \ \ \textcolor{comment}{//\ TODO:\ need\ to\ setup\ foreground\ and\ background\ processes\ assert(strcmp(string,\ ));}}
+\DoxyCodeLine{00543\ \ \ \ \ }
+\DoxyCodeLine{00544\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 2\ -\/\ 6\ need\ foreground\ and\ background\ processes}}
+\DoxyCodeLine{00545\ \ \ \ \ }
+\DoxyCodeLine{00546\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 7:\ \string~/\ at\ beginning,\ \$\$\ present,\ IFS\ set\ }}
+\DoxyCodeLine{00547\ \ \ \ \ \textcolor{keywordtype}{char}\ string7[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}\string~/Ted\$\$"{}};}
+\DoxyCodeLine{00548\ \ \ \ \ \textcolor{keywordtype}{char}\ string7b[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}\string~/\$\$Ted"{}};}
+\DoxyCodeLine{00549\ \ \ \ \ \textcolor{keywordtype}{char}\ result7\_pid[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
+\DoxyCodeLine{00550\ \ \ \ \ \textcolor{keywordtype}{char}\ result7\_home\ =\ getenv(\textcolor{stringliteral}{"{}HOME"{}});}
+\DoxyCodeLine{00551\ \ \ \ \ \textcolor{keywordtype}{char}\ result7b\_home\ =\ getenv(\textcolor{stringliteral}{"{}HOME"{}});}
+\DoxyCodeLine{00552\ }
+\DoxyCodeLine{00553\ \ \ \ \ \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(getpid(),\ result7\_pid,\ 10);}
+\DoxyCodeLine{00554\ \ \ \ \ strcat(result7\_home,\ \textcolor{stringliteral}{"{}Ted"{}});}
+\DoxyCodeLine{00555\ \ \ \ \ strcat(result7\_home,\ result7\_pid);}
+\DoxyCodeLine{00556\ \ \ \ \ strcat(result7b\_home,\ result7\_pid);}
+\DoxyCodeLine{00557\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}\ \(\backslash\)t\(\backslash\)n"{}},\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00558\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Can't\ set\ IFS\ to\ neutral\ delimiter"{}});}
+\DoxyCodeLine{00559\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00560\ \ \ \ \ \};}
+\DoxyCodeLine{00561\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string7)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00562\ \ \ \ \ assert(strcmp(string7,\ result7\_home));}
+\DoxyCodeLine{00563\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string7b)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00564\ \ \ \ \ assert(strcmp(string7b,\ result7b\_home));}
+\DoxyCodeLine{00565\ }
+\DoxyCodeLine{00566\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 8:\ \string~/\ at\ beginning,\ \$\$\ present,\ IFS\ unset}}
+\DoxyCodeLine{00567\ \ \ \ \ \textcolor{keywordtype}{char}\ string8[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}\string~/Ted\$\$"{}};}
+\DoxyCodeLine{00568\ \ \ \ \ \textcolor{keywordtype}{char}\ string8b[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}`/\$\$Ted"{}};}
+\DoxyCodeLine{00569\ \ \ \ \ \textcolor{keywordtype}{char}\ result8\_pid[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
+\DoxyCodeLine{00570\ \ \ \ \ \textcolor{keywordtype}{char}\ result8\_home\ =\ getenv(\textcolor{stringliteral}{"{}HOME"{}});}
+\DoxyCodeLine{00571\ \ \ \ \ \textcolor{keywordtype}{char}\ result8b\_home\ =\ getenv(\textcolor{stringliteral}{"{}HOME"{}});}
+\DoxyCodeLine{00572\ }
+\DoxyCodeLine{00573\ \ \ \ \ \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(getpid(),\ result8\_pid,\ 10);}
+\DoxyCodeLine{00574\ \ \ \ \ strcat(result8\_home,\ \textcolor{stringliteral}{"{}Ted"{}});}
+\DoxyCodeLine{00575\ \ \ \ \ strcat(result8\_home,\ result8\_pid);}
+\DoxyCodeLine{00576\ \ \ \ \ strcat(result8b\_home,\ result8\_pid);}
+\DoxyCodeLine{00577\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}NULL"{}},\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00578\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Can't\ set\ IFS\ to\ neutral\ delimiter"{}});}
+\DoxyCodeLine{00579\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00580\ \ \ \ \ \};}
+\DoxyCodeLine{00581\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string8)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00582\ \ \ \ \ assert(strcmp(string8,\ result8\_home)\ ==\ 0);}
+\DoxyCodeLine{00583\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string8b)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00584\ \ \ \ \ assert(strcmp(string8b,\ result8b\_home)\ ==\ 0);}
+\DoxyCodeLine{00585\ }
+\DoxyCodeLine{00586\ \ \ \ \ \textcolor{comment}{//\ TODO:\ Test\ Cases\ 9-\/14\ need\ foreground\ and\ background\ processes\ implemented}}
+\DoxyCodeLine{00587\ \ \ \ \ }
+\DoxyCodeLine{00588\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 15:\ \string~/\ at\ beginning,\ \$\$,\ \$?,\ \$!\ are\ not\ present,\ IFS\ set}}
+\DoxyCodeLine{00589\ \ \ \ \ \textcolor{keywordtype}{char}\ string15[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}\string~/"{}};}
+\DoxyCodeLine{00590\ \ \ \ \ \textcolor{keywordtype}{char}\ string15b[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}\string~/Ted"{}};}
+\DoxyCodeLine{00591\ \ \ \ \ \textcolor{keywordtype}{char}\ result15[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ getenv(\textcolor{stringliteral}{"{}HOME"{}});}
+\DoxyCodeLine{00592\ \ \ \ \ \textcolor{keywordtype}{char}\ result15b[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{00593\ \ \ \ \ strcat(result15b,\ result15);}
+\DoxyCodeLine{00594\ \ \ \ \ strcat(result15b,\ \textcolor{stringliteral}{"{}/Ted"{}});}
+\DoxyCodeLine{00595\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}\ \(\backslash\)t\(\backslash\)n"{}},\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00596\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Can't\ set\ IFS\ to\ neutral\ delimiter"{}});}
+\DoxyCodeLine{00597\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00598\ \ \ \ \ \};}
+\DoxyCodeLine{00599\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string15)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00600\ \ \ \ \ assert(strcmp(string15,\ result15)\ ==\ 0);}
+\DoxyCodeLine{00601\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string15b)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00602\ \ \ \ \ assert(strcmp(string15b,\ result15b)\ ==\ 0);}
+\DoxyCodeLine{00603\ }
+\DoxyCodeLine{00604\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 16:\ \string~/\ at\ beginning,\ \$\$,\ \$?,\ \$!\ are\ not\ present,\ IFS\ not\ set}}
+\DoxyCodeLine{00605\ \ \ \ \ \textcolor{keywordtype}{char}\ string16[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}\string~/"{}};}
+\DoxyCodeLine{00606\ \ \ \ \ \textcolor{keywordtype}{char}\ string16b[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}\string~/Ted"{}};}
+\DoxyCodeLine{00607\ \ \ \ \ \textcolor{keywordtype}{char}\ result16[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ getenv(\textcolor{stringliteral}{"{}HOME"{}});}
+\DoxyCodeLine{00608\ \ \ \ \ \textcolor{keywordtype}{char}\ result16b[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{00609\ \ \ \ \ strcat(result16b,\ result15);}
+\DoxyCodeLine{00610\ \ \ \ \ strcat(result16b,\ \textcolor{stringliteral}{"{}/Ted"{}});}
+\DoxyCodeLine{00611\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}NULL"{}},\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00612\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Can't\ set\ IFS\ to\ neutral\ delimiter"{}});}
+\DoxyCodeLine{00613\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00614\ \ \ \ \ \};}
+\DoxyCodeLine{00615\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string16)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00616\ \ \ \ \ assert(strcmp(string16,\ result16)\ ==\ 0);}
+\DoxyCodeLine{00617\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string16b)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00618\ \ \ \ \ assert(strcmp(string16b,\ result16b)\ ==\ 0);}
+\DoxyCodeLine{00619\ }
+\DoxyCodeLine{00620\ \ \ \ \ \textcolor{comment}{//\ TODO:\ 17-\/22\ need\ foreground\ and\ background\ processes\ implemented}}
+\DoxyCodeLine{00621\ \ \ \ \ }
+\DoxyCodeLine{00622\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 23:\ \string~/\ not\ front,\ \$\$\ present,\ S?\ and\ S!\ not\ present,\ IFS\ set}}
+\DoxyCodeLine{00623\ \ \ \ \ \textcolor{keywordtype}{char}\ string23[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}\$\$Ted\string~/"{}};}
+\DoxyCodeLine{00624\ \ \ \ \ \textcolor{keywordtype}{char}\ result23[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
+\DoxyCodeLine{00625\ \ \ \ \ \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(getpid(),\ result23,\ 10);}
+\DoxyCodeLine{00626\ \ \ \ \ strcat(result23,\ \textcolor{stringliteral}{"{}Ted\string~/"{}});}
+\DoxyCodeLine{00627\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}\ \(\backslash\)t\(\backslash\)n"{}},\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00628\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Can't\ set\ IFS\ to\ neutral\ delimiter"{}});}
+\DoxyCodeLine{00629\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00630\ \ \ \ \ \};}
+\DoxyCodeLine{00631\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string23)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00632\ \ \ \ \ assert(strcmp(result23,\ string23)\ ==\ 0);}
+\DoxyCodeLine{00633\ }
+\DoxyCodeLine{00634\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 24:\ \string~/\ not\ at\ front,\ \$\$\ present,\ S?\ and\ \$!\ not\ present,\ IFS\ not\ set}}
+\DoxyCodeLine{00635\ \ \ \ \ \textcolor{keywordtype}{char}\ string24[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}Ted\string~/\$\$"{}};}
+\DoxyCodeLine{00636\ \ \ \ \ \textcolor{keywordtype}{char}\ result24[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}Ted\string~/"{}};}
+\DoxyCodeLine{00637\ \ \ \ \ \textcolor{keywordtype}{char}\ holder[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
+\DoxyCodeLine{00638\ \ \ \ \ \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(getpid(),\ holder,\ 10);}
+\DoxyCodeLine{00639\ \ \ \ \ strcat(result24,\ holder);}
+\DoxyCodeLine{00640\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}NULL"{}},\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00641\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Can't\ set\ IFS\ to\ neutral\ delimiter"{}});}
+\DoxyCodeLine{00642\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00643\ \ \ \ \ \};}
+\DoxyCodeLine{00644\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string24)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00645\ \ \ \ \ assert(strcmp(result24,\ string24)\ ==\ 0);}
+\DoxyCodeLine{00646\ }
+\DoxyCodeLine{00647\ }
+\DoxyCodeLine{00648\ \ \ \ \ \textcolor{comment}{//\ TODO:\ Test\ cases\ 25-\/30\ need\ foreground\ and\ background\ processes\ implemented}}
+\DoxyCodeLine{00649\ \ \ \ \ }
+\DoxyCodeLine{00650\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 31:\ \string~/\ is\ not\ at\ front,\ \$*\ are\ all\ not\ present,\ IFS\ is\ set}}
+\DoxyCodeLine{00651\ \ \ \ \ \textcolor{keywordtype}{char}\ string31[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}Ted\string~/"{}};}
+\DoxyCodeLine{00652\ \ \ \ \ \textcolor{keywordtype}{char}\ result31[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}Ted\string~/"{}};}
+\DoxyCodeLine{00653\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}\ \(\backslash\)t\(\backslash\)n"{}},\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00654\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Can't\ set\ IFS"{}});}
+\DoxyCodeLine{00655\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00656\ \ \ \ \ \};}
+\DoxyCodeLine{00657\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string31)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00658\ \ \ \ \ assert(strcmp(result31,\ string31)\ ==\ 0);}
+\DoxyCodeLine{00659\ }
+\DoxyCodeLine{00660\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 32:\ \string~/\ is\ not\ at\ front,\ \$*\ are\ all\ not\ present,\ IFS\ is\ not\ set}}
+\DoxyCodeLine{00661\ \ \ \ \ \textcolor{keywordtype}{char}\ string32[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}How?\string~/"{}};}
+\DoxyCodeLine{00662\ \ \ \ \ \textcolor{keywordtype}{char}\ result32[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}]\ =\ \textcolor{stringliteral}{"{}How?\string~/"{}};}
+\DoxyCodeLine{00663\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}NULL"{}},\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00664\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Can't\ set\ IFS"{}});}
+\DoxyCodeLine{00665\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00666\ \ \ \ \ \};}
+\DoxyCodeLine{00667\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(string32)\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00668\ \ \ \ \ assert(strcmp(result32,\ string32)\ ==\ 0);}
+\DoxyCodeLine{00669\ }
+\DoxyCodeLine{00670\ \ \ \ \ \textcolor{comment}{//\ TODO:\ Test\ cases\ 33-\/38\ need\ foreground\ and\ background\ processes\ implemented}}
+\DoxyCodeLine{00671\ \ \ \ \ }
+\DoxyCodeLine{00672\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 39:\ \string~/\ does\ not\ occur\ at\ all,\ \$\$\ present,\ IFS\ set}}
+\DoxyCodeLine{00673\ \ \ \ \ strcpy(\textcolor{keywordtype}{string},\ \textcolor{stringliteral}{"{}Ted\$\$"{}});}
+\DoxyCodeLine{00674\ \ \ \ \ strcpy(result,\ \textcolor{stringliteral}{"{}Ted"{}});}
+\DoxyCodeLine{00675\ \ \ \ \ strcpy(holder,\ \textcolor{stringliteral}{"{}"{}});}
+\DoxyCodeLine{00676\ \ \ \ \ strcat(result,\ \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\_int\_to\_string}}(getpid(),\ holder,\ 10));}
+\DoxyCodeLine{00677\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}\ \(\backslash\)t\(\backslash\)n"{}},\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00678\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Can't\ set\ IFS"{}});}
+\DoxyCodeLine{00679\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00680\ \ \ \ \ \};}
+\DoxyCodeLine{00681\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(\textcolor{keywordtype}{string})\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00682\ \ \ \ \ assert(strcmp(result,\ \textcolor{keywordtype}{string})\ ==\ 0);}
+\DoxyCodeLine{00683\ }
+\DoxyCodeLine{00684\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 40:\ \string~/\ does\ not\ occur\ at\ all,\ \$\$\ present,\ IFS\ not\ set}}
+\DoxyCodeLine{00685\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}NULL"{}},\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00686\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Can't\ set\ IFS"{}});}
+\DoxyCodeLine{00687\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00688\ \ \ \ \ \};}
+\DoxyCodeLine{00689\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(\textcolor{keywordtype}{string})\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00690\ \ \ \ \ assert(strcmp(result,\ \textcolor{keywordtype}{string})\ ==\ 0);}
+\DoxyCodeLine{00691\ }
+\DoxyCodeLine{00692\ \ \ \ \ \textcolor{comment}{//\ TODO:\ Test\ cases\ 41-\/46\ need\ foreground\ and\ background\ processes\ implemented}}
+\DoxyCodeLine{00693\ \ \ \ \ }
+\DoxyCodeLine{00694\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 47:\ No\ variables\ need\ expanding,\ IFS\ set}}
+\DoxyCodeLine{00695\ \ \ \ \ strcpy(\textcolor{keywordtype}{string},\ \textcolor{stringliteral}{"{}Ted"{}});}
+\DoxyCodeLine{00696\ \ \ \ \ strcpy(result,\ \textcolor{stringliteral}{"{}Ted"{}});}
+\DoxyCodeLine{00697\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}\ \(\backslash\)t\(\backslash\)n"{}},\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00698\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Can't\ set\ IFS"{}});}
+\DoxyCodeLine{00699\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00700\ \ \ \ \ \};}
+\DoxyCodeLine{00701\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(\textcolor{keywordtype}{string})\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00702\ \ \ \ \ assert(strcmp(result,\ \textcolor{keywordtype}{string})\ ==\ 0);}
+\DoxyCodeLine{00703\ }
+\DoxyCodeLine{00704\ \ \ \ \ \textcolor{comment}{//\ Test\ Case\ 48:\ No\ variables\ need\ expanding,\ IFS\ set}}
+\DoxyCodeLine{00705\ \ \ \ \ \textcolor{keywordflow}{if}(setenv(\textcolor{stringliteral}{"{}IFS"{}},\ \textcolor{stringliteral}{"{}NULL"{}},\ 1)\ !=\ 0)\{}
+\DoxyCodeLine{00706\ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Can't\ set\ IFS"{}});}
+\DoxyCodeLine{00707\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00708\ \ \ \ \ \};}
+\DoxyCodeLine{00709\ \ \ \ \ assert(\mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\_expansion}}(\textcolor{keywordtype}{string})\ ==\ EXIT\_SUCCESS);}
+\DoxyCodeLine{00710\ \ \ \ \ assert(strcmp(result,\ \textcolor{keywordtype}{string})\ ==\ 0);}
+\DoxyCodeLine{00711\ \}}
+\DoxyCodeLine{00712\ }
+\DoxyCodeLine{00713\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{tester_8h_a840291bc02cba5474a4cb46a9b9566fe}{main}}(\textcolor{keywordtype}{void})\{}
+\DoxyCodeLine{00720\ \ \ \ \ pid\_t\ pid;}
+\DoxyCodeLine{00721\ \ \ \ \ \textcolor{keywordtype}{int}\ status;}
+\DoxyCodeLine{00722\ }
+\DoxyCodeLine{00723\ \ \ \ \ \textcolor{comment}{//\ Variables\ needed\ for\ prompts\ declared\ outside\ the\ infinite\ loop\ to\ not\ create\ memory\ leaks}}
+\DoxyCodeLine{00724\ \ \ \ \ \textcolor{keywordtype}{char}\ line[\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}];}
+\DoxyCodeLine{00725\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ line\_size\ =\ \mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}-\/1;}
+\DoxyCodeLine{00726\ \ \ \ \ }
+\DoxyCodeLine{00727\ \ \ \ \ \textcolor{comment}{//\ Runtime\ debug\ testing\ to\ make\ sure\ functions\ act\ according\ to\ how\ I\ want}}
+\DoxyCodeLine{00728\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{tester_8h_a1d06ff09876d5a3f4d79a3b87b63cbd8}{test\_input}}()\ ==\ EXIT\_FAILURE)\{}
+\DoxyCodeLine{00729\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Input\ functions\ fail\ runtime\ tests\(\backslash\)n"{}});}
+\DoxyCodeLine{00730\ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00731\ \ \ \ \ \};}
+\DoxyCodeLine{00732\ }
+\DoxyCodeLine{00733\ \ \ \ \ \textcolor{keywordflow}{for}(;;)\{}
+\DoxyCodeLine{00734\ }
+\DoxyCodeLine{00735\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Specification\ requirement\ to\ identify\ child\ processes\ potentially\ exiting\ between\ loops}}
+\DoxyCodeLine{00736\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}((pid\ =\ waitpid(0,\ \&status,\ WNOHANG))\ >\ 0)\ \ \{}
+\DoxyCodeLine{00737\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{smallsh_8c_a175a4a384e4085a18752c7fa657b7083}{spec\_check\_for\_child\_background\_processes}}(status,\ pid)\ !=\ EXIT\_SUCCESS)\{}
+\DoxyCodeLine{00738\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00739\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00740\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00741\ }
+\DoxyCodeLine{00742\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(pid\ ==\ 0)\{}
+\DoxyCodeLine{00743\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Children\ exist\ but\ have\ not\ yet\ completed"{}});}
+\DoxyCodeLine{00744\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(pid\ <\ 0)\{}
+\DoxyCodeLine{00745\ \ \ \ \ \ \ \ \ \ \ \ \ perror(\textcolor{stringliteral}{"{}Error\ looking\ for\ children"{}});}
+\DoxyCodeLine{00746\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00747\ }
+\DoxyCodeLine{00748\ \ \ \ \ \ \ \ \ assert(pid\ <\ 1);}
+\DoxyCodeLine{00749\ }
+\DoxyCodeLine{00750\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ TODO:\ turn\ on\ a\ signal\ handler\ so\ that\ any\ signal\ prints\ a\ newline\ and\ for\ loop\ continues}}
+\DoxyCodeLine{00751\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Print\ prompt\ TODO:\ change\ stdin\ to\ file\ stream\ variable\ when\ implemented}}
+\DoxyCodeLine{00752\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{smallsh_8c_a60d3ad2c41bae9aefb988318b561633e}{spec\_get\_line}}(line,\ line\_size,\ stdin)\ ==\ EXIT\_SUCCESS)\{}
+\DoxyCodeLine{00753\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Only\ in\ the\ singular\ case\ where\ we\ can\ verify\ input\ has\ succeeded\ are\ we\ heading\ out\ to\ any\ other\ function}}
+\DoxyCodeLine{00754\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00755\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00756\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}error\ with\ spec\_get\_line"{}});}
+\DoxyCodeLine{00757\ \ \ \ \ \ \ \ \ \ \ \ \ exit(EXIT\_FAILURE);}
+\DoxyCodeLine{00758\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00759\ \ \ \ \ \ \ \ \ clearerr(stdin);\ \textcolor{comment}{//TODO:\ change\ stdin\ to\ the\ file\ stream\ variable\ when\ implemented}}
+\DoxyCodeLine{00760\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ TODO:\ turn\ off\ custom\ signal\ handler}}
+\DoxyCodeLine{00761\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Nothing\ goes\ below\ this\ line.\ Without\ input,\ there's\ no\ point\ in\ continuing\ processing.\ Instead,\ start\ the\ infinite\ loop\ again.}}
+\DoxyCodeLine{00762\ \ \ \ \ \}}
+\DoxyCodeLine{00763\ }
+\DoxyCodeLine{00764\ }
+\DoxyCodeLine{00765\ \ \ \ \ exit(EXIT\_SUCCESS);}
+\DoxyCodeLine{00766\ \}}
 
 \end{DoxyCode}

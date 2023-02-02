@@ -9,6 +9,7 @@
 {\ttfamily \#include $<$stdlib.\+h$>$}\newline
 {\ttfamily \#include $<$assert.\+h$>$}\newline
 {\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}utilities/utilities.\+h\char`\"{}}\newline
 {\ttfamily \#include $<$errno.\+h$>$}\newline
 \doxysubsection*{Macros}
 \begin{DoxyCompactItemize}
@@ -30,23 +31,17 @@
 \item 
 int \mbox{\hyperlink{smallsh_8c_a263aba6b2412ede62ca2b906fffeda8e}{err\+\_\+child\+\_\+error}} (char child\+\_\+action\mbox{[}$\,$\mbox{]}, char action\+\_\+taken\mbox{[}$\,$\mbox{]})
 \item 
-char $\ast$ \mbox{\hyperlink{smallsh_8c_a3a3d8ea9836c11a16cab31d6695843d6}{util\+\_\+setenv}} (char $\ast$env\+\_\+var, char $\ast$new\+\_\+val)
-\item 
-void \mbox{\hyperlink{smallsh_8c_a24e88b303379b25f8b97695830514759}{util\+\_\+reset\+\_\+storage}} (char $\ast$storage\mbox{[}\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]})
-\item 
-int \mbox{\hyperlink{smallsh_8c_ac08d0a771bc3ef4684ba82aa5c671de5}{util\+\_\+int\+\_\+to\+\_\+string}} (int num, char $\ast$str, int size)
-\item 
 int \mbox{\hyperlink{smallsh_8c_a175a4a384e4085a18752c7fa657b7083}{spec\+\_\+check\+\_\+for\+\_\+child\+\_\+background\+\_\+processes}} (int status, pid\+\_\+t pid)
 \item 
-int \mbox{\hyperlink{smallsh_8c_a60d3ad2c41bae9aefb988318b561633e}{spec\+\_\+get\+\_\+line}} (char input\mbox{[}\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]}, size\+\_\+t input\+\_\+size, FILE $\ast$stream)
+int \mbox{\hyperlink{smallsh_8c_a60d3ad2c41bae9aefb988318b561633e}{spec\+\_\+get\+\_\+line}} (char input\mbox{[}\mbox{\hyperlink{smallsh_8c_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]}, size\+\_\+t input\+\_\+size, FILE $\ast$stream)
 \item 
 char $\ast$$\ast$ \mbox{\hyperlink{smallsh_8c_aeff5e401fc3e38b585aa1734023af74d}{help\+\_\+split\+\_\+line}} (char $\ast$$\ast$storage, char $\ast$line)
 \item 
-int \mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\+\_\+word\+\_\+splitting}} (char $\ast$storage\mbox{[}\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]}, char input\mbox{[}\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]})
+int \mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\+\_\+word\+\_\+splitting}} (char $\ast$storage\mbox{[}\mbox{\hyperlink{smallsh_8c_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]}, char input\mbox{[}\mbox{\hyperlink{smallsh_8c_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]})
 \item 
 int \mbox{\hyperlink{smallsh_8c_a1d06ff09876d5a3f4d79a3b87b63cbd8}{test\+\_\+input}} ()
 \item 
-int \mbox{\hyperlink{smallsh_8c_a55a75c1dc1422282de693893c7a1d3a4}{spec\+\_\+expansion}} (char string\mbox{[}\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]})
+int \mbox{\hyperlink{smallsh_8c_a55a75c1dc1422282de693893c7a1d3a4}{spec\+\_\+expansion}} (char string\mbox{[}\mbox{\hyperlink{smallsh_8c_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]})
 \item 
 int \mbox{\hyperlink{smallsh_8c_a40ab51c1432c06798dd25e53faaaf9cd}{test\+\_\+expansion}} (void)
 \item 
@@ -244,47 +239,3 @@ EXIT\+\_\+\+SUCCESS if all tests pass, EXIT\+\_\+\+FAILURE if any test fails
 
 \hypertarget{smallsh.c_autotoc_md1}{}\doxyparagraph{Utility Function Testing}\label{smallsh.c_autotoc_md1}
 \hypertarget{smallsh.c_autotoc_md2}{}\doxyparagraph{Spec Function Testing}\label{smallsh.c_autotoc_md2}
-\mbox{\Hypertarget{smallsh_8c_ac08d0a771bc3ef4684ba82aa5c671de5}\label{smallsh_8c_ac08d0a771bc3ef4684ba82aa5c671de5}} 
-\index{smallsh.c@{smallsh.c}!util\_int\_to\_string@{util\_int\_to\_string}}
-\index{util\_int\_to\_string@{util\_int\_to\_string}!smallsh.c@{smallsh.c}}
-\doxysubsubsection{\texorpdfstring{util\_int\_to\_string()}{util\_int\_to\_string()}}
-{\footnotesize\ttfamily int util\+\_\+int\+\_\+to\+\_\+string (\begin{DoxyParamCaption}\item[{int}]{num,  }\item[{char $\ast$}]{str,  }\item[{int}]{size }\end{DoxyParamCaption})}
-
-Converts an integer to its strings representation
-
-
-\begin{DoxyParams}{Parameters}
-{\em num} & is the integer that needs to be converted to a string \\
-\hline
-{\em str} & is the holder string that stores the integer representation \\
-\hline
-{\em size} & is the maximum length possible to store in str, including \textbackslash{}0 \\
-\hline
-\end{DoxyParams}
-\begin{DoxyReturn}{Returns}
-EXIT\+\_\+\+SUCCESS if integer has been entirely converted to string, EXIT\+\_\+\+FAILURE if integer cannot be convered to string
-\end{DoxyReturn}
-\mbox{\Hypertarget{smallsh_8c_a24e88b303379b25f8b97695830514759}\label{smallsh_8c_a24e88b303379b25f8b97695830514759}} 
-\index{smallsh.c@{smallsh.c}!util\_reset\_storage@{util\_reset\_storage}}
-\index{util\_reset\_storage@{util\_reset\_storage}!smallsh.c@{smallsh.c}}
-\doxysubsubsection{\texorpdfstring{util\_reset\_storage()}{util\_reset\_storage()}}
-{\footnotesize\ttfamily void util\+\_\+reset\+\_\+storage (\begin{DoxyParamCaption}\item[{char $\ast$}]{storage\mbox{[}\+LINESIZE\mbox{]} }\end{DoxyParamCaption})}
-
-resets a char$\ast$$\ast$ of size LINESIZE to a null terminated first byte
-
-
-\begin{DoxyParams}{Parameters}
-{\em storage} & is a char$\ast$$\ast$ with each memory address pointing to an array of size LINESIZE.\\
-\hline
-\end{DoxyParams}
-{\itshape Memset does not return error codes}
-
-\begin{DoxyReturn}{Returns}
-void as storage is released to calling function
-\end{DoxyReturn}
-\mbox{\Hypertarget{smallsh_8c_a3a3d8ea9836c11a16cab31d6695843d6}\label{smallsh_8c_a3a3d8ea9836c11a16cab31d6695843d6}} 
-\index{smallsh.c@{smallsh.c}!util\_setenv@{util\_setenv}}
-\index{util\_setenv@{util\_setenv}!smallsh.c@{smallsh.c}}
-\doxysubsubsection{\texorpdfstring{util\_setenv()}{util\_setenv()}}
-{\footnotesize\ttfamily char $\ast$ util\+\_\+setenv (\begin{DoxyParamCaption}\item[{char $\ast$}]{env\+\_\+var,  }\item[{char $\ast$}]{new\+\_\+val }\end{DoxyParamCaption})}
-
