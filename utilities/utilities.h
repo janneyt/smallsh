@@ -21,23 +21,15 @@
 # define LINESIZE   1046
 # define DELIMITER  " \t\n"
 
-/* Utility functions */
-
-char* util_setenv(char* env_var, char* new_val){
-
-	// Save old IFS to restore later
-	char* old_var = getenv(env_var);
-	if(old_var == new_val){
-		return old_var;		
-	};
-	if(setenv(env_var,new_val, 1) != 0){
-		perror("Could not set env for %s to NULL. Shell needs to be restarted.");
-		exit(EXIT_FAILURE);
-	};
-	return getenv(env_var);
-
-
-}
+char* util_setenv(char* env_var, char* new_val)
+	/**
+	 * \brief Sets the environment variable *with error checking*
+	 *
+	 * @param env_ver a string the signifies which environment variable needs to be set
+	 * @param new_val the new value for the environment variable you are changing
+	 * 
+	 * @return Returns the old variable if it is identical to the new value, returns the new variable if setting the variable was successful, and exits entirely if writing to the environment fails
+	 * */
 
 void util_reset_storage(char* storage[LINESIZE]){
 	/**
@@ -49,9 +41,6 @@ void util_reset_storage(char* storage[LINESIZE]){
 	 *
 	 * @return void as storage is released to calling function
 	 * */
-	for(int i = 0; i < LINESIZE; i++){
-		memset(&storage[i], '\0',1);	
-	};
 }
 
 int util_int_to_string(int num, char* str, int size){
@@ -66,32 +55,4 @@ int util_int_to_string(int num, char* str, int size){
 	 * string, EXIT_FAILURE if integer cannot be convered to string
 	 *
 	 */
-	
-
-	char *temp = malloc(size);
-	
-	memset(str, 0, sizeof(*str));
-	if(sprintf(temp, "%d", num) < 0){
-		perror("Could not convert integer to string");
-		errno = 0;
-		free(temp);
-		return EXIT_FAILURE;
-	};
-	assert(atoi(temp) == num);
-	if(strlen(str) > strlen(temp)){
-		perror("Input string was too small to hold integer to string conversion value");
-		errno = 0;
-		free(temp);
-		return EXIT_FAILURE;
-	};
-	assert(strlen(str) <= strlen(temp));
-	if(strcat(str, temp) == NULL){
-		perror("Could not convert integer to string");
-		errno = 0;
-		free(temp);
-		return EXIT_FAILURE;
-	};
-	assert(atoi(str) == num);
-	free(temp);
-	return EXIT_SUCCESS;
 }

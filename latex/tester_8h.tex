@@ -1,0 +1,202 @@
+\hypertarget{tester_8h}{}\doxysection{tester.\+h File Reference}
+\label{tester_8h}\index{tester.h@{tester.h}}
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$sys/types.\+h$>$}\newline
+{\ttfamily \#include $<$signal.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$sys/wait.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include $<$errno.\+h$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{tester_8h_ac3d144aa01e765a1fae62ab5491c7cc1}{\+\_\+\+POSIX\+\_\+\+SOURCE}}
+\begin{DoxyCompactList}\small\item\em Need this to compile with kill() and -\/std=c99. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{tester_8h_a369266c24eacffb87046522897a570d5}{\+\_\+\+GNU\+\_\+\+SOURCE}}
+\item 
+\#define \mbox{\hyperlink{tester_8h_a50669c139ff7b7685cb651cf77020934}{\+\_\+\+POSIC\+\_\+\+C\+\_\+\+SOURCE}}~$>$= 200112L
+\item 
+\#define \mbox{\hyperlink{tester_8h_ab3bd0bb38a140cf3ae6428b92e8542e2}{STRINGSIZE}}~100
+\item 
+\#define \mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}~1046
+\item 
+\#define \mbox{\hyperlink{tester_8h_a23195218eef2cf21e2beae685a041783}{DELIMITER}}~\char`\"{} \textbackslash{}t\textbackslash{}n\char`\"{}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{tester_8h_a263aba6b2412ede62ca2b906fffeda8e}{err\+\_\+child\+\_\+error}} (char child\+\_\+action\mbox{[}$\,$\mbox{]}, char action\+\_\+taken\mbox{[}$\,$\mbox{]})
+\item 
+char $\ast$ \mbox{\hyperlink{tester_8h_a3a3d8ea9836c11a16cab31d6695843d6}{util\+\_\+setenv}} (char $\ast$env\+\_\+var, char $\ast$new\+\_\+val)
+\item 
+void \mbox{\hyperlink{tester_8h_a24e88b303379b25f8b97695830514759}{util\+\_\+reset\+\_\+storage}} (char $\ast$storage\mbox{[}\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]})
+\item 
+int \mbox{\hyperlink{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}{util\+\_\+int\+\_\+to\+\_\+string}} (int num, char $\ast$str, int size)
+\item 
+int \mbox{\hyperlink{tester_8h_a1d06ff09876d5a3f4d79a3b87b63cbd8}{test\+\_\+input}} ()
+\item 
+int \mbox{\hyperlink{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}{spec\+\_\+expansion}} (char string\mbox{[}\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]})
+\item 
+int \mbox{\hyperlink{tester_8h_a40ab51c1432c06798dd25e53faaaf9cd}{test\+\_\+expansion}} (void)
+\item 
+int \mbox{\hyperlink{tester_8h_a840291bc02cba5474a4cb46a9b9566fe}{main}} (void)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{tester_8h_a369266c24eacffb87046522897a570d5}\label{tester_8h_a369266c24eacffb87046522897a570d5}} 
+\index{tester.h@{tester.h}!\_GNU\_SOURCE@{\_GNU\_SOURCE}}
+\index{\_GNU\_SOURCE@{\_GNU\_SOURCE}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{\_GNU\_SOURCE}{\_GNU\_SOURCE}}
+{\footnotesize\ttfamily \#define \+\_\+\+GNU\+\_\+\+SOURCE}
+
+\mbox{\Hypertarget{tester_8h_a50669c139ff7b7685cb651cf77020934}\label{tester_8h_a50669c139ff7b7685cb651cf77020934}} 
+\index{tester.h@{tester.h}!\_POSIC\_C\_SOURCE@{\_POSIC\_C\_SOURCE}}
+\index{\_POSIC\_C\_SOURCE@{\_POSIC\_C\_SOURCE}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{\_POSIC\_C\_SOURCE}{\_POSIC\_C\_SOURCE}}
+{\footnotesize\ttfamily \#define \+\_\+\+POSIC\+\_\+\+C\+\_\+\+SOURCE~$>$= 200112L}
+
+\mbox{\Hypertarget{tester_8h_ac3d144aa01e765a1fae62ab5491c7cc1}\label{tester_8h_ac3d144aa01e765a1fae62ab5491c7cc1}} 
+\index{tester.h@{tester.h}!\_POSIX\_SOURCE@{\_POSIX\_SOURCE}}
+\index{\_POSIX\_SOURCE@{\_POSIX\_SOURCE}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{\_POSIX\_SOURCE}{\_POSIX\_SOURCE}}
+{\footnotesize\ttfamily \#define \+\_\+\+POSIX\+\_\+\+SOURCE}
+
+
+
+Need this to compile with kill() and -\/std=c99. 
+
+\mbox{\Hypertarget{tester_8h_a23195218eef2cf21e2beae685a041783}\label{tester_8h_a23195218eef2cf21e2beae685a041783}} 
+\index{tester.h@{tester.h}!DELIMITER@{DELIMITER}}
+\index{DELIMITER@{DELIMITER}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{DELIMITER}{DELIMITER}}
+{\footnotesize\ttfamily \#define DELIMITER~\char`\"{} \textbackslash{}t\textbackslash{}n\char`\"{}}
+
+\mbox{\Hypertarget{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}\label{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}} 
+\index{tester.h@{tester.h}!LINESIZE@{LINESIZE}}
+\index{LINESIZE@{LINESIZE}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{LINESIZE}{LINESIZE}}
+{\footnotesize\ttfamily \#define LINESIZE~1046}
+
+LINESIZE has to support 512 whitespace/character pairs \mbox{\Hypertarget{tester_8h_ab3bd0bb38a140cf3ae6428b92e8542e2}\label{tester_8h_ab3bd0bb38a140cf3ae6428b92e8542e2}} 
+\index{tester.h@{tester.h}!STRINGSIZE@{STRINGSIZE}}
+\index{STRINGSIZE@{STRINGSIZE}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{STRINGSIZE}{STRINGSIZE}}
+{\footnotesize\ttfamily \#define STRINGSIZE~100}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{tester_8h_a263aba6b2412ede62ca2b906fffeda8e}\label{tester_8h_a263aba6b2412ede62ca2b906fffeda8e}} 
+\index{tester.h@{tester.h}!err\_child\_error@{err\_child\_error}}
+\index{err\_child\_error@{err\_child\_error}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{err\_child\_error()}{err\_child\_error()}}
+{\footnotesize\ttfamily int err\+\_\+child\+\_\+error (\begin{DoxyParamCaption}\item[{char}]{child\+\_\+action\mbox{[}$\,$\mbox{]},  }\item[{char}]{action\+\_\+taken\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+Produces an error because a child process has completed in a systematic way.
+
+
+\begin{DoxyParams}{Parameters}
+{\em child\+\_\+action} & is a string of arbitrary size that represents {\itshape what} caused completion \\
+\hline
+{\em action\+\_\+taken} & is a string of arbtrary size that represents {\itshape what was the result} such as continuing or exiting.\\
+\hline
+\end{DoxyParams}
+{\itshape Writes to stderr}
+
+\begin{DoxyReturn}{Returns}
+EXIT\+\_\+\+SUCCESS if process successfully writes to stderr, EXIT\+\_\+\+FAILURE if there was an error while writing
+\end{DoxyReturn}
+\mbox{\Hypertarget{tester_8h_a840291bc02cba5474a4cb46a9b9566fe}\label{tester_8h_a840291bc02cba5474a4cb46a9b9566fe}} 
+\index{tester.h@{tester.h}!main@{main}}
+\index{main@{main}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Main calling function that exclusively calls other functions {\itshape required to meet specifications}
+
+\begin{DoxyReturn}{Returns}
+Exits to EXIT\+\_\+\+FAILURE if utility functions such as print fails, otherwise exits to EXIT\+\_\+\+SUCCESS when appropriate signal is sent
+\end{DoxyReturn}
+Waitpid set to 0 to make parent wait for child sharing the process group id\mbox{\Hypertarget{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}\label{tester_8h_a55a75c1dc1422282de693893c7a1d3a4}} 
+\index{tester.h@{tester.h}!spec\_expansion@{spec\_expansion}}
+\index{spec\_expansion@{spec\_expansion}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{spec\_expansion()}{spec\_expansion()}}
+{\footnotesize\ttfamily int spec\+\_\+expansion (\begin{DoxyParamCaption}\item[{char}]{string\mbox{[}\+LINESIZE\mbox{]} }\end{DoxyParamCaption})}
+
+Expands four variables based on the specifications.
+
+
+\begin{DoxyParams}{Parameters}
+{\em string} & is the string that needs to be scanned for expansion variables\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+EXIT\+\_\+\+SUCCESS for a successful scan and replace, EXIT\+\_\+\+FAILURE for an unsuccessful scan or replace
+\end{DoxyReturn}
+\mbox{\Hypertarget{tester_8h_a40ab51c1432c06798dd25e53faaaf9cd}\label{tester_8h_a40ab51c1432c06798dd25e53faaaf9cd}} 
+\index{tester.h@{tester.h}!test\_expansion@{test\_expansion}}
+\index{test\_expansion@{test\_expansion}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{test\_expansion()}{test\_expansion()}}
+{\footnotesize\ttfamily int test\+\_\+expansion (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Tests the expansion portion of the specifications
+
+\begin{DoxyReturn}{Returns}
+EXIT\+\_\+\+SUCCESS if all tests pass, EXIT\+\_\+\+FAILURE if any test fails
+\end{DoxyReturn}
+\mbox{\Hypertarget{tester_8h_a1d06ff09876d5a3f4d79a3b87b63cbd8}\label{tester_8h_a1d06ff09876d5a3f4d79a3b87b63cbd8}} 
+\index{tester.h@{tester.h}!test\_input@{test\_input}}
+\index{test\_input@{test\_input}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{test\_input()}{test\_input()}}
+{\footnotesize\ttfamily int test\+\_\+input (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\hypertarget{tester.h_autotoc_md3}{}\doxyparagraph{Utility Function Testing}\label{tester.h_autotoc_md3}
+\hypertarget{tester.h_autotoc_md4}{}\doxyparagraph{Spec Function Testing}\label{tester.h_autotoc_md4}
+\mbox{\Hypertarget{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}\label{tester_8h_ac08d0a771bc3ef4684ba82aa5c671de5}} 
+\index{tester.h@{tester.h}!util\_int\_to\_string@{util\_int\_to\_string}}
+\index{util\_int\_to\_string@{util\_int\_to\_string}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{util\_int\_to\_string()}{util\_int\_to\_string()}}
+{\footnotesize\ttfamily int util\+\_\+int\+\_\+to\+\_\+string (\begin{DoxyParamCaption}\item[{int}]{num,  }\item[{char $\ast$}]{str,  }\item[{int}]{size }\end{DoxyParamCaption})}
+
+Converts an integer to its strings representation
+
+
+\begin{DoxyParams}{Parameters}
+{\em num} & is the integer that needs to be converted to a string \\
+\hline
+{\em str} & is the holder string that stores the integer representation \\
+\hline
+{\em size} & is the maximum length possible to store in str, including \textbackslash{}0 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+EXIT\+\_\+\+SUCCESS if integer has been entirely converted to string, EXIT\+\_\+\+FAILURE if integer cannot be convered to string
+\end{DoxyReturn}
+\mbox{\Hypertarget{tester_8h_a24e88b303379b25f8b97695830514759}\label{tester_8h_a24e88b303379b25f8b97695830514759}} 
+\index{tester.h@{tester.h}!util\_reset\_storage@{util\_reset\_storage}}
+\index{util\_reset\_storage@{util\_reset\_storage}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{util\_reset\_storage()}{util\_reset\_storage()}}
+{\footnotesize\ttfamily void util\+\_\+reset\+\_\+storage (\begin{DoxyParamCaption}\item[{char $\ast$}]{storage\mbox{[}\+LINESIZE\mbox{]} }\end{DoxyParamCaption})}
+
+resets a char$\ast$$\ast$ of size LINESIZE to a null terminated first byte
+
+
+\begin{DoxyParams}{Parameters}
+{\em storage} & is a char$\ast$$\ast$ with each memory address pointing to an array of size LINESIZE.\\
+\hline
+\end{DoxyParams}
+{\itshape Memset does not return error codes}
+
+\begin{DoxyReturn}{Returns}
+void as storage is released to calling function
+\end{DoxyReturn}
+\mbox{\Hypertarget{tester_8h_a3a3d8ea9836c11a16cab31d6695843d6}\label{tester_8h_a3a3d8ea9836c11a16cab31d6695843d6}} 
+\index{tester.h@{tester.h}!util\_setenv@{util\_setenv}}
+\index{util\_setenv@{util\_setenv}!tester.h@{tester.h}}
+\doxysubsubsection{\texorpdfstring{util\_setenv()}{util\_setenv()}}
+{\footnotesize\ttfamily char $\ast$ util\+\_\+setenv (\begin{DoxyParamCaption}\item[{char $\ast$}]{env\+\_\+var,  }\item[{char $\ast$}]{new\+\_\+val }\end{DoxyParamCaption})}
+

@@ -1,0 +1,290 @@
+\hypertarget{smallsh_8c}{}\doxysection{smallsh.\+c File Reference}
+\label{smallsh_8c}\index{smallsh.c@{smallsh.c}}
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$sys/types.\+h$>$}\newline
+{\ttfamily \#include $<$signal.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$sys/wait.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include $<$errno.\+h$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{smallsh_8c_ac3d144aa01e765a1fae62ab5491c7cc1}{\+\_\+\+POSIX\+\_\+\+SOURCE}}
+\begin{DoxyCompactList}\small\item\em Need this to compile with kill() and -\/std=c99. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{smallsh_8c_a369266c24eacffb87046522897a570d5}{\+\_\+\+GNU\+\_\+\+SOURCE}}
+\item 
+\#define \mbox{\hyperlink{smallsh_8c_a50669c139ff7b7685cb651cf77020934}{\+\_\+\+POSIC\+\_\+\+C\+\_\+\+SOURCE}}~$>$= 200112L
+\item 
+\#define \mbox{\hyperlink{smallsh_8c_ab3bd0bb38a140cf3ae6428b92e8542e2}{STRINGSIZE}}~100
+\item 
+\#define \mbox{\hyperlink{smallsh_8c_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}~1046
+\item 
+\#define \mbox{\hyperlink{smallsh_8c_a23195218eef2cf21e2beae685a041783}{DELIMITER}}~\char`\"{} \textbackslash{}t\textbackslash{}n\char`\"{}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{smallsh_8c_a263aba6b2412ede62ca2b906fffeda8e}{err\+\_\+child\+\_\+error}} (char child\+\_\+action\mbox{[}$\,$\mbox{]}, char action\+\_\+taken\mbox{[}$\,$\mbox{]})
+\item 
+char $\ast$ \mbox{\hyperlink{smallsh_8c_a3a3d8ea9836c11a16cab31d6695843d6}{util\+\_\+setenv}} (char $\ast$env\+\_\+var, char $\ast$new\+\_\+val)
+\item 
+void \mbox{\hyperlink{smallsh_8c_a24e88b303379b25f8b97695830514759}{util\+\_\+reset\+\_\+storage}} (char $\ast$storage\mbox{[}\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]})
+\item 
+int \mbox{\hyperlink{smallsh_8c_ac08d0a771bc3ef4684ba82aa5c671de5}{util\+\_\+int\+\_\+to\+\_\+string}} (int num, char $\ast$str, int size)
+\item 
+int \mbox{\hyperlink{smallsh_8c_a175a4a384e4085a18752c7fa657b7083}{spec\+\_\+check\+\_\+for\+\_\+child\+\_\+background\+\_\+processes}} (int status, pid\+\_\+t pid)
+\item 
+int \mbox{\hyperlink{smallsh_8c_a60d3ad2c41bae9aefb988318b561633e}{spec\+\_\+get\+\_\+line}} (char input\mbox{[}\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]}, size\+\_\+t input\+\_\+size, FILE $\ast$stream)
+\item 
+char $\ast$$\ast$ \mbox{\hyperlink{smallsh_8c_aeff5e401fc3e38b585aa1734023af74d}{help\+\_\+split\+\_\+line}} (char $\ast$$\ast$storage, char $\ast$line)
+\item 
+int \mbox{\hyperlink{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}{spec\+\_\+word\+\_\+splitting}} (char $\ast$storage\mbox{[}\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]}, char input\mbox{[}\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]})
+\item 
+int \mbox{\hyperlink{smallsh_8c_a1d06ff09876d5a3f4d79a3b87b63cbd8}{test\+\_\+input}} ()
+\item 
+int \mbox{\hyperlink{smallsh_8c_a55a75c1dc1422282de693893c7a1d3a4}{spec\+\_\+expansion}} (char string\mbox{[}\mbox{\hyperlink{tester_8h_a0095c1e0ae26941efea12c77f2232f2f}{LINESIZE}}\mbox{]})
+\item 
+int \mbox{\hyperlink{smallsh_8c_a40ab51c1432c06798dd25e53faaaf9cd}{test\+\_\+expansion}} (void)
+\item 
+int \mbox{\hyperlink{smallsh_8c_a840291bc02cba5474a4cb46a9b9566fe}{main}} (void)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{smallsh_8c_a369266c24eacffb87046522897a570d5}\label{smallsh_8c_a369266c24eacffb87046522897a570d5}} 
+\index{smallsh.c@{smallsh.c}!\_GNU\_SOURCE@{\_GNU\_SOURCE}}
+\index{\_GNU\_SOURCE@{\_GNU\_SOURCE}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{\_GNU\_SOURCE}{\_GNU\_SOURCE}}
+{\footnotesize\ttfamily \#define \+\_\+\+GNU\+\_\+\+SOURCE}
+
+\mbox{\Hypertarget{smallsh_8c_a50669c139ff7b7685cb651cf77020934}\label{smallsh_8c_a50669c139ff7b7685cb651cf77020934}} 
+\index{smallsh.c@{smallsh.c}!\_POSIC\_C\_SOURCE@{\_POSIC\_C\_SOURCE}}
+\index{\_POSIC\_C\_SOURCE@{\_POSIC\_C\_SOURCE}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{\_POSIC\_C\_SOURCE}{\_POSIC\_C\_SOURCE}}
+{\footnotesize\ttfamily \#define \+\_\+\+POSIC\+\_\+\+C\+\_\+\+SOURCE~$>$= 200112L}
+
+\mbox{\Hypertarget{smallsh_8c_ac3d144aa01e765a1fae62ab5491c7cc1}\label{smallsh_8c_ac3d144aa01e765a1fae62ab5491c7cc1}} 
+\index{smallsh.c@{smallsh.c}!\_POSIX\_SOURCE@{\_POSIX\_SOURCE}}
+\index{\_POSIX\_SOURCE@{\_POSIX\_SOURCE}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{\_POSIX\_SOURCE}{\_POSIX\_SOURCE}}
+{\footnotesize\ttfamily \#define \+\_\+\+POSIX\+\_\+\+SOURCE}
+
+
+
+Need this to compile with kill() and -\/std=c99. 
+
+\mbox{\Hypertarget{smallsh_8c_a23195218eef2cf21e2beae685a041783}\label{smallsh_8c_a23195218eef2cf21e2beae685a041783}} 
+\index{smallsh.c@{smallsh.c}!DELIMITER@{DELIMITER}}
+\index{DELIMITER@{DELIMITER}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{DELIMITER}{DELIMITER}}
+{\footnotesize\ttfamily \#define DELIMITER~\char`\"{} \textbackslash{}t\textbackslash{}n\char`\"{}}
+
+\mbox{\Hypertarget{smallsh_8c_a0095c1e0ae26941efea12c77f2232f2f}\label{smallsh_8c_a0095c1e0ae26941efea12c77f2232f2f}} 
+\index{smallsh.c@{smallsh.c}!LINESIZE@{LINESIZE}}
+\index{LINESIZE@{LINESIZE}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{LINESIZE}{LINESIZE}}
+{\footnotesize\ttfamily \#define LINESIZE~1046}
+
+LINESIZE has to support 512 whitespace/character pairs \mbox{\Hypertarget{smallsh_8c_ab3bd0bb38a140cf3ae6428b92e8542e2}\label{smallsh_8c_ab3bd0bb38a140cf3ae6428b92e8542e2}} 
+\index{smallsh.c@{smallsh.c}!STRINGSIZE@{STRINGSIZE}}
+\index{STRINGSIZE@{STRINGSIZE}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{STRINGSIZE}{STRINGSIZE}}
+{\footnotesize\ttfamily \#define STRINGSIZE~100}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{smallsh_8c_a263aba6b2412ede62ca2b906fffeda8e}\label{smallsh_8c_a263aba6b2412ede62ca2b906fffeda8e}} 
+\index{smallsh.c@{smallsh.c}!err\_child\_error@{err\_child\_error}}
+\index{err\_child\_error@{err\_child\_error}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{err\_child\_error()}{err\_child\_error()}}
+{\footnotesize\ttfamily int err\+\_\+child\+\_\+error (\begin{DoxyParamCaption}\item[{char}]{child\+\_\+action\mbox{[}$\,$\mbox{]},  }\item[{char}]{action\+\_\+taken\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+Produces an error because a child process has completed in a systematic way.
+
+
+\begin{DoxyParams}{Parameters}
+{\em child\+\_\+action} & is a string of arbitrary size that represents {\itshape what} caused completion \\
+\hline
+{\em action\+\_\+taken} & is a string of arbtrary size that represents {\itshape what was the result} such as continuing or exiting.\\
+\hline
+\end{DoxyParams}
+{\itshape Writes to stderr}
+
+\begin{DoxyReturn}{Returns}
+EXIT\+\_\+\+SUCCESS if process successfully writes to stderr, EXIT\+\_\+\+FAILURE if there was an error while writing
+\end{DoxyReturn}
+\mbox{\Hypertarget{smallsh_8c_aeff5e401fc3e38b585aa1734023af74d}\label{smallsh_8c_aeff5e401fc3e38b585aa1734023af74d}} 
+\index{smallsh.c@{smallsh.c}!help\_split\_line@{help\_split\_line}}
+\index{help\_split\_line@{help\_split\_line}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{help\_split\_line()}{help\_split\_line()}}
+{\footnotesize\ttfamily char $\ast$$\ast$ help\+\_\+split\+\_\+line (\begin{DoxyParamCaption}\item[{char $\ast$$\ast$}]{storage,  }\item[{char $\ast$}]{line }\end{DoxyParamCaption})}
+
+Helper function that tokenizes a line into an array of words
+
+
+\begin{DoxyParams}{Parameters}
+{\em line} & an array, with delimiters, of words needing to be tokenized \\
+\hline
+{\em storage} & is an array of points needed to hold the tokenized words \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+an array of tokens
+\end{DoxyReturn}
+\mbox{\Hypertarget{smallsh_8c_a840291bc02cba5474a4cb46a9b9566fe}\label{smallsh_8c_a840291bc02cba5474a4cb46a9b9566fe}} 
+\index{smallsh.c@{smallsh.c}!main@{main}}
+\index{main@{main}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Main calling function that exclusively calls other functions {\itshape required to meet specifications}
+
+\begin{DoxyReturn}{Returns}
+Exits to EXIT\+\_\+\+FAILURE if utility functions such as print fails, otherwise exits to EXIT\+\_\+\+SUCCESS when appropriate signal is sent
+\end{DoxyReturn}
+Waitpid set to 0 to make parent wait for child sharing the process group id\mbox{\Hypertarget{smallsh_8c_a175a4a384e4085a18752c7fa657b7083}\label{smallsh_8c_a175a4a384e4085a18752c7fa657b7083}} 
+\index{smallsh.c@{smallsh.c}!spec\_check\_for\_child\_background\_processes@{spec\_check\_for\_child\_background\_processes}}
+\index{spec\_check\_for\_child\_background\_processes@{spec\_check\_for\_child\_background\_processes}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{spec\_check\_for\_child\_background\_processes()}{spec\_check\_for\_child\_background\_processes()}}
+{\footnotesize\ttfamily int spec\+\_\+check\+\_\+for\+\_\+child\+\_\+background\+\_\+processes (\begin{DoxyParamCaption}\item[{int}]{status,  }\item[{pid\+\_\+t}]{pid }\end{DoxyParamCaption})}
+
+Checks if a pid in the same process group id has completed either normally or in various abnormal ways.
+
+
+\begin{DoxyParams}{Parameters}
+{\em status} & is the status of the pid in question \\
+\hline
+{\em pid} & is the process id of the process in question\\
+\hline
+\end{DoxyParams}
+{\itshape Writes to stderr}
+
+{\ttfamily check\+\_\+for\+\_\+child\+\_\+background\+\_\+processes} is required to meet a specification requirement
+
+\begin{DoxyReturn}{Returns}
+EXIT\+\_\+\+FAILURE if printing to stderr didn\textquotesingle{}t work, EXIT\+\_\+\+SUCCESS if printing to stderr works.
+\end{DoxyReturn}
+\mbox{\Hypertarget{smallsh_8c_a55a75c1dc1422282de693893c7a1d3a4}\label{smallsh_8c_a55a75c1dc1422282de693893c7a1d3a4}} 
+\index{smallsh.c@{smallsh.c}!spec\_expansion@{spec\_expansion}}
+\index{spec\_expansion@{spec\_expansion}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{spec\_expansion()}{spec\_expansion()}}
+{\footnotesize\ttfamily int spec\+\_\+expansion (\begin{DoxyParamCaption}\item[{char}]{string\mbox{[}\+LINESIZE\mbox{]} }\end{DoxyParamCaption})}
+
+Expands four variables based on the specifications.
+
+
+\begin{DoxyParams}{Parameters}
+{\em string} & is the string that needs to be scanned for expansion variables\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+EXIT\+\_\+\+SUCCESS for a successful scan and replace, EXIT\+\_\+\+FAILURE for an unsuccessful scan or replace
+\end{DoxyReturn}
+\mbox{\Hypertarget{smallsh_8c_a60d3ad2c41bae9aefb988318b561633e}\label{smallsh_8c_a60d3ad2c41bae9aefb988318b561633e}} 
+\index{smallsh.c@{smallsh.c}!spec\_get\_line@{spec\_get\_line}}
+\index{spec\_get\_line@{spec\_get\_line}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{spec\_get\_line()}{spec\_get\_line()}}
+{\footnotesize\ttfamily int spec\+\_\+get\+\_\+line (\begin{DoxyParamCaption}\item[{char}]{input\mbox{[}\+LINESIZE\mbox{]},  }\item[{size\+\_\+t}]{input\+\_\+size,  }\item[{FILE $\ast$}]{stream }\end{DoxyParamCaption})}
+
+Gets the input and returns it. Has it\textquotesingle{}s own signal handling.
+
+
+\begin{DoxyParams}{Parameters}
+{\em input\mbox{[}$\,$\mbox{]}} & a character array \\
+\hline
+{\em input\+\_\+size} & is the size of the input {\itshape array} \\
+\hline
+{\em stream} & is a FILE$\ast$ file pointer and allows for redirection.\\
+\hline
+\end{DoxyParams}
+{\itshape Be careful to not overrun input}
+
+{\itshape This is a specification requirement function} \begin{DoxyReturn}{Returns}
+EXIT\+\_\+\+FAILURE if any part of the function errors, EXIT\+\_\+\+SUCCESS if there\textquotesingle{}s a valid input (and the full input) in the passed input parameter
+\end{DoxyReturn}
+\mbox{\Hypertarget{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}\label{smallsh_8c_a177c11db8353d765ea6379b0bcc492db}} 
+\index{smallsh.c@{smallsh.c}!spec\_word\_splitting@{spec\_word\_splitting}}
+\index{spec\_word\_splitting@{spec\_word\_splitting}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{spec\_word\_splitting()}{spec\_word\_splitting()}}
+{\footnotesize\ttfamily int spec\+\_\+word\+\_\+splitting (\begin{DoxyParamCaption}\item[{char $\ast$}]{storage\mbox{[}\+LINESIZE\mbox{]},  }\item[{char}]{input\mbox{[}\+LINESIZE\mbox{]} }\end{DoxyParamCaption})}
+
+Splits a word into tokens and fills a passed char$\ast$$\ast$ with each token
+
+
+\begin{DoxyParams}{Parameters}
+{\em storage} & is a char$\ast$$\ast$ with space to hold LINESIZE sized tokens \\
+\hline
+{\em input} & is a char\mbox{[}LINESIZE\mbox{]} with @min an empty string and @max a single string of size LINESIZE\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+EXIT\+\_\+\+SUCCESS if sentence can be tokenized, EXIT\+\_\+\+FAILURE if it can\textquotesingle{}t
+\end{DoxyReturn}
+\mbox{\Hypertarget{smallsh_8c_a40ab51c1432c06798dd25e53faaaf9cd}\label{smallsh_8c_a40ab51c1432c06798dd25e53faaaf9cd}} 
+\index{smallsh.c@{smallsh.c}!test\_expansion@{test\_expansion}}
+\index{test\_expansion@{test\_expansion}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{test\_expansion()}{test\_expansion()}}
+{\footnotesize\ttfamily int test\+\_\+expansion (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Tests the expansion portion of the specifications
+
+\begin{DoxyReturn}{Returns}
+EXIT\+\_\+\+SUCCESS if all tests pass, EXIT\+\_\+\+FAILURE if any test fails
+\end{DoxyReturn}
+\mbox{\Hypertarget{smallsh_8c_a1d06ff09876d5a3f4d79a3b87b63cbd8}\label{smallsh_8c_a1d06ff09876d5a3f4d79a3b87b63cbd8}} 
+\index{smallsh.c@{smallsh.c}!test\_input@{test\_input}}
+\index{test\_input@{test\_input}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{test\_input()}{test\_input()}}
+{\footnotesize\ttfamily int test\+\_\+input (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\hypertarget{smallsh.c_autotoc_md1}{}\doxyparagraph{Utility Function Testing}\label{smallsh.c_autotoc_md1}
+\hypertarget{smallsh.c_autotoc_md2}{}\doxyparagraph{Spec Function Testing}\label{smallsh.c_autotoc_md2}
+\mbox{\Hypertarget{smallsh_8c_ac08d0a771bc3ef4684ba82aa5c671de5}\label{smallsh_8c_ac08d0a771bc3ef4684ba82aa5c671de5}} 
+\index{smallsh.c@{smallsh.c}!util\_int\_to\_string@{util\_int\_to\_string}}
+\index{util\_int\_to\_string@{util\_int\_to\_string}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{util\_int\_to\_string()}{util\_int\_to\_string()}}
+{\footnotesize\ttfamily int util\+\_\+int\+\_\+to\+\_\+string (\begin{DoxyParamCaption}\item[{int}]{num,  }\item[{char $\ast$}]{str,  }\item[{int}]{size }\end{DoxyParamCaption})}
+
+Converts an integer to its strings representation
+
+
+\begin{DoxyParams}{Parameters}
+{\em num} & is the integer that needs to be converted to a string \\
+\hline
+{\em str} & is the holder string that stores the integer representation \\
+\hline
+{\em size} & is the maximum length possible to store in str, including \textbackslash{}0 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+EXIT\+\_\+\+SUCCESS if integer has been entirely converted to string, EXIT\+\_\+\+FAILURE if integer cannot be convered to string
+\end{DoxyReturn}
+\mbox{\Hypertarget{smallsh_8c_a24e88b303379b25f8b97695830514759}\label{smallsh_8c_a24e88b303379b25f8b97695830514759}} 
+\index{smallsh.c@{smallsh.c}!util\_reset\_storage@{util\_reset\_storage}}
+\index{util\_reset\_storage@{util\_reset\_storage}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{util\_reset\_storage()}{util\_reset\_storage()}}
+{\footnotesize\ttfamily void util\+\_\+reset\+\_\+storage (\begin{DoxyParamCaption}\item[{char $\ast$}]{storage\mbox{[}\+LINESIZE\mbox{]} }\end{DoxyParamCaption})}
+
+resets a char$\ast$$\ast$ of size LINESIZE to a null terminated first byte
+
+
+\begin{DoxyParams}{Parameters}
+{\em storage} & is a char$\ast$$\ast$ with each memory address pointing to an array of size LINESIZE.\\
+\hline
+\end{DoxyParams}
+{\itshape Memset does not return error codes}
+
+\begin{DoxyReturn}{Returns}
+void as storage is released to calling function
+\end{DoxyReturn}
+\mbox{\Hypertarget{smallsh_8c_a3a3d8ea9836c11a16cab31d6695843d6}\label{smallsh_8c_a3a3d8ea9836c11a16cab31d6695843d6}} 
+\index{smallsh.c@{smallsh.c}!util\_setenv@{util\_setenv}}
+\index{util\_setenv@{util\_setenv}!smallsh.c@{smallsh.c}}
+\doxysubsubsection{\texorpdfstring{util\_setenv()}{util\_setenv()}}
+{\footnotesize\ttfamily char $\ast$ util\+\_\+setenv (\begin{DoxyParamCaption}\item[{char $\ast$}]{env\+\_\+var,  }\item[{char $\ast$}]{new\+\_\+val }\end{DoxyParamCaption})}
+
