@@ -23,6 +23,33 @@
 
 /* Utility functions */
 
+int util_env_var_to_fixed_array(char env_var[LINESIZE], char fixed_array[LINESIZE]){
+	/**
+	 * \brief Takes an environment variable and sets it in a fixed array after error checking
+	 *
+	 * @param env_var is the environment variable
+	 * @param fixed_array is the fixed array
+	 *
+	 * @return EXIT_FAILURE if either an error is returned from getenv or the returned value does not fit into fixed_array, EXIT_SUCCESS if both getenv returns not null and the returned value fits into fixed_array
+	 * */
+	
+	if(env_var != NULL && strlen(env_var) > 0){
+		getenv(env_var);
+		if(env_var == NULL){
+			return EXIT_FAILURE;
+		};
+		if(strlen(env_var) > strlen(fixed_array)){
+			return EXIT_FAILURE;
+		};
+		if(strcpy(fixed_array, getenv(env_var)) != '\0'){
+			return EXIT_SUCCESS;
+		};
+		return EXIT_FAILURE;
+		
+	};
+	return EXIT_FAILURE;
+};
+
 char* util_setenv(char* env_var, char* new_val){
 
 	// Save old IFS to restore later

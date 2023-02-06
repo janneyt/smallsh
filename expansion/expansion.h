@@ -7,7 +7,7 @@
 # include <stdlib.h>
 # include <assert.h>
 # include <stdint.h>
-
+# include "../constants/constants.h"
 # include <stdlib.h>
 # include <errno.h>
 int spec_expansion(char string[LINESIZE]);

@@ -13,14 +13,17 @@
 # include <stdlib.h>
 # include <errno.h>
 
-# include "constants/constants.h"
+# include "../constants/constants.h"
 
-char* util_envi_var_to_fixed_array(char env_var[LINESIZE], char fixed_array){
-	if(env_var == NULL){
-		perror("environment variable has errored");
-		return EXIT_FAILURE;
-	};
-};
+char* util_env_var_to_fixed_array(char env_var[], char fixed_array[]);
+	/**
+	 * \brief Takes a environment variable and sets it in a fixed array after error checking
+	 *
+	 * @param env_var is the environment variable
+	 * @param fixed_array is the fixed array
+	 *
+	 * @return EXIT_FAILURE if either an error is returned from getenv or the env_var doesn't fit into the fixed array, otherwise EXIT_SUCCESS indicates both that getenv was successful and the fixed array can contain the returned value
+	 * */
 
 char* util_setenv(char* env_var, char* new_val);
 	/**
@@ -54,3 +57,4 @@ int util_int_to_string(int num, char* str, int size);
 	 * string, EXIT_FAILURE if integer cannot be convered to string
 	 *
 	 */
+

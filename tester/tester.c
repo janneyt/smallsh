@@ -20,11 +20,15 @@ int test_input(void){
 	char* storage[LINESIZE];
 	char* discardable;
 	char* old_IFS;
+	char holder[LINESIZE];
 	//char  str[LINESIZE];
 
 	/** ### Utility Function Testing */
 
 	char* test_input[LINESIZE];
+	util_reset_storage(test_input);
+	assert(test_input[0] == NULL);
+	test_input[0] = 't';
 	util_reset_storage(test_input);
 	assert(test_input[0] == NULL);
 
@@ -418,14 +422,16 @@ int test_expansion(void){
 	// Test Case 1: ~/ at beginning, $$ is present, $? is present, $! is present, IFS is set (not null)
 	char string[LINESIZE] = "~/$$$?$!";
 	char home[100];
-	strcat(home, getenv("HOME"));
-	if(home == NULL){
-		perror("There's been an issue get the home environment variable");
-		exit(EXIT_FAILURE);
-	};
+	util_env_var_to_fixed_array("HOME", home);
 	char result[LINESIZE] = "";
+	char holder[LINESIZE];
+	char resultb[LINESIZE];
+	char str_pid[LINESIZE];
+	char stringb[LINESIZE];
 	strcat(result, home);
-	strcat(result, util_int_to_string(getpid()));
+	strcpy(holder, "");
+	util_int_to_string(getpid(), holder, strlen(holder));
+	strcat(result, holder);
 	// TODO: strcat(result, ); need to setup foreground and background processes
 	if(setenv("IFS", " \t\n", 1) != 0){
 		perror("Can't set IFS to neutral delimiter");
@@ -438,78 +444,73 @@ int test_expansion(void){
 	// Test Case 2 - 6 need foreground and background processes
 	
 	// Test Case 7: ~/ at beginning, $$ present, IFS set 
-	char string7[LINESIZE] = "~/Ted$$";
-	char string7b[LINESIZE] = "~/$$Ted";
-	char result7_pid[LINESIZE];
-	char result7_home[LINESIZE] = getenv("HOME");
-	char result7b_home = getenv("HOME");
+	strcpy(string, "~/Ted$$");
+	strcpy(stringb, "~/$$Ted");
+	strcpy(result, "");
+	util_env_var_to_fixed_array("HOME", result);
 
-	util_int_to_string(getpid(), result7_pid, 10);
-	strcat(result7_home, "Ted");
-	strcat(result7_home, result7_pid);
-	strcat(result7b_home, result7_pid);
+	util_int_to_string(getpid(), str_pid, 10);
+	strcat(result, "Ted");
+	strcat(result, str_pid);
 	if(setenv("IFS", " \t\n", 1) != 0){
 		perror("Can't set IFS to neutral delimiter");
 		exit(EXIT_FAILURE);
 	};
-	assert(spec_expansion(string7) == EXIT_SUCCESS);
-	assert(strcmp(string7, result7_home));
-	assert(spec_expansion(string7b) == EXIT_SUCCESS);
-	assert(strcmp(string7b, result7b_home));
+	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(spec_expansion(stringb) == EXIT_SUCCESS);
+	assert(strcmp(string, result) == 0);
+
+	assert(spec_expansion(stringb) == EXIT_SUCCESS);
+	assert(strcmp(stringb, result));
 
 	// Test Case 8: ~/ at beginning, $$ present, IFS unset
-	char string8[LINESIZE] = "~/Ted$$";
-	char string8b[LINESIZE] = "`/$$Ted";
-	char result8_pid[LINESIZE];
-	char result8_home = getenv("HOME");
-	char result8b_home = getenv("HOME");
+	strcpy(string, "~/Ted$$");
+	strcpy(stringb, "~/$$Ted");
+	util_env_var_to_fixed_array("HOME", result);
 
-	util_int_to_string(getpid(), result8_pid, 10);
-	strcat(result8_home, "Ted");
-	strcat(result8_home, result8_pid);
-	strcat(result8b_home, result8_pid);
+	util_int_to_string(getpid(), str_pid, 10);
+	strcat(result, "Ted");
+	strcat(result, str_pid);
+	strcat(resultb, str_pid);
+	strcat(resultb, "Ted");
 	if(setenv("IFS", "NULL", 1) != 0){
 		perror("Can't set IFS to neutral delimiter");
 		exit(EXIT_FAILURE);
 	};
-	assert(spec_expansion(string8) == EXIT_SUCCESS);
-	assert(strcmp(string8, result8_home) == 0);
-	assert(spec_expansion(string8b) == EXIT_SUCCESS);
-	assert(strcmp(string8b, result8b_home) == 0);
+	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(strcmp(string, result) == 0);
+	assert(spec_expansion(stringb) == EXIT_SUCCESS);
+	assert(strcmp(stringb, resultb) == 0);
 
 	// TODO: Test Cases 9-14 need foreground and background processes implemented
 	
 	// Test Case 15: ~/ at beginning, $$, $?, $! are not present, IFS set
-	char string15[LINESIZE] = "~/";
-	char string15b[LINESIZE] = "~/Ted";
-	char result15[LINESIZE] = getenv("HOME");
-	char result15b[LINESIZE] = "";
-	strcat(result15b, result15);
-	strcat(result15b, "/Ted");
+	strcpy(string, "~/");
+	strcpy(stringb, "~/Ted");
+	util_env_var_to_fixed_array("HOME", result);
+	util_env_var_to_fixed_array("HOME", resultb);
+	strcat(resultb, "/TeD");
 	if(setenv("IFS", " \t\n", 1) != 0){
 		perror("Can't set IFS to neutral delimiter");
 		exit(EXIT_FAILURE);
 	};
-	assert(spec_expansion(string15) == EXIT_SUCCESS);
-	assert(strcmp(string15, result15) == 0);
-	assert(spec_expansion(string15b) == EXIT_SUCCESS);
-	assert(strcmp(string15b, result15b) == 0);
+	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(strcmp(string, result) == 0);
+	assert(spec_expansion(stringb) == EXIT_SUCCESS);
+	assert(strcmp(stringb, resultb) == 0);
 
 	// Test Case 16: ~/ at beginning, $$, $?, $! are not present, IFS not set
-	char string16[LINESIZE] = "~/";
-	char string16b[LINESIZE] = "~/Ted";
-	char result16[LINESIZE] = getenv("HOME");
-	char result16b[LINESIZE] = "";
-	strcat(result16b, result15);
-	strcat(result16b, "/Ted");
-	if(setenv("IFS", "NULL", 1) != 0){
-		perror("Can't set IFS to neutral delimiter");
-		exit(EXIT_FAILURE);
-	};
-	assert(spec_expansion(string16) == EXIT_SUCCESS);
-	assert(strcmp(string16, result16) == 0);
-	assert(spec_expansion(string16b) == EXIT_SUCCESS);
-	assert(strcmp(string16b, result16b) == 0);
+	strcpy(string, "~/");
+	strcpy(stringb, "~/Ted");
+	util_env_var_to_fixed_array("HOME", result);
+	strcpy(resultb, result);
+	strcat(resultb, "/Ted");
+	util_setenv("IFS", "NULL");
+
+	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(strcmp(string, result) == 0);
+	assert(spec_expansion(stringb) == EXIT_SUCCESS);
+	assert(strcmp(stringb, resultb) == 0);
 
 	// TODO: 17-22 need foreground and background processes implemented
 	
@@ -526,40 +527,39 @@ int test_expansion(void){
 	assert(strcmp(result23, string23) == 0);
 
 	// Test Case 24: ~/ not at front, $$ present, S? and $! not present, IFS not set
-	char string24[LINESIZE] = "Ted~/$$";
-	char result24[LINESIZE] = "Ted~/";
-	char holder[LINESIZE];
+	strcpy(string, "Ted~/$$");
+	strcpy(result, "Ted~/");
 	util_int_to_string(getpid(), holder, 10);
-	strcat(result24, holder);
+	strcat(result, holder);
 	if(setenv("IFS", "NULL", 1) != 0){
 		perror("Can't set IFS to neutral delimiter");
 		exit(EXIT_FAILURE);
 	};
-	assert(spec_expansion(string24) == EXIT_SUCCESS);
-	assert(strcmp(result24, string24) == 0);
+	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(strcmp(result, string) == 0);
 
 
 	// TODO: Test cases 25-30 need foreground and background processes implemented
 	
 	// Test Case 31: ~/ is not at front, $* are all not present, IFS is set
-	char string31[LINESIZE] = "Ted~/";
-	char result31[LINESIZE] = "Ted~/";
+	strcpy(string, "Ted~/");
+	strcpy( result, "Ted~/");
 	if(setenv("IFS", " \t\n", 1) != 0){
 		perror("Can't set IFS");
 		exit(EXIT_FAILURE);
 	};
-	assert(spec_expansion(string31) == EXIT_SUCCESS);
-	assert(strcmp(result31, string31) == 0);
+	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(strcmp(result, string) == 0);
 
 	// Test Case 32: ~/ is not at front, $* are all not present, IFS is not set
-	char string32[LINESIZE] = "How?~/";
-	char result32[LINESIZE] = "How?~/";
+	strcpy(string, "How?~/");
+	strcpy(result, string);
 	if(setenv("IFS", "NULL", 1) != 0){
 		perror("Can't set IFS");
 		exit(EXIT_FAILURE);
 	};
-	assert(spec_expansion(string32) == EXIT_SUCCESS);
-	assert(strcmp(result32, string32) == 0);
+	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(strcmp(result, string) == 0);
 
 	// TODO: Test cases 33-38 need foreground and background processes implemented
 	
@@ -567,7 +567,8 @@ int test_expansion(void){
 	strcpy(string, "Ted$$");
 	strcpy(result, "Ted");
 	strcpy(holder, "");
-	strcat(result, util_int_to_string(getpid(), holder, 10));
+	util_int_to_string(getpid(), holder, 10);
+	strcat(result, holder);
 	if(setenv("IFS", " \t\n", 1) != 0){
 		perror("Can't set IFS");
 		exit(EXIT_FAILURE);
@@ -602,4 +603,6 @@ int test_expansion(void){
 	};
 	assert(spec_expansion(string) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
+
+	return EXIT_SUCCESS;
 }
