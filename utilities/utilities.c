@@ -17,9 +17,9 @@
 # include <errno.h>
 
 # define STRINGSIZE 100
-/** LINESIZE has to support 512 whitespace/character pairs */
-# define LINESIZE   1046
-# define DELIMITER  " \t\n"
+# ifndef  LINESIZE
+# include "../constants/constants.h"
+# endif
 
 /* Utility functions */
 
@@ -32,23 +32,24 @@ int util_env_var_to_fixed_array(char env_var[LINESIZE], char fixed_array[LINESIZ
 	 *
 	 * @return EXIT_FAILURE if either an error is returned from getenv or the returned value does not fit into fixed_array, EXIT_SUCCESS if both getenv returns not null and the returned value fits into fixed_array
 	 * */
-	
+	char* temp = "";
+	strcpy(fixed_array, "");
 	if(env_var != NULL && strlen(env_var) > 0){
-		getenv(env_var);
-		if(env_var == NULL){
+		temp = getenv(env_var);
+		if(strcmp(temp, "") == 0){
 			return EXIT_FAILURE;
 		};
-		if(strlen(env_var) > strlen(fixed_array)){
+		if(strlen(temp) > LINESIZE){
 			return EXIT_FAILURE;
 		};
-		if(strcpy(fixed_array, getenv(env_var)) != '\0'){
+		if(strcmp(strcpy(fixed_array, getenv(env_var)), "") != 0){
 			return EXIT_SUCCESS;
 		};
 		return EXIT_FAILURE;
 		
 	};
 	return EXIT_FAILURE;
-};
+}
 
 char* util_setenv(char* env_var, char* new_val){
 
@@ -76,8 +77,10 @@ void util_reset_storage(char* storage[LINESIZE]){
 	 *
 	 * @return void as storage is released to calling function
 	 * */
-	for(int i = 0; i < LINESIZE; i++){
-		memset(&storage[i], '\0',1);	
+	const size_t length = LINESIZE/sizeof(storage[0]);
+
+	for(size_t i = 0; i < length; i++){
+		memset(&storage[i], '\0', LINESIZE * sizeof(char));	
 	};
 }
 

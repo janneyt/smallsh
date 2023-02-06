@@ -8,8 +8,9 @@
 # include <stdlib.h>
 # include <assert.h>
 # include <stdint.h>
+#ifndef LINESIZE
 # include "../constants/constants.h"
-
+#endif
 # include <stdlib.h>
 # include <errno.h>
 

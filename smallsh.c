@@ -17,7 +17,9 @@
 # include "input/input.h"
 # include "tester/tester.h"
 # include "expansion/expansion.h"
+# ifndef  LINESIZE
 # include "constants/constants.h"
+# endif
 
 # include <stdlib.h>
 # include <errno.h>
@@ -43,6 +45,9 @@ int main(void){
 	// Runtime debug testing to make sure functions act according to how I want
 	if(test_input() == EXIT_FAILURE){
 		printf("Input functions fail runtime tests\n");
+		exit(EXIT_FAILURE);
+	};
+	if(test_expansion() == EXIT_FAILURE){
 		exit(EXIT_FAILURE);
 	};
 

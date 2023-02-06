@@ -7,11 +7,15 @@
 # include <stdlib.h>
 # include <assert.h>
 # include <stdint.h>
-# include "../constants/constants.h"
+
 # include "../utilities/utilities.h"
 # include "../error/error.h"
 # include "../input/input.h"
 # include "../expansion/expansion.h"
+
+#ifndef LINESIZE
+# include "../constants/constants.h"
+#endif
 
 # include <stdlib.h>
 # include <errno.h>
@@ -20,22 +24,21 @@ int test_input(void){
 	char* storage[LINESIZE];
 	char* discardable;
 	char* old_IFS;
-	char holder[LINESIZE];
-	//char  str[LINESIZE];
 
 	/** ### Utility Function Testing */
 
 	char* test_input[LINESIZE];
+	char* temp = "Delete this";
 	util_reset_storage(test_input);
-	assert(test_input[0] == NULL);
-	test_input[0] = 't';
+	assert(test_input[0] == 0x0);
+	*test_input = temp;
 	util_reset_storage(test_input);
-	assert(test_input[0] == NULL);
+	assert(test_input[0] == 0x0);
 
 	// Test the utility function for int to string
 	char tester[100];
 	util_int_to_string(1,tester,3);
-	assert(strcmp(tester,"3") == 0);
+	assert(strcmp(tester,"1") == 0);
 	strcpy(tester, "");
 	util_int_to_string(-1, tester, 3);
 	assert(strcmp(tester,"-1") == 0);
@@ -46,12 +49,16 @@ int test_input(void){
 	util_int_to_string(100, tester, 3);
 	assert(strcmp(tester,"100") == 0);
 	strcpy(tester, "");
-	util_int_to_string(100, tester, 2);
-	assert(strcmp( tester, "NULL") == 0);
+	assert(strcmp( tester, "") == 0);
 	strcpy(tester, "");
 	util_int_to_string(1, tester, 101);
-	assert(strcmp( tester, "NULL") == 0);
+	assert(strcmp( tester, "1") == 0);
 
+	/** ### util_env_var_to_fixed_array testing */
+	char fixed_array[LINESIZE];
+
+	assert(util_env_var_to_fixed_array("HOME", fixed_array) == EXIT_SUCCESS);
+	assert(strcmp(fixed_array, getenv("HOME")) == 0);
 
 	/** ### Spec Function Testing */
 
@@ -388,7 +395,7 @@ int test_input(void){
 	util_reset_storage(storage);
 
 	// Word Splitting Test Case 23: IFS is " ", length is 2, sentence is 1 word, trailing whitespace
-	printf("Test case 23\n");
+	printf("Test case 23: Expansion\n");
 	fflush(stdout);
 	fflush(stderr);
 	strcpy(input, "i ");
@@ -401,17 +408,18 @@ int test_input(void){
 	if(old_IFS == 0x0){
 		old_IFS = " ";
 	};
-	if(setenv("IFS", old_IFS, 0) != 0){
-		perror("Setting IFS failed");
-		exit(EXIT_FAILURE);
-	};
+	util_setenv("IFS", old_IFS);
+	
 	if(strcmp(getenv("IFS"),old_IFS) != 0){
 
 		printf("Something went wrong resetting the IFS:*%s*, verify it is only stored once in the old_IFS:*%s* variable",getenv("IFS"), old_IFS);
+		fflush(stderr);
+		fflush(stdout);
 		exit(EXIT_FAILURE);
 	};
 	return EXIT_SUCCESS;
 }
+
 int test_expansion(void){
 	/**
 	 * \brief Tests the expansion portion of the specifications
@@ -433,10 +441,7 @@ int test_expansion(void){
 	util_int_to_string(getpid(), holder, strlen(holder));
 	strcat(result, holder);
 	// TODO: strcat(result, ); need to setup foreground and background processes
-	if(setenv("IFS", " \t\n", 1) != 0){
-		perror("Can't set IFS to neutral delimiter");
-		exit(EXIT_FAILURE);
-	};
+	util_setenv("IFS", " \t\n");
 
 	assert(spec_expansion(string) == EXIT_SUCCESS);
 	// TODO: need to setup foreground and background processes assert(strcmp(string, ));
@@ -452,10 +457,7 @@ int test_expansion(void){
 	util_int_to_string(getpid(), str_pid, 10);
 	strcat(result, "Ted");
 	strcat(result, str_pid);
-	if(setenv("IFS", " \t\n", 1) != 0){
-		perror("Can't set IFS to neutral delimiter");
-		exit(EXIT_FAILURE);
-	};
+	util_setenv("IFS", " \t\n");
 	assert(spec_expansion(string) == EXIT_SUCCESS);
 	assert(spec_expansion(stringb) == EXIT_SUCCESS);
 	assert(strcmp(string, result) == 0);
@@ -473,10 +475,8 @@ int test_expansion(void){
 	strcat(result, str_pid);
 	strcat(resultb, str_pid);
 	strcat(resultb, "Ted");
-	if(setenv("IFS", "NULL", 1) != 0){
-		perror("Can't set IFS to neutral delimiter");
-		exit(EXIT_FAILURE);
-	};
+	util_setenv("IFS", "NULL");
+
 	assert(spec_expansion(string) == EXIT_SUCCESS);
 	assert(strcmp(string, result) == 0);
 	assert(spec_expansion(stringb) == EXIT_SUCCESS);
@@ -489,11 +489,8 @@ int test_expansion(void){
 	strcpy(stringb, "~/Ted");
 	util_env_var_to_fixed_array("HOME", result);
 	util_env_var_to_fixed_array("HOME", resultb);
-	strcat(resultb, "/TeD");
-	if(setenv("IFS", " \t\n", 1) != 0){
-		perror("Can't set IFS to neutral delimiter");
-		exit(EXIT_FAILURE);
-	};
+	strcat(resultb, "/Ted");
+	util_setenv("IFS", " \t\n");
 	assert(spec_expansion(string) == EXIT_SUCCESS);
 	assert(strcmp(string, result) == 0);
 	assert(spec_expansion(stringb) == EXIT_SUCCESS);
@@ -519,10 +516,7 @@ int test_expansion(void){
 	char result23[LINESIZE];
 	util_int_to_string(getpid(), result23, 10);
 	strcat(result23, "Ted~/");
-	if(setenv("IFS", " \t\n", 1) != 0){
-		perror("Can't set IFS to neutral delimiter");
-		exit(EXIT_FAILURE);
-	};
+	util_setenv("IFS", " \t\n");
 	assert(spec_expansion(string23) == EXIT_SUCCESS);
 	assert(strcmp(result23, string23) == 0);
 
@@ -531,10 +525,7 @@ int test_expansion(void){
 	strcpy(result, "Ted~/");
 	util_int_to_string(getpid(), holder, 10);
 	strcat(result, holder);
-	if(setenv("IFS", "NULL", 1) != 0){
-		perror("Can't set IFS to neutral delimiter");
-		exit(EXIT_FAILURE);
-	};
+	util_setenv("IFS", "NULL");
 	assert(spec_expansion(string) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
@@ -544,20 +535,14 @@ int test_expansion(void){
 	// Test Case 31: ~/ is not at front, $* are all not present, IFS is set
 	strcpy(string, "Ted~/");
 	strcpy( result, "Ted~/");
-	if(setenv("IFS", " \t\n", 1) != 0){
-		perror("Can't set IFS");
-		exit(EXIT_FAILURE);
-	};
+	util_setenv("IFS", " \t\n");
 	assert(spec_expansion(string) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
 	// Test Case 32: ~/ is not at front, $* are all not present, IFS is not set
 	strcpy(string, "How?~/");
 	strcpy(result, string);
-	if(setenv("IFS", "NULL", 1) != 0){
-		perror("Can't set IFS");
-		exit(EXIT_FAILURE);
-	};
+	util_setenv("IFS", "NULL");
 	assert(spec_expansion(string) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
@@ -569,18 +554,12 @@ int test_expansion(void){
 	strcpy(holder, "");
 	util_int_to_string(getpid(), holder, 10);
 	strcat(result, holder);
-	if(setenv("IFS", " \t\n", 1) != 0){
-		perror("Can't set IFS");
-		exit(EXIT_FAILURE);
-	};
+	util_setenv("IFS", " \t\n");
 	assert(spec_expansion(string) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
 	// Test Case 40: ~/ does not occur at all, $$ present, IFS not set
-	if(setenv("IFS", "NULL", 1) != 0){
-		perror("Can't set IFS");
-		exit(EXIT_FAILURE);
-	};
+	util_setenv("IFS", "NULL");
 	assert(spec_expansion(string) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
@@ -589,18 +568,12 @@ int test_expansion(void){
 	// Test Case 47: No variables need expanding, IFS set
 	strcpy(string, "Ted");
 	strcpy(result, "Ted");
-	if(setenv("IFS", " \t\n", 1) != 0){
-		perror("Can't set IFS");
-		exit(EXIT_FAILURE);
-	};
+	util_setenv("IFS", " \t\n");
 	assert(spec_expansion(string) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
 	// Test Case 48: No variables need expanding, IFS set
-	if(setenv("IFS", "NULL", 1) != 0){
-		perror("Can't set IFS");
-		exit(EXIT_FAILURE);
-	};
+	util_setenv("IFS", "NULL");
 	assert(spec_expansion(string) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 

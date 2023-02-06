@@ -13,7 +13,9 @@
 # include <stdlib.h>
 # include <errno.h>
 
+# ifndef  LINESIZE
 # include "../constants/constants.h"
+# endif
 
 char* util_env_var_to_fixed_array(char env_var[], char fixed_array[]);
 	/**
