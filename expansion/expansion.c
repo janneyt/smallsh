@@ -34,21 +34,27 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code){
 	 *
 	 * @return EXIT_SUCCESS for a successful scan (no expansion variables left) and and replace, EXIT_FAILURE for an unsuccessful scan or replace
 	 * */
-	int length = strlen(arg);
+
 	char str_pid[10];
 
 	// For some reason, getenv("HOME") is overwriting pointers so I'm saving the value before I declare anything
 	// Substring == $$, to be replaced with the pid		
 	if(control_code == 1){
-		util_int_to_string(getpid(), str_pid, 10);
+		util_int_to_string(getpid(), str_pid, LINESIZE);
 	} else if(control_code == 2){
 		// Substring == ~/, replace with the HOME environment variable
-		strcpy(str_pid, getenv("HOME")); 
+		util_env_var_to_fixed_array("HOME", str_pid); 
 
 	};
 	char *discovery = strstr(arg, substring);
 	char* temporary = "";
-	char* initial = "";
+
+	int length = strlen(arg);
+
+	if(length < 1 || length > LINESIZE){
+		fprintf(stderr, "The length of the passed string is not in the range of 1 and %d inclusive", LINESIZE);
+		exit(EXIT_FAILURE);
+	}
 
 	// No need to process if current substring hasn't been found
 	if(discovery == NULL){
@@ -60,16 +66,8 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code){
 			
 	};
 	
-	// If the first substring doesn't *start* the whole string, set the initial pointer to be discovery - 1
-	if(&arg[0] != &discovery[0]){
-		initial = discovery - 1;
-	} 
 
-	// Although LINESIZE is a global constant in the constants file, this enforces the size
-	if(length < 1 || length > LINESIZE){
-		fprintf(stderr, "The length is not in the range 1 and %d includsive", LINESIZE);
-		return EXIT_FAILURE;
-	};
+
 
 	// This exhaustively searches for the substrings
 	while(discovery != NULL){
@@ -79,27 +77,27 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code){
 		if(&discovery[0] != &(arg[length - 2])){
 			temporary = strdup(discovery);
 			temporary += 2;
-		} else {
-			strcpy(temporary, "");
-		};
+		} 
 
 		// Mainstream, non-edge case processing where the discovery is not at the front of the string
-		if(&initial[0] != &discovery[0]){	
+		if(&arg[0] != &discovery[0]){	
 			*discovery = '\0';
-			strcat(initial, str_pid);
-			strcat(initial, temporary);
+			strcat(arg, str_pid);
+			strcat(arg, temporary);
 		} else {
-			strcat(str_pid, temporary);
-			arg = str_pid;
+			*discovery = '\0';
+			strcat(arg, str_pid);
+			strcat(arg, temporary);
 		}
 		discovery = strstr(arg, substring);
 		
 	};
+
+	strcat(arg, "");
 	
 	if(control_code == 1){
 		return spec_expansion(arg, "~/", 2);
 	}
-	free(temporary);
 	return EXIT_SUCCESS;
 
 }

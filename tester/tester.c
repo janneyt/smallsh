@@ -36,7 +36,7 @@ int test_input(void){
 	assert(test_input[0] == 0x0);
 
 	// Test the utility function for int to string
-	char tester[100];
+	char tester[LINESIZE];
 	util_int_to_string(1,tester,3);
 	assert(strcmp(tester,"1") == 0);
 	strcpy(tester, "");
@@ -98,7 +98,7 @@ int test_input(void){
 
 	// Word Splitting Test Case 1: the length of the inputted string is zero
 	char* empty_str = "";
-	memset(input, '\0', 1);
+	strcpy(input, "");
 	strcat(input, empty_str);
 	assert(spec_word_splitting(storage, input) == EXIT_FAILURE);
 	
@@ -437,8 +437,7 @@ int test_expansion(void){
 	char str_pid[LINESIZE];
 	char stringb[LINESIZE];
 	strcat(result, home);
-	strcpy(holder, "");
-	util_int_to_string(getpid(), holder, strlen(holder));
+	util_int_to_string(getpid(), holder, LINESIZE);
 	strcat(result, holder);
 	// TODO: strcat(result, ); need to setup foreground and background processes
 	util_setenv("IFS", " \t\n");

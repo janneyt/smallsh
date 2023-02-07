@@ -80,11 +80,11 @@ void util_reset_storage(char* storage[LINESIZE]){
 	const size_t length = LINESIZE/sizeof(storage[0]);
 
 	for(size_t i = 0; i < length; i++){
-		memset(&storage[i], '\0', LINESIZE * sizeof(char));	
+		storage[i] = 0x0;
 	};
 }
 
-int util_int_to_string(int num, char* str, int size){
+int util_int_to_string(int num, char str[LINESIZE]){
 	
 	/**
 	 * \brief Converts an integer to its strings representation
@@ -98,30 +98,18 @@ int util_int_to_string(int num, char* str, int size){
 	 */
 	
 
-	char *temp = malloc(size);
-	
-	memset(str, 0, sizeof(*str));
+	char temp[LINESIZE];
+
 	if(sprintf(temp, "%d", num) < 0){
 		perror("Could not convert integer to string");
 		errno = 0;
-		free(temp);
 		return EXIT_FAILURE;
 	};
+	strcat(temp, "");
 	assert(atoi(temp) == num);
-	if(strlen(str) > strlen(temp)){
-		perror("Input string was too small to hold integer to string conversion value");
-		errno = 0;
-		free(temp);
-		return EXIT_FAILURE;
-	};
-	assert(strlen(str) <= strlen(temp));
-	if(strcat(str, temp) == NULL){
-		perror("Could not convert integer to string");
-		errno = 0;
-		free(temp);
-		return EXIT_FAILURE;
-	};
+
+	strcat(str, "");
+	strcpy(str, temp);
 	assert(atoi(str) == num);
-	free(temp);
 	return EXIT_SUCCESS;
 }
