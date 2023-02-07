@@ -443,7 +443,7 @@ int test_expansion(void){
 	// TODO: strcat(result, ); need to setup foreground and background processes
 	util_setenv("IFS", " \t\n");
 
-	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	// TODO: need to setup foreground and background processes assert(strcmp(string, ));
 	
 	// Test Case 2 - 6 need foreground and background processes
@@ -455,14 +455,14 @@ int test_expansion(void){
 	util_env_var_to_fixed_array("HOME", result);
 
 	util_int_to_string(getpid(), str_pid, 10);
-	strcat(result, "Ted");
+	strcat(result, "/Ted");
 	strcat(result, str_pid);
 	util_setenv("IFS", " \t\n");
-	assert(spec_expansion(string) == EXIT_SUCCESS);
-	assert(spec_expansion(stringb) == EXIT_SUCCESS);
+	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
+	assert(spec_expansion(stringb, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(string, result) == 0);
 
-	assert(spec_expansion(stringb) == EXIT_SUCCESS);
+	assert(spec_expansion(stringb, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(stringb, result));
 
 	// Test Case 8: ~/ at beginning, $$ present, IFS unset
@@ -471,15 +471,15 @@ int test_expansion(void){
 	util_env_var_to_fixed_array("HOME", result);
 
 	util_int_to_string(getpid(), str_pid, 10);
-	strcat(result, "Ted");
+	strcat(result, "/Ted");
 	strcat(result, str_pid);
 	strcat(resultb, str_pid);
 	strcat(resultb, "Ted");
 	util_setenv("IFS", "NULL");
 
-	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(string, result) == 0);
-	assert(spec_expansion(stringb) == EXIT_SUCCESS);
+	assert(spec_expansion(stringb, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(stringb, resultb) == 0);
 
 	// TODO: Test Cases 9-14 need foreground and background processes implemented
@@ -491,9 +491,9 @@ int test_expansion(void){
 	util_env_var_to_fixed_array("HOME", resultb);
 	strcat(resultb, "/Ted");
 	util_setenv("IFS", " \t\n");
-	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(string, result) == 0);
-	assert(spec_expansion(stringb) == EXIT_SUCCESS);
+	assert(spec_expansion(stringb, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(stringb, resultb) == 0);
 
 	// Test Case 16: ~/ at beginning, $$, $?, $! are not present, IFS not set
@@ -504,21 +504,21 @@ int test_expansion(void){
 	strcat(resultb, "/Ted");
 	util_setenv("IFS", "NULL");
 
-	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(string, result) == 0);
-	assert(spec_expansion(stringb) == EXIT_SUCCESS);
+	assert(spec_expansion(stringb, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(stringb, resultb) == 0);
 
 	// TODO: 17-22 need foreground and background processes implemented
 	
 	// Test Case 23: ~/ not front, $$ present, S? and S! not present, IFS set
-	char string23[LINESIZE] = "$$Ted~/";
-	char result23[LINESIZE];
-	util_int_to_string(getpid(), result23, 10);
-	strcat(result23, "Ted~/");
+	strcpy(string, "$$Ted~/");
+	strcpy(result, "");
+	util_int_to_string(getpid(), result, 10);
+	strcat(result, "Ted~/");
 	util_setenv("IFS", " \t\n");
-	assert(spec_expansion(string23) == EXIT_SUCCESS);
-	assert(strcmp(result23, string23) == 0);
+	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
+	assert(strcmp(result, string) == 0);
 
 	// Test Case 24: ~/ not at front, $$ present, S? and $! not present, IFS not set
 	strcpy(string, "Ted~/$$");
@@ -526,7 +526,7 @@ int test_expansion(void){
 	util_int_to_string(getpid(), holder, 10);
 	strcat(result, holder);
 	util_setenv("IFS", "NULL");
-	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
 
@@ -536,14 +536,14 @@ int test_expansion(void){
 	strcpy(string, "Ted~/");
 	strcpy( result, "Ted~/");
 	util_setenv("IFS", " \t\n");
-	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
 	// Test Case 32: ~/ is not at front, $* are all not present, IFS is not set
 	strcpy(string, "How?~/");
 	strcpy(result, string);
 	util_setenv("IFS", "NULL");
-	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
 	// TODO: Test cases 33-38 need foreground and background processes implemented
@@ -555,12 +555,12 @@ int test_expansion(void){
 	util_int_to_string(getpid(), holder, 10);
 	strcat(result, holder);
 	util_setenv("IFS", " \t\n");
-	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
 	// Test Case 40: ~/ does not occur at all, $$ present, IFS not set
 	util_setenv("IFS", "NULL");
-	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
 	// TODO: Test cases 41-46 need foreground and background processes implemented
@@ -569,12 +569,12 @@ int test_expansion(void){
 	strcpy(string, "Ted");
 	strcpy(result, "Ted");
 	util_setenv("IFS", " \t\n");
-	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
 	// Test Case 48: No variables need expanding, IFS set
 	util_setenv("IFS", "NULL");
-	assert(spec_expansion(string) == EXIT_SUCCESS);
+	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
 	return EXIT_SUCCESS;
