@@ -42,10 +42,10 @@ int util_env_var_to_fixed_array(char env_var[LINESIZE], char fixed_array[LINESIZ
 		if(strlen(temp) > LINESIZE){
 			return EXIT_FAILURE;
 		};
-		if(strcmp(strcpy(fixed_array, getenv(env_var)), "") != 0){
-			return EXIT_SUCCESS;
-		};
-		return EXIT_FAILURE;
+		strcpy(fixed_array, temp);
+		fixed_array[strlen(temp)] = '\0';
+
+		return EXIT_SUCCESS;
 		
 	};
 	return EXIT_FAILURE;

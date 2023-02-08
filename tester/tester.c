@@ -447,14 +447,15 @@ int test_expansion(void){
 	
 	// Test Case 2 - 6 need foreground and background processes
 	
-	// Test Case 7: ~/ at beginning, $$ present, IFS set 
+	// Test Case 7: ~/ at beginning, $$ present, IFS set
+	
 	strcpy(string, "~/Ted$$");
 	strcpy(stringb, "~/$$Ted");
 	strcpy(result, "");
 	util_env_var_to_fixed_array("HOME", result);
 
 	util_int_to_string(getpid(), str_pid, 10);
-	strcat(result, "/Ted");
+	strcat(result, "Ted");
 	strcat(result, str_pid);
 	util_setenv("IFS", " \t\n");
 	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
@@ -468,9 +469,9 @@ int test_expansion(void){
 	strcpy(string, "~/Ted$$");
 	strcpy(stringb, "~/$$Ted");
 	util_env_var_to_fixed_array("HOME", result);
-
+	strcpy(resultb, result);
 	util_int_to_string(getpid(), str_pid, 10);
-	strcat(result, "/Ted");
+	strcat(result, "Ted");
 	strcat(result, str_pid);
 	strcat(resultb, str_pid);
 	strcat(resultb, "Ted");
@@ -488,7 +489,7 @@ int test_expansion(void){
 	strcpy(stringb, "~/Ted");
 	util_env_var_to_fixed_array("HOME", result);
 	util_env_var_to_fixed_array("HOME", resultb);
-	strcat(resultb, "/Ted");
+	strcat(resultb, "Ted");
 	util_setenv("IFS", " \t\n");
 	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(string, result) == 0);
@@ -500,7 +501,7 @@ int test_expansion(void){
 	strcpy(stringb, "~/Ted");
 	util_env_var_to_fixed_array("HOME", result);
 	strcpy(resultb, result);
-	strcat(resultb, "/Ted");
+	strcat(resultb, "Ted");
 	util_setenv("IFS", "NULL");
 
 	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
@@ -516,6 +517,7 @@ int test_expansion(void){
 	util_int_to_string(getpid(), result, 10);
 	strcat(result, "Ted~/");
 	util_setenv("IFS", " \t\n");
+	strcpy(resultb,"");
 	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);
 
@@ -532,8 +534,16 @@ int test_expansion(void){
 	// TODO: Test cases 25-30 need foreground and background processes implemented
 	
 	// Test Case 31: ~/ is not at front, $* are all not present, IFS is set
+	strcpy(string, "");
+	strcpy(result, "");
 	strcpy(string, "Ted~/");
 	strcpy( result, "Ted~/");
+	result[5] = '\0';
+	strcpy(holder, "");
+	strcat(string, "");
+	strcat(result, "");
+	util_env_var_to_fixed_array("HOME", holder);
+	strcat(result, holder);
 	util_setenv("IFS", " \t\n");
 	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
 	assert(strcmp(result, string) == 0);

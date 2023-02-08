@@ -35,12 +35,14 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code){
 	 * @return EXIT_SUCCESS for a successful scan (no expansion variables left) and and replace, EXIT_FAILURE for an unsuccessful scan or replace
 	 * */
 
-	char str_pid[10];
+	// Maximum pid size for 64 bit systems is 9 digits long
+	char str_pid[LINESIZE];
 
 	// For some reason, getenv("HOME") is overwriting pointers so I'm saving the value before I declare anything
 	// Substring == $$, to be replaced with the pid		
 	if(control_code == 1){
 		util_int_to_string(getpid(), str_pid, LINESIZE);
+
 	} else if(control_code == 2){
 		// Substring == ~/, replace with the HOME environment variable
 		util_env_var_to_fixed_array("HOME", str_pid); 
@@ -78,16 +80,33 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code){
 			temporary = strdup(discovery);
 			temporary += 2;
 		} 
+		if( &arg[0] == &discovery[0] && control_code == 2){
+			*discovery = '\0';
+			discovery++;
+			*discovery = '\0';
+			strcat(arg, str_pid);
+			strcat(arg, temporary);
+			return EXIT_SUCCESS;	
+		}
 
 		// Mainstream, non-edge case processing where the discovery is not at the front of the string
-		if(&arg[0] != &discovery[0]){	
+		else if( &arg[0] != &discovery[0] && control_code != 2){
 			*discovery = '\0';
+			discovery++;
+			*discovery = '\0';
+
 			strcat(arg, str_pid);
 			strcat(arg, temporary);
-		} else {
+		} else if (control_code != 2){
 			*discovery = '\0';
+			discovery++;
+			*discovery = '\0';
+
 			strcat(arg, str_pid);
 			strcat(arg, temporary);
+		} else if (control_code == 2){
+			arg[length] = '\0';
+			return EXIT_SUCCESS;
 		}
 		discovery = strstr(arg, substring);
 		
