@@ -20,6 +20,146 @@
 # include <stdlib.h>
 # include <errno.h>
 
+int test_parsing(void){
+	char string[LINESIZE] = "";
+	char result[LINESIZE] = "";
+
+	// Test Case 1
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	assert(strcmp(string, result) == 0);
+
+	// Test Case 2
+	strcpy(string, "&");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+
+	// Test Case 3
+	strcpy(string, "#");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+
+	// Test Case 4
+	strcpy(string, "ps");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	strcpy(string, "ps&");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+	assert(prog_args.background == False);
+
+	// Test Case 6
+	strcpy(string, "< >");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+	assert(strcmp(prog_args.input, "") == 0);
+	assert(strcmp(prog_args.output, "") == 0);
+	strcpy(string, "<>");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+	assert(strcmp(prog_args.input, "") == 0);
+	assert(strcmp(prog_args.output, "") == 0);
+
+	// Test Case 7
+	strcpy(string, "< #");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+	assert(strcmp(prog_args.input, "") == 0);
+	strcpy(string, "<#");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+	assert(strcmp(prog_args.input, "") == 0);
+
+	// Test Case 8
+	strcpy(string, "> #");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+	assert(strcmp(prog_args.output, "") == 0);
+	strcpy(string, ">#");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+	assert(strcmp(prog_args.output, "") == 0);
+
+	// Test Case 9
+	strcpy(string, "# <");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	assert(strcmp(prog_args.input, "") == 0);
+
+	// Test Case 10
+	strcpy(string, "< &");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+	assert(strcmp(prog_args.input, "") == 0);
+	strcpy(string, "<&");
+
+	// Test Case 11
+	strcpy(string, "< & #");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+	strcpy(string, "<& #");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+	strcpy(string, "< &#");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+	
+	// Test Case 12
+	strcpy(string, "< file1.txt");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	assert(strcmp(prog_args.input, "file1.txt") == 0);
+	strcpy(string, "<file1.txt");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+
+	// Test Case 16
+	strcpy(string, "> file1.txt");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	assert(strcmp(prog_args.output, "file1.txt") == 0);
+	strcpy(string, ">file1.txt");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+
+	// Test Case 18
+	strcpy(string, "ps &");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	assert(prog_args.background == True);
+	strcpy(string, "& ps");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+
+	// Test Case 20
+	strcpy(string, "cd ..");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	assert(prog_args.background == False);
+	strcpy(string, "cd ls");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	assert(prog_args.background == False);
+	
+	// Test Case 22
+	strcpy(string, "ps < file1.txt > file1.txt");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	strcpy(string, "ps > file1.txt < file1.txt");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	assert(strcmp(prog_args.input, "file1.txt") == 0);
+	assert(strcmp(prog_args.output, "file1.txt") == 0);
+	strcpy(string, "ls ps < > file1.txt");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+	strcpy(string, "< file1.txt > file1.txt ps");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+
+	// Test Case 23
+	strcpy(string, "< file1.txt > file1.txt #");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	assert(strcmp(prog_args.input, "file1.txt") == 0);
+	assert(strcmp(prog_args.output, "file1.txt") == 0);
+	strcpy(string, "> file1.txt < file1.txt #");
+	assert(spec_parsing(String) == EXIT_SUCCESS);
+	assert(strcmp(prog_args.input, "file1.txt") == 0);
+	assert(strcmp(prog_args.output, "file1.txt") == 0);
+
+	// Test Case 24
+	strcpy(string, "cd pwd ps < file1.txt");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	assert(strcmp(prog_args.input, "file1.txt") == 0);
+	assert(strcmp(prog_args.output, "") == 0);
+	strcpy(string, "cd pwd < file1.txt ps");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+
+	// Test Case 25
+	strcpy(string, "ls ps < file25.txt #");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	assert(strcmp(prog_args.input, "file25.txt") == 0);
+	strcpy(string, "< file25.txt # ls ps");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+	strcpy(string, "< file25.txt ls # ps");
+	assert(spec_parsing(string) == EXIT_FAILURE);
+	strcpy(string, "< file25.txt # ls ps");
+	assert(spec_parsing(string) == EXIT_SUCCESS);
+
+}
+
 int test_input(void){
 	char* storage[LINESIZE];
 	char* discardable;
@@ -538,14 +678,10 @@ int test_expansion(void){
 	strcpy(result, "");
 	strcpy(string, "Ted~/");
 	strcpy( result, "Ted~/");
-	result[5] = '\0';
-	strcpy(holder, "");
-	strcat(string, "");
-	strcat(result, "");
-	util_env_var_to_fixed_array("HOME", holder);
-	strcat(result, holder);
+
 	util_setenv("IFS", " \t\n");
 	assert(spec_expansion(string, "$$", 1) == EXIT_SUCCESS);
+
 	assert(strcmp(result, string) == 0);
 
 	// Test Case 32: ~/ is not at front, $* are all not present, IFS is not set
