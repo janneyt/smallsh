@@ -20,6 +20,7 @@
 # ifndef  LINESIZE
 # include "constants/constants.h"
 # endif
+# include <stdbool.h>
 
 # include <stdlib.h>
 # include <errno.h>
@@ -27,6 +28,7 @@
 # define STRINGSIZE 100
 /** LINESIZE has to support 512 whitespace/character pairs */
 # define DELIMITER  " \t\n"
+
 
 int main(void){
 	/**
@@ -42,6 +44,12 @@ int main(void){
 	char line[LINESIZE];
 	size_t line_size = LINESIZE-1;
 	
+	struct ProgArgs current;
+	strcpy(current.command, "");
+	strcpy(current.input, "");
+	strcpy(current.output, "");
+	current.background = false;
+
 	// Runtime debug testing to make sure functions act according to how I want
 	if(test_input() == EXIT_FAILURE){
 		printf("Input functions fail runtime tests\n");
@@ -50,6 +58,10 @@ int main(void){
 	if(test_expansion() == EXIT_FAILURE){
 		exit(EXIT_FAILURE);
 	};
+	
+	if(test_parsing(current) == EXIT_FAILURE){
+		exit(EXIT_FAILURE);
+	}	
 
 	for(;;){
 

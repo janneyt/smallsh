@@ -17,7 +17,7 @@
 # include <errno.h>
 
 # define STRINGSIZE 100
-# ifndef  LINESIZE
+# ifndef LINESIZE
 # include "../constants/constants.h"
 # endif
 

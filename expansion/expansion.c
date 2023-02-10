@@ -15,7 +15,7 @@
 # include "../utilities/utilities.h"
 # include "../error/error.h"
 # include "../tester/tester.h"
-# ifndef  LINESIZE
+# ifndef LINESIZE
 # include "../constants/constants.h"
 # endif
 

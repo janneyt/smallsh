@@ -13,7 +13,7 @@
 # include <stdlib.h>
 # include <errno.h>
 
-# ifndef  LINESIZE
+# ifndef LINESIZE
 # include "../constants/constants.h"
 # endif
 

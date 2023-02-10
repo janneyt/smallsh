@@ -124,8 +124,9 @@ char** help_split_line(char** storage, char* line){
 	int	token_bufsize = 64;
 	char**  array_of_tokens = storage;
 
-	delim = (delim != 0x0) ? delim : DELIMITER;
-	
+	if(delim == 0x0 || delim == NULL || strcmp(delim, "NULL") == 0){
+		delim = strdup(DELIMITER);
+	} 	
 	if(bufsize < 1){
 		printf("A buffer of 1 or more is needed for tokenization");
 		exit(EXIT_FAILURE);
