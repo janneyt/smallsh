@@ -11,3 +11,7 @@ struct ProgArgs {
 	char output[STRINGSIZE];
 	int background;
 };
+
+struct Spawn {
+	char command[LINESIZE];
+}

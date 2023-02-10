@@ -59,7 +59,7 @@ int main(void){
 		exit(EXIT_FAILURE);
 	};
 	
-	if(test_parsing(current) == EXIT_FAILURE){
+	if(test_parsing(&current) == EXIT_FAILURE){
 		exit(EXIT_FAILURE);
 	}	
 

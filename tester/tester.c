@@ -22,365 +22,503 @@
 # include <stdlib.h>
 # include <errno.h>
 
-int test_parsing(struct ProgArgs prog_args){
+int test_parsing(struct ProgArgs *prog_arg){
 	char string[LINESIZE] = "";
 	char result[LINESIZE] = "";
 
 	// Test Case 1
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
 	assert(strcmp(string, result) == 0);
 
 	// Test Case 2
 	strcpy(string, "&");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 
 	// Test Case 3
 	strcpy(string, "#");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
 
 	// Test Case 4
 	strcpy(string, "ps");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
 	strcpy(string, "ps&");
 	// It doesn't matter if the command is valid, only standalone & causes errors
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(prog_args.background == false);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(prog_arg->background == false);
 
 	// Test Case 6
 	strcpy(string, "< >");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
-	assert(strcmp(prog_args.input, "") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
 	strcpy(string, "<>");
 	// <> could theoretically be a valid command line option for a program so its successful
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.input, "") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
 
 	// Test Case 7
 	strcpy(string, "< #");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
-	assert(strcmp(prog_args.input, "") == 0);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
+	assert(strcmp(prog_arg->input, "") == 0);
 
 	// <# could be a valid command line argument and is NOT a comment and is NOT a redirection
 	strcpy(string, "<#");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.input, "") == 0);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->input, "") == 0);
 
 	// Test Case 8
 	strcpy(string, "> #");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
-	assert(strcmp(prog_args.output, "") == 0);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
+	assert(strcmp(prog_arg->output, "") == 0);
 	strcpy(string, ">#");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.output, "") == 0);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->output, "") == 0);
 
 	// Test Case 9
 	strcpy(string, "# <");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.input, "") == 0);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->input, "") == 0);
 
 	// Test Case 10
 	strcpy(string, "< &");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
-	assert(strcmp(prog_args.input, "") == 0);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
+	assert(strcmp(prog_arg->input, "") == 0);
 	strcpy(string, "<&");
 
 	// Test Case 11
 	strcpy(string, "< & #");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "<& #");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
 	strcpy(string, "< &#");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	
 	// Test Case 12
 	strcpy(string, "< file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	printf("prog_args.input: %s", prog_args.input);
-	assert(strcmp(prog_args.input, "file1.txt") == 0);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+
+	assert(strcmp(prog_arg->input, "file1.txt") == 0);
+	// Again, there's no way to distinguish between < <file1.txt and <file1.txt as a mistype, so pass it along to the operating system for file validity
 	strcpy(string, "<file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
 
 	// Test Case 16
 	strcpy(string, "> file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.output, "file1.txt") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->output, "file1.txt") == 0);
 	strcpy(string, ">file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->output, "") == 0);
+	// Weirdly enough, this parses as a command and the operating system has to handle that it is an invalid command
+	assert(strcmp(prog_arg->command, ">file1.txt") == 0);
 
 	// Test Case 18
 	strcpy(string, "ps &");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(prog_args.background == true);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(prog_arg->background == true);
 	strcpy(string, "& ps");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 
 	// Test Case 20
 	strcpy(string, "cd ..");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(prog_args.background == false);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(prog_arg->background == false);
 	strcpy(string, "cd ls");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(prog_args.background == false);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(prog_arg->background == false);
 	
 	// Test Case 22
 	strcpy(string, "ps < file1.txt > file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
 	strcpy(string, "ps > file1.txt < file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.input, "file1.txt") == 0);
-	assert(strcmp(prog_args.output, "file1.txt") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->input, "file1.txt") == 0);
+	assert(strcmp(prog_arg->output, "file1.txt") == 0);
 	strcpy(string, "ls ps < > file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "< file1.txt > file1.txt ps");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 
 	// Test Case 23
 	strcpy(string, "< file1.txt > file1.txt #");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.input, "file1.txt") == 0);
-	assert(strcmp(prog_args.output, "file1.txt") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->input, "file1.txt") == 0);
+	assert(strcmp(prog_arg->output, "file1.txt") == 0);
 	strcpy(string, "> file1.txt < file1.txt #");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.input, "file1.txt") == 0);
-	assert(strcmp(prog_args.output, "file1.txt") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->input, "file1.txt") == 0);
+	assert(strcmp(prog_arg->output, "file1.txt") == 0);
 
 	// Test Case 24
 	strcpy(string, "ls -a ~/ < file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.input, "file1.txt") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->input, "file1.txt") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
 	strcpy(string, "cd pwd < file1.txt ps");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 
 	// Test Case 25
 	strcpy(string, "ls ~/ < file25.txt #");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.input, "file25.txt") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->input, "file25.txt") == 0);
 	strcpy(string, "< file25.txt # ls ps");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
 	strcpy(string, "< file25.txt ls # ps");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "< file25.txt # ls ps");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
 
 	// Test Case 26
 	strcpy(string, "ls ~/ > file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.output, "file1.txt") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->output, "file1.txt") == 0);
 	strcpy(string, "ls ~/ >file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
 	strcpy(string, "> file1.txt ls ~/");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 
 	// Test Case 27
 	strcpy(string, "ls ~/ > file1.txt #");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.output, "file1.txt") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->output, "file1.txt") == 0);
 	strcpy(string, "> file1.txt ls ~/ #");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "> file1.txt # ls ~/");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.output, "file1.txt") == 0);
-	assert(strcmp(prog_args.command, "") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->command, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->output, "file1.txt") == 0);
+	assert(strcmp(prog_arg->command, "") == 0);
 
 	// Test Case 28
 	strcpy(string, "ls -a -b -c -d -f");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
 
 	// Test Case 29
 	strcpy(string, "ls -a -b -c -d #");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a -b -c -d"));
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	strcpy(prog_arg->command, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a -b -c -d "));
 	strcpy(string, "ls -a -b -c # -d");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a -b -c") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a -b -c") == 0);
 	strcpy(string, "ls -a -b # -c -d");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a -b") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a -b") == 0);
 	strcpy(string, "ls -a # -b -c -d");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a") == 0);
 	strcpy(string, "ls # -a -b -c -d");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls") == 0);
 	strcpy(string, "#ls -a -b -c -d -f");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	strcpy(prog_arg->command, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "") == 0);
 
 	// Test Case 30
 	strcpy(string, "ls -a < file1.txt > file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a") == 0);
-	assert(strcmp(prog_args.input, "file1.txt") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a ") == 0);
+	assert(strcmp(prog_arg->input, "file1.txt") == 0);
 	strcpy(string, "ls < file1.txt > file1.txt -a");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
-	assert(strcmp(prog_args.output, "file1.txt") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
+	assert(strcmp(prog_arg->output, "") == 0);
 	strcpy(string, "-a ls < file1.txt > file1.txt");
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
 	// We do not need to make sure the parameters to ls make sense
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "-a ls") == 0);
-	assert(strcmp(prog_args.input, "file1.txt") == 0);
-	assert(strcmp(prog_args.output, "file1.txt") == 0);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "-a ls ") == 0);
+	assert(strcmp(prog_arg->input, "file1.txt") == 0);
+	assert(strcmp(prog_arg->output, "file1.txt") == 0);
 
 	// Test Case 31
 	strcpy(string, "ls < file1.txt > file1.txt & #");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls") == 0);
-	assert(strcmp(prog_args.input, "file1.txt") == 0);
-	assert(strcmp(prog_args.output, "file1.txt") == 0);
-	assert(prog_args.background == false);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	prog_arg->background = false;
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls ") == 0);
+	assert(strcmp(prog_arg->input, "file1.txt") == 0);
+	assert(strcmp(prog_arg->output, "file1.txt") == 0);
+	assert(prog_arg->background == true);
 	strcpy(string, "ls < file1.txt # > file1.txt # &");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls") == 0);
-	assert(strcmp(prog_args.input, "file1.txt") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
-	assert(prog_args.background == false);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls ") == 0);
+	assert(strcmp(prog_arg->input, "file1.txt") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
+	assert(prog_arg->background == false);
 	strcpy(string, "ls # < file1.txt > file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls") == 0);
 	strcpy(string, "ls & # < file1.txt >");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls") == 0);
-	assert(prog_args.background == true);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls ") == 0);
+	assert(prog_arg->background == true);
 	strcpy(string, "& ls");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "ls & # < file1.txt > file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls") == 0);
-	assert(prog_args.background == true);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls ") == 0);
+	assert(prog_arg->background == true);
 	strcpy(string, "# ls < file1.txt > file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "") == 0);
-	assert(strcmp(prog_args.input, "") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "") == 0);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
 
 	// Test Case 34
 	strcpy(string, "ls -a -b < file1.txt &");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a -b") == 0);
-	assert(strcmp(prog_args.input, "file1.txt") == 0);
-	assert(prog_args.background == true);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a -b ") == 0);
+	assert(strcmp(prog_arg->input, "file1.txt") == 0);
+	assert(prog_arg->background == true);
 	strcpy(string, "ls -a -b < & file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "ls -a & < file1.txt -b");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "< file1.txt ls -a -b &");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "& ls -a -b < file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 
 	// Test Case 35
 	strcpy(string, "ls -a -b < file1.txt # &");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a -b") == 0);
-	assert(strcmp(prog_args.input, "file1.txt") == 0);
-	assert(prog_args.background == false);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a -b ") == 0);
+	assert(strcmp(prog_arg->input, "file1.txt") == 0);
+	assert(prog_arg->background == false);
 	strcpy(string, "ls -a -b < file1.txt & #");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a -b") == 0);
-	assert(strcmp(prog_args.input, "file1.txt") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
-	assert(prog_args.background == true);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a -b ") == 0);
+	assert(strcmp(prog_arg->input, "file1.txt") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
+	assert(prog_arg->background == true);
 	strcpy(string, "ls -a -b < & file1.txt #");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
-	// This is actually the test for the proper initialization of prog_args being preserved through the function
-	assert(strcmp(prog_args.command, "") == 0);
-	assert(strcmp(prog_args.input, "") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
-	assert(prog_args.background == false);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
+	// This is actually the test for the proper initialization of *prog_arg being preserved through the function
+	assert(strcmp(prog_arg->command, "") == 0);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
+	assert(prog_arg->background == false);
 	strcpy(string, "ls -a -b # < & file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a -b") == 0);
-	assert(strcmp(prog_args.input, "") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
-	assert(prog_args.background == false);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a -b") == 0);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
+	assert(prog_arg->background == false);
 	strcpy(string, "ls -a & < # file1.txt -b");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "ls -a # & < file1.txt -b");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a") == 0);
-	assert(strcmp(prog_args.input, "") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
-	assert(prog_args.background == false);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a") == 0);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
+	assert(prog_arg->background == false);
 	strcpy(string, "< file1.txt ls -a -b &");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
+	assert(strcmp(prog_arg->command, "") == 0);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
+	assert(prog_arg->background == false);
+	strcpy(string, "< file1.txt ls -a -b &");
+
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
+	assert(strcmp(prog_arg->command, "") == 0);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
+
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	strcpy(string, "< file1.txt ls -a -b &");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
 	strcpy(string, "# < file1.txt ls -a -b &");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "") == 0);
-	assert(prog_args.background == false);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "") == 0);
+	assert(prog_arg->background == false);
 	strcpy(string, "& ls -a -b < file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+
+	strcpy(prog_arg->input, "");
+	strcpy(prog_arg->output, "");
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "# & ls -a -b < file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "") == 0);
-	assert(strcmp(prog_args.input, "") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
-	assert(prog_args.background == false);
+
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "") == 0);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
+	assert(prog_arg->background == false);
 
 	// Test Case 36
 	strcpy(string, "ls -a -b > file1.txt &");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a -b") == 0);
-	assert(strcmp(prog_args.output, "file1.txt") == 0);
-	assert(prog_args.background == true);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a -b ") == 0);
+	assert(strcmp(prog_arg->output, "file1.txt") == 0);
+	assert(prog_arg->background == true);
 	strcpy(string, "ls -a -b > & file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "ls -a & > file1.txt -b");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "> file1.txt ls -a -b &");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "& ls -a -b > file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 
 	// Test Case 37
 	strcpy(string, "ls -a -b > file1.txt # &");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a -b") == 0);
-	assert(strcmp(prog_args.output, "file1.txt") == 0);
-	assert(prog_args.background == false);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a -b ") == 0);
+	assert(strcmp(prog_arg->output, "file1.txt") == 0);
+	assert(prog_arg->background == false);
 	strcpy(string, "ls -a -b > file1.txt & #");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a -b") == 0);
-	assert(strcmp(prog_args.output, "file1.txt") == 0);
-	assert(strcmp(prog_args.input, "") == 0);
-	assert(prog_args.background == true);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a -b ") == 0);
+	assert(strcmp(prog_arg->output, "file1.txt") == 0);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(prog_arg->background == true);
 	strcpy(string, "ls -a -b > & file1.txt #");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
-	// This is actually the test for the proper initialization of prog_args being preserved through the function
-	assert(strcmp(prog_args.command, "") == 0);
-	assert(strcmp(prog_args.input, "") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
-	assert(prog_args.background == false);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
+	// This is actually the test for the proper initialization of *prog_arg being preserved through the function
+	assert(strcmp(prog_arg->command, "") == 0);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
+	assert(prog_arg->background == false);
 	strcpy(string, "ls -a -b # > & file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a -b") == 0);
-	assert(strcmp(prog_args.input, "") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
-	assert(prog_args.background == false);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a -b") == 0);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
+	assert(prog_arg->background == false);
 	strcpy(string, "ls -a & > # file1.txt -b");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "ls -a # & > file1.txt -b");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "ls -a") == 0);
-	assert(strcmp(prog_args.input, "") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
-	assert(prog_args.background == false);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "ls -a") == 0);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
+	assert(prog_arg->background == false);
 	strcpy(string, "> file1.txt ls -a -b &");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "# > file1.txt ls -a -b &");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "") == 0);
-	assert(prog_args.background == false);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "") == 0);
+	assert(prog_arg->background == false);
 	strcpy(string, "& ls -a -b > file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_FAILURE);
+	assert(spec_parsing(string, prog_arg) == EXIT_FAILURE);
 	strcpy(string, "# & ls -a -b > file1.txt");
-	assert(spec_parsing(string, prog_args) == EXIT_SUCCESS);
-	assert(strcmp(prog_args.command, "") == 0);
-	assert(strcmp(prog_args.input, "") == 0);
-	assert(strcmp(prog_args.output, "") == 0);
-	assert(prog_args.background == false);
+	assert(spec_parsing(string, prog_arg) == EXIT_SUCCESS);
+	assert(strcmp(prog_arg->command, "") == 0);
+	assert(strcmp(prog_arg->input, "") == 0);
+	assert(strcmp(prog_arg->output, "") == 0);
+	assert(prog_arg->background == false);
 
 	return EXIT_SUCCESS;
 

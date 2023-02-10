@@ -5,6 +5,7 @@
 # include <stdlib.h>
 # include <stdio.h>
 # include <string.h>
+# include <stdbool.h>
 # ifndef  LINESIZE
 # include "../constants/constants.h"
 # endif
@@ -21,9 +22,14 @@ int spec_parsing(char string[LINESIZE], struct ProgArgs *current){
 	 * */
 	char* storage[LINESIZE];
 	int storagelength = 0;
-	
+	char  command[LINESIZE];
+	strcpy(command, "");
 	spec_word_splitting(storage, string);
 	int index = 0;
+	strcpy(current->command, "");
+	strcpy(current->input, "");
+	strcpy(current->output, "");
+	current->background = false;
 
 	// Find the length of the char**
 	while(index < LINESIZE){
@@ -35,23 +41,49 @@ int spec_parsing(char string[LINESIZE], struct ProgArgs *current){
 		if(storage[index] == 0x0){
 			storagelength = index;
 			index = LINESIZE;
-		}
+		} else if(strcmp(storage[index], "#") == 0){
+			storagelength = index;
+			index = LINESIZE;
 
+		}
 
 		index++;
 	}
 
 	// Now begin sorting and rejecting bad command line options
 	index = 0;
+
+
 	while(index < storagelength){
+
+		// #< or #file1 etc are still comments
+		if(storage[index][0] == '#'){
+			index = storagelength;
+			continue;
+		}
 
 		// Lone & gets rejected
 		if(index == 0 && strcmp(storage[index], "&") == 0){
+			current->background = false;
 			return EXIT_FAILURE;
 		}
 
+		// < or > at the end are automatically invalid
+		else if(index == storagelength -1){
+			if(strcmp(storage[index], "<") == 0) {
+				return EXIT_FAILURE;
+			} else if(strcmp(storage[index], ">") == 0){
+				return EXIT_FAILURE;
+			} else if(strcmp(storage[index], "&") == 0){
+				current->background = true;
+				
+			} else {
+				strcat(command, storage[index]);
+
+			}
+		}
 		// < should not be followed by > # or &
-		if(strcmp(storage[index], "<") == 0 && index != storagelength - 1){
+		else if(strcmp(storage[index], "<") == 0 && index != storagelength - 1){
 
 			// Rejection criteria
 			if(strcmp(storage[index+1], ">") == 0 || strcmp(storage[index+1],"<") == 0){
@@ -62,15 +94,22 @@ int spec_parsing(char string[LINESIZE], struct ProgArgs *current){
 				return EXIT_FAILURE;
 			} else if(storage[index+1][0] == '#' || storage[index+1][0] == '&'){
 				return EXIT_FAILURE; 
+			} else if(strcmp(storage[index], ">") == 0 && index == storagelength){
+				return EXIT_FAILURE;
+			} 
+
+			// The valid options for redirection operation + 2 are & or # or the other redirection operator
+			if(storage[index+2] && (strcmp(storage[index+2], "#") != 0 && strcmp(storage[index+2], "&") != 0 && strcmp(storage[index+2], ">") != 0)){
+				return EXIT_FAILURE;
 			}
 
-			strcpy(current->input, storage[index + 1]);
+			strcpy(current->input, storage[index+1]);
 			
 			index++;
 		}
 
 		// > should not be followed by < # or &
-		if(strcmp(storage[index], ">") == 0 && index != storagelength - 1){
+		else if(strcmp(storage[index], ">") == 0 && index != storagelength - 1){
 
 			// Rejection criteria
 			if(strcmp(storage[index+1], ">") == 0 || strcmp(storage[index+1],"<") == 0){
@@ -81,16 +120,43 @@ int spec_parsing(char string[LINESIZE], struct ProgArgs *current){
 				return EXIT_FAILURE;
 			} else if(storage[index+1][0] == '#' || storage[index+1][0] == '&'){
 				return EXIT_FAILURE; 
+			} 
+
+			// The valid options for redirection operation + 2 are & or # or the other redirection operator
+			if(storage[index+2] && (strcmp(storage[index+2], "#") != 0 && strcmp(storage[index+2], "&") != 0 && strcmp(storage[index+2], "<") != 0)){
+				return EXIT_FAILURE;
 			}
 
-			strcpy(current->input, storage[index + 1]);
+			strcpy(current->output, storage[index + 1]);
 			
 			index++;
 		}
-	
+
+		// & must only be at the end, all other invalid
+		else if(strcmp(storage[index], "&") == 0 && index == storagelength -1){
+			current->background = true;
+			return EXIT_SUCCESS;
+		} else if (strcmp(storage[index], "&") == 0 && index != storagelength -1){
+			return EXIT_FAILURE;
+		}
+
+		// Having weeded out everything else, we now have to assemble a command line with options by reconcatenating
+		// THIS DOES NOT NEED TO BE A VALID PROGRAM, we will let the operating system handle that
+		else {
+			if(storage[index] == 0x0){
+				return EXIT_FAILURE;
+			}
+			strcat(command, storage[index]);
+
+			if(index != storagelength-1){
+				strcat(command, " ");
+			}
+		}
+
 		index++;
 	}
 
+	strcpy(current->command, command);
 
 	return EXIT_SUCCESS;
 }

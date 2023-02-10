@@ -5,4 +5,4 @@
 
 int test_input(void);
 int test_expansion(void);
-int test_parsing(struct ProgArgs);
+int test_parsing(struct ProgArgs *current);
