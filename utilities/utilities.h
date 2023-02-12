@@ -17,7 +17,7 @@
 # include "../constants/constants.h"
 # endif
 
-char* util_env_var_to_fixed_array(char env_var[], char fixed_array[]);
+int util_env_var_to_fixed_array(char env_var[], char fixed_array[]);
 	/**
 	 * \brief Takes a environment variable and sets it in a fixed array after error checking
 	 *

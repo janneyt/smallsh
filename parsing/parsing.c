@@ -31,12 +31,20 @@ int spec_parsing(char string[LINESIZE], struct ProgArgs *current){
 	strcpy(current->output, "");
 	current->background = false;
 
+	if(storage[0] == 0x0){
+		fprintf(stderr, "Input is equal to null, which is invalid");
+		return EXIT_FAILURE;
+	}
+
 	// Find the length of the char**
 	while(index < LINESIZE){
 
 		// Blank commands should simple returned with no commands set
 		if(storage[index] == 0x0 && index == 0){
 			return EXIT_SUCCESS;
+		}
+		if(storage[index] && strcmp(storage[index], "exit") == 0){
+			exit(EXIT_SUCCESS);
 		}
 		if(storage[index] == 0x0){
 			storagelength = index;

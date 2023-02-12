@@ -12,8 +12,10 @@ struct ProgArgs {
 	int background;
 };
 
+
 struct ParentStruct {
 	int pid_counter;
 	int pid;
 	struct ProgArgs *array[NUMCHKLDREN];
 }
+

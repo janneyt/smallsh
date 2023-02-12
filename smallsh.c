@@ -17,6 +17,7 @@
 # include "input/input.h"
 # include "tester/tester.h"
 # include "expansion/expansion.h"
+# include "parsing/parsing.h"
 # ifndef  LINESIZE
 # include "constants/constants.h"
 # endif
@@ -24,7 +25,9 @@
 
 # include <stdlib.h>
 # include <errno.h>
+
 # include "../builtins/builtins.h"
+
 
 int main(void){
 	/**
@@ -35,6 +38,9 @@ int main(void){
 
 	pid_t pid;
 	int status;
+	char child_action[LINESIZE];
+
+	char holder[LINESIZE];
 
 	// Variables needed for prompts declared outside the infinite loop to not create memory leaks
 	char line[LINESIZE];
@@ -57,21 +63,38 @@ int main(void){
 	
 	if(test_parsing(&current) == EXIT_FAILURE){
 		exit(EXIT_FAILURE);
-	}	
+	}
+	printf("\nRoutine tests pass!\n");
 
 	for(;;){
 
 		// Specification requirement to identify child processes potentially exiting between loops
-		while((pid = waitpid(0, &status, WNOHANG)) > 0) /** Waitpid set to 0 to make parent wait for child sharing the process group id */ {
+		while((pid = waitpid(1, &status, WNOHANG)) > 0){
+		
+			child_action[0] = '\0';
+
+
 			if(spec_check_for_child_background_processes(status, pid) != EXIT_SUCCESS){
 				exit(EXIT_FAILURE);
 			}
+			if(WIFEXITED(status)){
+				strcat(child_action, "Process ");
+				util_int_to_string(pid, holder, 10);
+				strcat(child_action, holder);
+				strcat(child_action, " exited with status: ");
+				util_int_to_string(pid, holder, 10);
+				strcat(child_action, holder);
+				printf("%s", child_action);
+			}
 		}
 
+		printf("%ul\n", pid);
+		
 		if(pid == 0){
 			printf("Children exist but have not yet completed");
 		} else if(pid < 0){
-			perror("Error looking for children");
+			printf("%ul\n", pid);
+			perror("");
 		};
 
 		assert(pid < 1);
@@ -80,6 +103,16 @@ int main(void){
 		// Print prompt TODO: change stdin to file stream variable when implemented
 		if(spec_get_line(line, line_size, stdin) == EXIT_SUCCESS){
 			// Only in the singular case where we can verify input has succeeded are we heading out to any other function
+			if(spec_expansion(line, "$$", 1) == EXIT_SUCCESS){
+				if(spec_parsing(line, &current) == EXIT_SUCCESS){
+					printf("Successfully parsed\n");
+				} else {
+					perror("");
+					printf("Could not parse line\n");
+				}
+			} else {
+				printf("Could not expand variables\n");
+			}
 			
 		} else {
 			printf("error with spec_get_line");
