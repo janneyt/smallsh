@@ -1,7 +1,7 @@
 # define LINESIZE 		1046
 # define DELIMITER 		" \t\n"
 # define STRINGSIZE 		100
-
+# define NUMCHILDREN		6
 
 typedef int make_iso_compilers_happy;
 
@@ -12,10 +12,10 @@ struct ProgArgs {
 	int background;
 };
 
-struct Spawn {
-	
-	int pid;
-	int pid_counter;
-	
 
-};
+struct ParentStruct {
+	int pid_counter;
+	int pid;
+	struct ProgArgs *array[NUMCHKLDREN];
+}
+
