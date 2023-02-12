@@ -13,5 +13,9 @@ struct ProgArgs {
 };
 
 struct Spawn {
-	char command[LINESIZE];
-}
+	
+	int pid;
+	int pid_counter;
+	
+
+};

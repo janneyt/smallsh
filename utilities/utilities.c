@@ -84,7 +84,7 @@ void util_reset_storage(char* storage[LINESIZE]){
 	};
 }
 
-int util_int_to_string(int num, char str[LINESIZE]){
+int util_int_to_string(int num, char str[LINESIZE], int size){
 	
 	/**
 	 * \brief Converts an integer to its strings representation
@@ -109,7 +109,7 @@ int util_int_to_string(int num, char str[LINESIZE]){
 	assert(atoi(temp) == num);
 
 	strcat(str, "");
-	strcpy(str, temp);
+	strncpy(str, temp, size);
 	assert(atoi(str) == num);
 	return EXIT_SUCCESS;
 }
