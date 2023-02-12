@@ -24,11 +24,7 @@
 
 # include <stdlib.h>
 # include <errno.h>
-
-# define STRINGSIZE 100
-/** LINESIZE has to support 512 whitespace/character pairs */
-# define DELIMITER  " \t\n"
-
+# include "../builtins/builtins.h"
 
 int main(void){
 	/**

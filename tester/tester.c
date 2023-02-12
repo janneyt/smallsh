@@ -22,6 +22,53 @@
 # include <stdlib.h>
 # include <errno.h>
 
+void test_struct_utilities() {
+  struct Spawn parent = {0};
+  struct Spawn child1 = {1};
+  struct Spawn child2 = {2};
+  struct Spawn child3 = {3};
+
+  // Test add_to_array
+  assert(add_to_array(&parent, &child1, 0) == EXIT_SUCCESS);
+  assert(parent.pid == child1.pid);
+  assert(parent.pid_counter == child1.pid_counter);
+  assert(parent.array[0] == &child1);
+
+  assert(add_to_array(&parent, &child2, 2) == EXIT_SUCCESS);
+  assert(parent.pid == child1.pid);
+  assert(parent.pid_counter == child1.pid_counter);
+  assert(parent.array[0] == &child1);
+  assert(parent.array[1] == NULL);
+  assert(parent.array[2] == &child2);
+
+  assert(add_to_array(&parent, &child3, 5) == EXIT_SUCCESS);
+  assert(parent.pid == child1.pid);
+  assert(parent.pid_counter == child1.pid_counter);
+  assert(parent.array[0] == &child1);
+  assert(parent.array[2] == &child2);
+  assert(parent.array[5] == &child3);
+
+  assert(add_to_array(&parent, &child1, 0) == EXIT_FAILURE); // Adding to non-empty array
+  assert(add_to_array(&parent, &child2, 6) == EXIT_FAILURE); // Adding to invalid index
+
+  // Test update_child
+  assert(update_child(&child1, 10, 20) == EXIT_SUCCESS);
+  assert(child1.pid == 10);
+  assert(child1.pid_counter == 20);
+
+  assert(update_child(NULL, 10, 20) == EXIT_FAILURE); // Updating NULL child
+
+  // Test remove_from_array
+  assert(remove_from_array(&parent, 2) == EXIT_SUCCESS);
+  assert(parent.array[2] == NULL);
+
+  assert(remove_from_array(&parent, 5) == EXIT_SUCCESS);
+  assert(parent.array[5] == NULL);
+
+  assert(remove_from_array(&parent, 2) == EXIT_FAILURE); // Removing non-existent child
+  assert(remove_from_array(&parent, 6) == EXIT_FAILURE); // Removing from invalid index
+}
+
 int test_parsing(struct ProgArgs *prog_arg){
 	char string[LINESIZE] = "";
 	char result[LINESIZE] = "";
