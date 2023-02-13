@@ -8,24 +8,7 @@
 # include "../signal-project/signal-project.h"
 
 
-void handle_exit(int num_args, char* args[]) {
-	int exit_status;
-
-  	// Parse the arguments
-  	if (argc > 2) {
-    		fprintf(stderr, "Usage: %s [exit_status]\n", argv[0]);
-    		exit_status = EXIT_FAILURE;	
-	
-  	} else if (argc == 2) {
-    		if (!isdigit(argv[1][0])) {
-      			fprintf(stderr, "%s: argument must be an integer\n", argv[0]);
-
-    		}
-    		exit_status = atoi(argv[1]);
-  	} else {
-    		// No argument provided, use the exit status of the last command
-    		exit_status = WEXITSTATUS(status);
-  	}
+void handle_exit(char args[LINESIZE]) {	
 
   	// Send SIGINT to all child processes
   	signal(SIGINT, signal_handler_exit);

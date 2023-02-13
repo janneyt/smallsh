@@ -66,61 +66,15 @@ int main(void){
 	}
 	printf("\nRoutine tests pass!\n");
 
+	if(spec_check_for_child_background_processes() == EXIT_FAILURE){
+		perror("Had trouble waiting for child process");
+		exit(EXIT_FAILURE);
+	}
 	for(;;){
 
-		// Specification requirement to identify child processes potentially exiting between loops
-		while((pid = waitpid(1, &status, WNOHANG)) > 0){
-		
-			child_action[0] = '\0';
-
-
-			if(spec_check_for_child_background_processes(status, pid) != EXIT_SUCCESS){
-				exit(EXIT_FAILURE);
-			}
-			if(WIFEXITED(status)){
-				strcat(child_action, "Process ");
-				util_int_to_string(pid, holder, 10);
-				strcat(child_action, holder);
-				strcat(child_action, " exited with status: ");
-				util_int_to_string(pid, holder, 10);
-				strcat(child_action, holder);
-				printf("%s", child_action);
-			}
-		}
-
-		printf("%ul\n", pid);
-		
-		if(pid == 0){
-			printf("Children exist but have not yet completed");
-		} else if(pid < 0){
-			printf("%ul\n", pid);
+		if(spec_execute(&current) == EXIT_FAILURE){
 			perror("");
-		};
-
-		assert(pid < 1);
-
-		// TODO: turn on a signal handler so that any signal prints a newline and for loop continues
-		// Print prompt TODO: change stdin to file stream variable when implemented
-		if(spec_get_line(line, line_size, stdin) == EXIT_SUCCESS){
-			// Only in the singular case where we can verify input has succeeded are we heading out to any other function
-			if(spec_expansion(line, "$$", 1) == EXIT_SUCCESS){
-				if(spec_parsing(line, &current) == EXIT_SUCCESS){
-					printf("Successfully parsed\n");
-				} else {
-					perror("");
-					printf("Could not parse line\n");
-				}
-			} else {
-				printf("Could not expand variables\n");
-			}
-			
-		} else {
-			printf("error with spec_get_line");
-			exit(EXIT_FAILURE);
-		};
-		clearerr(stdin); //TODO: change stdin to the file stream variable when implemented
-		// TODO: turn off custom signal handler
-		// Nothing goes below this line. Without input, there's no point in continuing processing. Instead, start the infinite loop again.
+		};		
 	}
 
 
