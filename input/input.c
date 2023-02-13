@@ -14,63 +14,47 @@
 # include <stdlib.h>
 # include <errno.h>
 
-int spec_check_for_child_background_processes(int status, pid_t pid){
-	/**
-	 * \brief Checks if a pid in the same process group id has completed either normally or in various abnormal ways.
-	 * 
-	 * @param status is the status of the pid in question
-	 * @param pid is the process id of the process in question
-	 *
-	 * *Writes to stderr*
-	 *
-	 * `check_for_child_background_processes` is required to meet a specification requirement
-	 *
-	 * @return EXIT_FAILURE if printing to stderr didn't work, EXIT_SUCCESS if printing to stderr works.
-	 */
-	if (WIFEXITED(status)){
-		if(fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) pid, WEXITSTATUS(status)) < 0){
-			perror("Could not print error");
-			errno = 0;
-			return EXIT_FAILURE;
-		};
-	}
-	else if (WIFSIGNALED(status)){
-		assert(!WIFEXITED(status));
-		if(fprintf(stderr, "Child process %jd done. Signaled %d.\n", (intmax_t) pid, WTERMSIG(status)) < 0){
-			perror("Could not print error");
-			errno = 0;
-			return EXIT_FAILURE;
-		};
+/**
+ * @brief Checks for un-waited-for background processes in the same process group ID as smallsh.
+ * Prints informative message to stderr for each process and returns EXIT_SUCCESS or EXIT_FAILURE.
+ *
+ * @return Returns EXIT_SUCCESS if there are no un-waited-for background processes,
+ * and EXIT_FAILURE if any child process exited or was signaled.
+ */
+int check_background_processes(void) {
+	pid_t pid;
+	int status;
+	int exit_status;
+	int signaled;
+	int stopped;
 
-		
-	}
-	else if (WIFSTOPPED(status)) {
-		if(kill(pid, SIGCONT) != 0){
-			assert(!WIFEXITED(status) && !WIFSIGNALED(status));
-			perror("Kill didn't send a signal to continue, exiting");
-			exit(EXIT_FAILURE);
-		};
-		// kill() never returns above 0, so initializing it to 1 indicates kill has not run
-		int result = 1;
-		if((result = kill(pid, SIGCONT)) != 0){
-			perror("Kill didn't work");
-			errno = 0;
-			return EXIT_FAILURE;
+    	for(;;) {
+        	pid = waitpid(-getpid(), &status, WNOHANG | WUNTRACED | WCONTINUED);
+        	if (pid != -1 || pid != 0) {
+        
+
+        		if (WIFEXITED(status)) {
+            			exit_status = WEXITSTATUS(status);
+            			fprintf(stderr, "Child process %d done. Exit status %d.\n", pid, exit_status);
+        		} else if (WIFSIGNALED(status)) {
+        			signaled = WTERMSIG(status);
+        			fprintf(stderr, "Child process %d done. Signaled %d.\n", pid, signaled);
+        		} else if (WIFSTOPPED(status)) {
+        			stopped = WSTOPSIG(status);
+        			if (stopped == SIGSTOP) {
+        				if (kill(pid, SIGCONT) == -1) {
+                				perror("kill couldn't send a signal");
+                    				return EXIT_FAILURE;
+                			}
+                			fprintf(stderr, "Child process %d stopped. Continuing.\n", pid);
+            			}
+			}
 		}
-		if(fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t) pid) < 0){
-			perror("Could not print");
-			assert(result == 0);
-		}
-		if(fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t) pid) < 0){
-			perror("Could not print error");
-			errno = 0;
-			return EXIT_FAILURE;
-		};
 
 	}
-	assert(!WIFSTOPPED(status) && !WIFEXITED(status) && !WIFSIGNALED(status));
 	return EXIT_SUCCESS;
 }
+
 
 int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
 	/**

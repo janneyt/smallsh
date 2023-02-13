@@ -22,11 +22,86 @@
 # include <stdlib.h>
 # include <errno.h>
 
+#include <assert.h>
+
+void test_check_background_processes() {
+    int status;
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    } else if (pid == 0) {
+        // Child process
+        sleep(1);
+        exit(0);
+    } else {
+        // Parent process
+        // Wait for child process to complete
+        waitpid(pid, &status, 0);
+
+        // Test WIFEXITED branch
+        assert(check_background_processes() == EXIT_SUCCESS);
+
+        pid = fork();
+        if (pid == -1) {
+            perror("fork");
+            exit(EXIT_FAILURE);
+        } else if (pid == 0) {
+            // Child process
+            sleep(1);
+            exit(1);
+        } else {
+            // Parent process
+            // Wait for child process to complete
+            waitpid(pid, &status, 0);
+
+            // Test WIFEXITED branch
+            assert(check_background_processes() == EXIT_FAILURE);
+        }
+
+        pid = fork();
+        if (pid == -1) {
+            perror("fork");
+            exit(EXIT_FAILURE);
+        } else if (pid == 0) {
+            // Child process
+            pause();
+        } else {
+            // Parent process
+            // Send SIGSTOP to child process
+            kill(pid, SIGSTOP);
+
+            // Test WIFSTOPPED branch
+            assert(check_background_processes() == EXIT_SUCCESS);
+
+            // Send SIGCONT to child process
+            kill(pid, SIGCONT);
+        }
+
+        pid = fork();
+        if (pid == -1) {
+            perror("fork");
+            exit(EXIT_FAILURE);
+        } else if (pid == 0) {
+            // Child process
+            abort();
+        } else {
+            // Parent process
+            // Wait for child process to complete
+            waitpid(pid, &status, 0);
+
+            // Test WIFSIGNALED branch
+            assert(check_background_processes() == EXIT_FAILURE);
+        }
+    }
+}
+
+
 void test_struct_utilities() {
-  struct Spawn parent = {0};
-  struct Spawn child1 = {1};
-  struct Spawn child2 = {2};
-  struct Spawn child3 = {3};
+  struct ParentStruct parent = {0};
+  struct ParentStruct child1 = {1};
+  struct ParentStruct child2 = {2};
+  struct ParentStruct child3 = {3};
 
   // Test add_to_array
   assert(add_to_array(&parent, &child1, 0) == EXIT_SUCCESS);
