@@ -6,7 +6,7 @@
 
 typedef int make_iso_compilers_happy;
 
-extern int heap_size = 0;
+int heap_size = 0;
 
 struct ProgArgs {
 	char command[STRINGSIZE];

@@ -19,10 +19,301 @@
 # include "../constants/constants.h"
 # endif
 
-# include <stdlib.h>
-# include <errno.h>
+void test_spec_word_splitting() {
+  // Test 1: Test with empty input string
+  char input[LINESIZE] = "";
+  char *storage[LINESIZE];
+  int result = spec_word_splitting(storage, input);
+  assert(result == EXIT_FAILURE);
 
-#include <assert.h>
+  // Test 2: Test with input string that can be tokenized
+  strcpy(input, "This is a sample input");
+  result = spec_word_splitting(storage, input);
+  assert(result == EXIT_SUCCESS);
+  assert(strcmp(storage[0], "This") == 0);
+  assert(strcmp(storage[1], "is") == 0);
+  assert(strcmp(storage[2], "a") == 0);
+  assert(strcmp(storage[3], "sample") == 0);
+  assert(strcmp(storage[4], "input") == 0);
+
+  // Test 3: Test with input string that has a length greater than LINESIZE
+  strcpy(input, "This is a sample input with a length greater than LINESIZE, which should result in failure");
+  for(int index = 0; index < LINESIZE+2; index++){
+	strcat(input, "q");
+  }
+  result = spec_word_splitting(storage, input);
+  assert(result == EXIT_FAILURE);
+}
+
+
+void test_help_split_line() {
+    char line[20] = "hello world";
+    char* storage[10];
+
+    // Test normal behavior
+    char** tokens = help_split_line(storage, line);
+    assert(tokens[0] == "hello");
+    assert(tokens[1] == "world");
+    assert(tokens[2] == NULL);
+
+    // Test passing a NULL line
+    tokens = help_split_line(storage, NULL);
+    assert(tokens == NULL);
+
+    // Test passing an empty line
+    line[0] = '\0';
+    tokens = help_split_line(storage, line);
+    assert(tokens[0] == NULL);
+
+    // Test bufsize < 1
+    int LINESIZE_OLD = LINESIZE;
+    LINESIZE = 0;
+    tokens = help_split_line(storage, line);
+    LINESIZE = LINESIZE_OLD;
+    assert(tokens == NULL);
+}
+
+void test_spec_execute() {
+    struct ProgArgs current;
+    int status;
+    char input[LINESIZE];
+
+    // Test for `cd` command
+    strcpy(input, "cd /");
+    assert(spec_execute(&current) == 0);
+
+    // Test for other commands
+    strcpy(input, "ls");
+    status = spec_execute(&current);
+    assert(status == 0 || status == 1);
+
+    // Check if the process is running in the background
+    pid_t pid = getpid();
+    char ps_command[100];
+    sprintf(ps_command, "ps -p %d | grep %d", pid, pid);
+    assert(system(ps_command) == 0);
+
+    // Check if the child process has not become a zombie process
+    char zombie_check_command[100];
+    sprintf(zombie_check_command, "ps -A -o stat= | grep Z | grep -v grep | awk '{ print $1 }'");
+    assert(system(zombie_check_command) != 0);
+}
+
+void test_other_commands_process_creation() {
+  pid_t parent_pid = getpid();
+  struct ProgArgs current;
+  current.command = "ls";
+  int result = other_commands(current);
+
+  // Check that the process was successfully created
+  assert(result == EXIT_SUCCESS);
+
+  // Check that a new process was created by using the 'ps' command
+  FILE *fp;
+  char output[1035];
+  char cmd[100];
+  sprintf(cmd, "ps --ppid %d | grep ls", parent_pid);
+  fp = popen(cmd, "r");
+  if (fp == NULL) {
+    printf("Failed to run command\n" );
+    exit(1);
+  }
+
+  fgets(output, sizeof(output)-1, fp);
+  pclose(fp);
+
+  // Check that the output of the 'ps' command is not empty, indicating that a new process was created
+  assert(output[0] != '\0');
+}
+
+void test_other_commands_no_zombie_processes() {
+  pid_t parent_pid = getpid();
+  struct ProgArgs current;
+  current.command = "ls";
+  int result = other_commands(current);
+
+  // Check that the process was successfully created
+  assert(result == EXIT_SUCCESS);
+
+  // Check that the child process has been reaped and is not a zombie by using the 'ps' command
+  FILE *fp;
+  char output[1035];
+  char cmd[100];
+  sprintf(cmd, "ps --ppid %d --state Z | grep ls", parent_pid);
+  fp = popen(cmd, "r");
+  if (fp == NULL) {
+    printf("Failed to run command\n" );
+    exit(1);
+  }
+
+  fgets(output, sizeof(output)-1, fp);
+  pclose(fp);
+
+  // Check that the output of the 'ps' command is empty, indicating that the child process is not a zombie
+  assert(output[0] == '\0');
+}
+
+void test_handle_redirection() {
+    struct args current = {NULL, NULL};
+    int success;
+
+    // Test without redirection
+    success = handle_redirection(&current);
+    assert(success == EXIT_SUCCESS);
+    assert(dup(STDIN_FILENO) == STDIN_FILENO);
+    assert(dup(STDOUT_FILENO) == STDOUT_FILENO);
+
+    // Test with input redirection
+    current.input = "input.txt";
+    success = handle_redirection(&current);
+    assert(success == EXIT_SUCCESS);
+    assert(dup(STDIN_FILENO) != STDIN_FILENO);
+    assert(dup(STDOUT_FILENO) == STDOUT_FILENO);
+    assert(close(STDIN_FILENO) == 0);
+
+    // Test with non-existent input file
+    current.input = "nonexistent.txt";
+    success = handle_redirection(&current);
+    assert(success == EXIT_FAILURE);
+    assert(dup(STDIN_FILENO) == STDIN_FILENO);
+    assert(dup(STDOUT_FILENO) == STDOUT_FILENO);
+
+    // Test with output redirection
+    current.input = NULL;
+    current.output = "output.txt";
+    success = handle_redirection(&current);
+    assert(success == EXIT_SUCCESS);
+    assert(dup(STDIN_FILENO) == STDIN_FILENO);
+    assert(dup(STDOUT_FILENO) != STDOUT_FILENO);
+    assert(close(STDOUT_FILENO) == 0);
+
+    // Test with input and output redirection
+    current.input = "input.txt";
+    current.output = "output.txt";
+    success = handle_redirection(&current);
+    assert(success == EXIT_SUCCESS);
+    assert(dup(STDIN_FILENO) != STDIN_FILENO);
+    assert(dup(STDOUT_FILENO) != STDOUT_FILENO);
+    assert(close(STDIN_FILENO) == 0);
+    assert(close(STDOUT_FILENO) == 0);
+
+    // Test with non-existent output file
+    current.input = NULL;
+    current.output = "/nonexistent/path/output.txt";
+    success = handle_redirection(&current);
+    assert(success == EXIT_FAILURE);
+    assert(dup(STDIN_FILENO) == STDIN_FILENO);
+    assert(dup(STDOUT_FILENO) == STDOUT_FILENO);
+
+    // Clean up
+    current.input = NULL;
+    current.output = NULL;
+}
+
+
+void test_reset_signals() {
+    // Test with SIGINT set to SIG_DFL
+    struct sigaction act = { .sa_handler = SIG_DFL };
+    if(sigaction(SIGINT, &act, NULL) == -1){
+        perror("Cannot set SIGINT to SIG_DFL");
+        exit(EXIT_FAILURE);
+    };
+    assert(reset_signals() == EXIT_SUCCESS);
+    struct sigaction oldact;
+    if(sigaction(SIGINT, NULL, &oldact) == -1){
+        perror("Cannot get SIGINT signal handler");
+        exit(EXIT_FAILURE);
+    };
+    assert(oldact.sa_handler == SIG_DFL);
+
+    // Test with SIGINT set to a custom signal handler
+    act.sa_handler = SIG_IGN;
+    if(sigaction(SIGINT, &act, NULL) == -1){
+        perror("Cannot set SIGINT to SIG_IGN");
+        exit(EXIT_FAILURE);
+    };
+    assert(reset_signals() == EXIT_SUCCESS);
+    if(sigaction(SIGINT, NULL, &oldact) == -1){
+        perror("Cannot get SIGINT signal handler");
+        exit(EXIT_FAILURE);
+    };
+    assert(oldact.sa_handler == SIG_IGN);
+
+    // Test with an error setting SIGINT to SIG_DFL
+    act.sa_handler = SIG_IGN;
+    if(sigaction(SIGINT, &act, NULL) == -1){
+        perror("Cannot set SIGINT to SIG_IGN");
+        exit(EXIT_FAILURE);
+    };
+    if(sigaction(SIGINT, &act, NULL) == -1){
+        perror("Cannot set SIGINT to SIG_DFL");
+        exit(EXIT_FAILURE);
+    };
+    assert(reset_signals() == EXIT_FAILURE);
+
+    // Test with an error getting the old signal handler
+    if(sigaction(SIGUSR1, &act, NULL) == -1){
+        perror("Cannot set SIGUSR1 to SIG_IGN");
+        exit(EXIT_FAILURE);
+    };
+    assert(reset_signals() == EXIT_FAILURE);
+}
+
+
+void test_handle_exit() {
+    // Test with no child processes
+    char command[256];
+    sprintf(command, "%s &", "sleep 1");
+    system(command);  // Start a background process
+    pid_t pid = getpid();  // Get the PID of this process
+    handle_exit(NULL);  // Call the function with no child processes
+    sprintf(command, "ps -o pid | grep %d | wc -l", pid);
+    FILE* fp = popen(command, "r");
+    char output[256];
+    fgets(output, sizeof(output), fp);
+    pclose(fp);
+    int count = atoi(output);
+    assert(count == 1);  // Only one process should be running (this one)
+
+    // Test with child processes
+    pid_t child_pid = fork();  // Start a child process
+    if (child_pid == 0) {
+        // Child process: just sleep for a few seconds
+        sleep(2);
+        exit(0);
+    } else {
+        // Parent process: send SIGINT to child processes and exit
+        handle_exit(NULL);
+        sprintf(command, "ps -o pid | grep -E '%d|%d' | wc -l", pid, child_pid);
+        fp = popen(command, "r");
+        fgets(output, sizeof(output), fp);
+        pclose(fp);
+        count = atoi(output);
+        assert(count == 1);  // Only one process should be running (this one)
+    }
+}
+
+
+void test_execute_cd() {
+    // Test with a valid path
+    int status = execute_cd("/");
+    assert(status == EXIT_SUCCESS);
+    assert(strcmp(getcwd(NULL, 0), "/") == 0);
+
+    // Test with a null path
+    status = execute_cd(NULL);
+    assert(status == EXIT_SUCCESS);
+    assert(strcmp(getcwd(NULL, 0), getenv("HOME")) == 0);
+
+    // Test with a non-existent path
+    status = execute_cd("/non-existent/path");
+    assert(status == EXIT_FAILURE);
+
+    // Test with a path to a file instead of a directory
+    status = execute_cd("/etc/hosts");
+    assert(status == EXIT_FAILURE);
+}
+
 
 void test_check_background_processes() {
     int status;
@@ -644,6 +935,30 @@ int test_parsing(struct ProgArgs *prog_arg){
 
 	return EXIT_SUCCESS;
 
+}
+
+int test_spec_get_line() {
+  char input[LINESIZE];
+  size_t input_size = LINESIZE;
+  FILE* stream = stdin;
+
+  // Test input of zero length
+  int result = spec_get_line(input, input_size, stream);
+  assert(result == EXIT_SUCCESS);
+
+  // Test successful input with positive length
+  strcpy(input, "test input\n");
+  input_size = strlen(input);
+  result = spec_get_line(input, input_size, stream);
+  assert(result == EXIT_SUCCESS);
+  assert(strcmp(input, "test input\n") == 0);
+
+  // Test failed input with negative length
+  stream = NULL;
+  result = spec_get_line(input, input_size, stream);
+  assert(result == EXIT_FAILURE);
+
+  return EXIT_SUCCESS;
 }
 
 int test_input(void){

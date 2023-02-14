@@ -89,6 +89,7 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
 		errno = 0;
 		return EXIT_FAILURE;
 	};
+
 	assert(input_length >= 0);
 	return EXIT_SUCCESS;
 }

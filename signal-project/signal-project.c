@@ -3,23 +3,12 @@
 # include <stdio.h>
 # include <string.h>
 # include <unistd.h>
+# include "../constants/constants.h"
 
-int parent_pid = get_pid();
+int parent_pid = getppid();
 
-void handle_signal_exit(void) {
-	// Just ignoring that signallllllll....
-}
-
-void add_to_struct_array(struct Spawn* parent, struct ProgArgs* child, int index){
-	if(parent->children[0] != NULL){
-		return EXIT_FAILURE;
-	}
-	if(index >= 0 && index < 6){
-		parent->children[index] = child;
-		return EXIT_SUCCESS;
-	} else {
-		return EXIT_FAILURE;
-	}
+void handle_signal_exit(void){
+	// Just ignoring
 }
 
 void handle_SIGSTOP(int signo){
@@ -27,9 +16,10 @@ void handle_SIGSTOP(int signo){
 	char *informative = "Entering foreground-only mode, & is ignored";
 	char *exiting = "Exiting foreground-only mode, you can use & to send a rpocess to the background";
 	char *weird_error = "Something went desperately wrong and the foreground is not in a binary state";
+	
 	write(STDOUT_FILENO, message, strlen(message));
 
-	if(get_pid() == parent_pid){
+	if(getppid() == parent_pid){
 		printf("%s", message);	
 	}
 }

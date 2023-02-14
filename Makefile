@@ -10,7 +10,7 @@ SRCS = $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*/*.c)
 OBJS = $(SRCS:.c=.o)
 
 # Include directories
-INCDIRS = tester utilities constants input builtins error expansion parsing signal
+INCDIRS = heap execute tester utilities constants input builtins error expansion parsing signal-project
 
 # Libraries
 LIBS =

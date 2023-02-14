@@ -44,7 +44,7 @@ int spec_parsing(char string[LINESIZE], struct ProgArgs *current){
 			return EXIT_SUCCESS;
 		}
 		if(storage[index] && strcmp(storage[index], "exit") == 0){
-			exit(EXIT_SUCCESS);
+			handle_exit();
 		}
 		if(storage[index] == 0x0){
 			storagelength = index;
