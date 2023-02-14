@@ -5,9 +5,10 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+# include "../constants/constants.h"
 
-struct ProgArgs child_process;
-static child_process heap[NUMCHILDREN];
+struct ParentStruct parent;
+
 
 /**
  * @brief Swaps the values of two child_process objects.
@@ -15,7 +16,7 @@ static child_process heap[NUMCHILDREN];
  * @param left Pointer to the first child_process object.
  * @param right Pointer to the second child_process object.
  */
-void swap(child_process *left, child_process *right){
+void swap(struct ProgArgs child_process *left, child_process *right){
     child_process tmp = *left;
     *left = *right;
     *right = tmp;
@@ -44,8 +45,8 @@ int up_heap(int index) {
         return EXIT_FAILURE;
     }
 
-    if (heap[parent].timestamp > heap[index].timestamp) {
-        swap(&heap[parent], &heap[index]);
+    if (child_process.heap[parent].timestamp > child_process.heap[index].timestamp) {
+        swap(&child_process.heap[parent], &child_process.heap[index]);
         return up_heap(parent);
     }
 
@@ -190,7 +191,7 @@ void child_error(char child_action[], char action_taken[])
  * @param signum The signal number
  * @return Returns EXIT_SUCCESS on success, and EXIT_FAILURE if an error occurs.
  */
-void sigchld_handler(int signum) {
+int sigchld_handler(void) {
     int status;
     pid_t pid;
 

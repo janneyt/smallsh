@@ -20,6 +20,6 @@ struct ProgArgs {
 struct ParentStruct {
 	int pid_counter;
 	int pid;
-	struct ProgArgs *array[NUMCHILDREN];
+	struct ProgArgs *heap[NUMCHILDREN];
 };
 

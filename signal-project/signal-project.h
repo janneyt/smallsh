@@ -5,7 +5,7 @@
 # include <unistd.h>
 # include "../constants/constants.h"
 
-void handle_signal_exit(void);
+void signal_handler_exit(void);
 
 void handle_SIGSTOP(int signo);
 void handle_SIGINT(int signo, struct ProgArgs *current);

@@ -16,11 +16,6 @@ void handle_exit(void) {
  	* @param args The command arguments (not used).
  	*/
 
-	// Send SIGINT to all child processes
-  	if(sigaction(SIGINT, signal_handler_exit) == -1){
-		perror("Sig action function failed in exit signal handling");
-		exit(EXIT_FAILURE);
-	};
   	if(kill(0, SIGINT) == -1){
 		perror("Could not kill all child processes");
 		exit(EXIT_FAILURE);
