@@ -8,13 +8,13 @@ typedef int make_iso_compilers_happy;
 
 int heap_size = 0;
 
-struct ProgArgs {
+typedef struct {
 	char command[STRINGSIZE];
 	char input[STRINGSIZE];
 	char output[STRINGSIZE];
 	int background;
 	time_t timestamp;
-};
+} ProgArgs;
 
 
 struct ParentStruct {

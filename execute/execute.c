@@ -1,3 +1,16 @@
+# include <stdlib.h>
+# ifndef  LINESIZE
+# include "../constants/constants.h"
+# endif
+# include "../builtins/builtins.h"
+# include <string.h>
+# include "../expansion/expansion.h"
+# include "../parsing/parsing.h"
+# include "../input/input.h"
+# include <stdbool.h>
+# include <fcntl.h>
+
+
 /**
  * @brief Resets all signals to their default disposition.
  *
@@ -27,9 +40,9 @@ int reset_signals() {
  * @param args The command arguments.
  * @return EXIT_SUCCESS if redirection was successful, EXIT_FAILURE otherwise.
  */
-int handle_redirection(*current) {
+int handle_redirection(ProgArgs* current) {
     int input_fd = STDIN_FILENO;
-    int output_fd = STDOUT_FILENO;i
+    int output_fd = STDOUT_FILENO;
     if (current->input != NULL) {
         input_fd = open(current->input, O_RDONLY);
         if (input_fd == -1) {
@@ -38,7 +51,6 @@ int handle_redirection(*current) {
         }
     }
 
-    char *current->output = get_output_file(args);
     if (current->output != NULL) {
         output_fd = open(current->output, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
         if (output_fd == -1) {
@@ -53,7 +65,7 @@ int handle_redirection(*current) {
     if (dup2(input_fd, STDIN_FILENO) == -1) {
         fprintf(stderr, "Failed to redirect input: %s\n", strerror(errno));
         if (current->input != NULL) {
-            close(input_nextdnsfd);
+            close(input_fd);
         }
         if (current->output != NULL) {
             close(output_fd);
@@ -94,7 +106,7 @@ int handle_redirection(*current) {
  * @param cmd The command to execute.
  * @return EXIT_SUCCESS if the command was executed successfully, EXIT_FAILURE otherwise.
  */
-int other_commands(struct ProgArgs current) {
+int other_commands(ProgArgs* current) {
     pid_t pid = fork();
     if (pid == -1) {
         perror("fork");
@@ -106,17 +118,17 @@ int other_commands(struct ProgArgs current) {
 		return EXIT_FAILURE;
 	};
 
-	if(handle_redirection(&current) == EXIT_FAILURE){
+	if(handle_redirection(current) == EXIT_FAILURE){
 		perror("Redirection not possible");
 		return EXIT_FAILURE;
 	};
 
         // Execute command
-	char** args;
-	char* arg = strtok(current->command);
+	char** args = {0};
+	char* arg = strtok(current->command, " ");
 	int index = 0;
 	while(arg != NULL){
-		args[index] = strtok(current->command);
+		args[index] = strtok(current->command, " ");
 		index++;
 	}
         if(execvp(args[0], args) < 0){
@@ -132,15 +144,16 @@ int other_commands(struct ProgArgs current) {
         }
         return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_FAILURE;
     }
+    return EXIT_FAILURE;
 }
 
-int spec_execute(*current){
+int spec_execute(ProgArgs* current){
 	char input[LINESIZE];
 
 	strcpy(current->command, "");
 	strcpy(current->input, "");
 	strcpy(current->output, "");
-	strcpy(current->background, false);
+	current->background = false;
 
 	// command is NULL
 	if(spec_get_line(input, LINESIZE, stdin) == EXIT_FAILURE){
@@ -155,27 +168,28 @@ int spec_execute(*current){
 	};
 
 	// command is NULL, but now it is being loaded.
-	if(spec_parsing(input, &current) == EXIT_FAILURE){
+	if(spec_parsing(input, current) == EXIT_FAILURE){
 		perror("");
 		return EXIT_FAILURE;
 	};
 
 	// command is "exit"
 	if(strcmp(current->command, "exit") == 0){
-		return handle_exit(new_args, current->command);
-	};
+		handle_exit();
+	}
 
 	// command is "cd"
 	else if(current->command[0] == 'c' && current->command[1] == 'd'){
-		return execute_cd(current->command[3]);
+		execute_cd(&current->command[3]);
+		return EXIT_SUCCESS;
 	}
 
 	// all other commands
 	else {
-		return other_command(&current);
+		return other_commands(current);
 	}
 	
-
+	return EXIT_SUCCESS;
 
 }
 

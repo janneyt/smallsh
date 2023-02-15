@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+
 struct ProgArgs child_process;
 static child_process heap[NUMCHILDREN];
 

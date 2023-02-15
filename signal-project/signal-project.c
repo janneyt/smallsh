@@ -5,6 +5,7 @@
 # include <unistd.h>
 # include "../constants/constants.h"
 
+
 int parent_pid = getppid();
 
 void handle_signal_exit(void){

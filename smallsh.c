@@ -18,6 +18,7 @@
 # include "tester/tester.h"
 # include "expansion/expansion.h"
 # include "parsing/parsing.h"
+# include "execute/execute.h"
 # ifndef  LINESIZE
 # include "constants/constants.h"
 # endif
@@ -36,16 +37,7 @@ int main(void){
 	 * @return Exits to EXIT_FAILURE if utility functions such as print fails, otherwise exits to EXIT_SUCCESS when appropriate signal is sent
 	 */
 
-	pid_t pid;
-	int status;
-	char child_action[LINESIZE];
-
-	char holder[LINESIZE];
-
-	// Variables needed for prompts declared outside the infinite loop to not create memory leaks
-	char line[LINESIZE];
-	size_t line_size = LINESIZE-1;
-	
+		
 	struct ProgArgs current;
 	strcpy(current.command, "");
 	strcpy(current.input, "");
