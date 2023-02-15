@@ -26,7 +26,8 @@
 # include <stdlib.h>
 # include <errno.h>
 
-# include "../builtins/builtins.h"
+# include "builtins/builtins.h"
+# include "execute/execute.h"
 
 
 int main(void){
@@ -36,17 +37,12 @@ int main(void){
 	 * @return Exits to EXIT_FAILURE if utility functions such as print fails, otherwise exits to EXIT_SUCCESS when appropriate signal is sent
 	 */
 
-	pid_t pid;
-	int status;
-	char child_action[LINESIZE];
-
-	char holder[LINESIZE];
 
 	// Variables needed for prompts declared outside the infinite loop to not create memory leaks
-	char line[LINESIZE];
-	size_t line_size = LINESIZE-1;
 	
 	struct ProgArgs current;
+	struct ParentStruct parent = {.heap = {0}, .last_foreground = 0, .last_background = 0};
+	strcpy(parent.heap[0], ""); 
 	strcpy(current.command, "");
 	strcpy(current.input, "");
 	strcpy(current.output, "");
@@ -72,7 +68,7 @@ int main(void){
 	}
 	for(;;){
 
-		if(spec_execute(&current) == EXIT_FAILURE){
+		if(spec_execute(&current, &parent) == EXIT_FAILURE){
 			perror("");
 		};		
 	}

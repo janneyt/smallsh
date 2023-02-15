@@ -39,7 +39,7 @@ int reset_signals() {
  * @param args The command arguments.
  * @return EXIT_SUCCESS if redirection was successful, EXIT_FAILURE otherwise.
  */
-int handle_redirection(struct ProgArgs *current) {
+int handle_redirection(ProgArgs *current) {
     int input_fd = STDIN_FILENO;
     int output_fd = STDOUT_FILENO;
     if (strcpy(current->input, "") != 0) {
@@ -105,7 +105,7 @@ int handle_redirection(struct ProgArgs *current) {
  * @param cmd The command to execute.
  * @return EXIT_SUCCESS if the command was executed successfully, EXIT_FAILURE otherwise.
  */
-int other_commands(struct ProgArgs *current) {
+int other_commands(ProgArgs *current) {
     pid_t pid = fork();
     if (pid == -1) {
         perror("fork");
@@ -146,7 +146,7 @@ int other_commands(struct ProgArgs *current) {
     return EXIT_SUCCESS;
 }
 
-int spec_execute(struct ProgArgs *current){
+int spec_execute(ProgArgs *current){
 	char input[LINESIZE];
 
 	strcpy(current->command, "");
@@ -179,7 +179,11 @@ int spec_execute(struct ProgArgs *current){
 
 	// command is "cd"
 	else if(current->command[0] == 'c' && current->command[1] == 'd'){
-		return execute_cd(&current->command[3]);
+		if(execute_cd(&current->command[3]) == EXIT_FAILURE){
+			perror("");
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
 	}
 
 	// all other commands

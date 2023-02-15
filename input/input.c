@@ -1,4 +1,5 @@
 # define _GNU_SOURCE
+# include <signal.h>
 # include <stdio.h>
 # include <sys/types.h>
 # include <signal.h>
@@ -11,9 +12,15 @@
 #ifndef LINESIZE
 # include "../constants/constants.h"
 #endif
+# ifndef  reset_signals
+# include "../execute/execute.h"
+# endif
 # include <stdlib.h>
 # include <errno.h>
-
+# include "../heap/heap.h"
+# ifndef  handle_signal_exit
+# include "../signal-project/signal-project.c"
+# endif
 /**
  * @brief Checks for un-waited-for background processes in the same process group ID as smallsh.
  * Prints informative message to stderr for each process and returns EXIT_SUCCESS or EXIT_FAILURE.
@@ -21,7 +28,7 @@
  * @return Returns EXIT_SUCCESS if there are no un-waited-for background processes,
  * and EXIT_FAILURE if any child process exited or was signaled.
  */
-int check_background_processes(void) {
+int check_background_processes(struct ParentStruct *parent) {
 	pid_t pid;
 	int status;
 	int exit_status;
@@ -48,6 +55,14 @@ int check_background_processes(void) {
                 			}
                 			fprintf(stderr, "Child process %d stopped. Continuing.\n", pid);
             			}
+			}
+
+			ProgArgs* current = parent->heap[find_in_heap(pid, parent->heap)];
+			// The specifcations require us to track the latest exited process for both background and foreground	
+			if(current->background){
+				parent->last_background = exit_status;
+			} else {
+				parent->last_foreground = exit_status;
 			}
 		}
 
@@ -80,6 +95,10 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
 		errno = 0;
 	};
 	assert(errno == 0);
+	struct sigaction sa;
+	sa.sa_handler = handle_signal_exit;
+	sigemptyset(&sa.sa_mask);
+	sigaction(SIGINT, &sa, NULL);
 
 	// PS1 print
 	printf("$");
@@ -91,6 +110,7 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
 	};
 
 	assert(input_length >= 0);
+	reset_signals();
 	return EXIT_SUCCESS;
 }
 

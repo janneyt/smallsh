@@ -11,8 +11,9 @@
 # endif
 # include "../expansion/expansion.h"
 # include "../input/input.h"
+# include "../builtins/builtins.h"
 
-int spec_parsing(char string[LINESIZE], struct ProgArgs *current){
+int spec_parsing(char string[LINESIZE], ProgArgs *current){
 	/**
 	 * \brief Takes a *non-tokenized* string, tokenizes it, validates it, and sets internal arguments for execution of parent and child processes
 	 *
