@@ -20,11 +20,11 @@ typedef struct {
 } ProgArgs;
 
 
-struct ParentStruct {
+typedef struct {
 	int pid_counter;
 	int pid;
 	ProgArgs* heap[NUMCHILDREN];
 	pid_t last_foreground;
 	pid_t last_background;
-};
+} ParentStruct;
 

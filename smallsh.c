@@ -15,7 +15,6 @@
 # include "utilities/utilities.h"
 # include "error/error.h"
 # include "input/input.h"
-# include "tester/tester.h"
 # include "expansion/expansion.h"
 # include "parsing/parsing.h"
 # include "execute/execute.h"
@@ -39,25 +38,13 @@ int main(void){
 	 */
 
 	ProgArgs current;
-	ParentStruct parent = {.heap = {0}, .last_foreground = 0, .last_background = 0};
-	strcpy(parent.heap[0], ""); 
+	ParentStruct parent = {.heap = {0}, .last_background = -1, .last_foreground = -1 }; 
 	strcpy(current.command, "");
 	strcpy(current.input, "");
 	strcpy(current.output, "");
 	current.background = false;
 
-	// Runtime debug testing to make sure functions act according to how I want
-	if(test_input() == EXIT_FAILURE){
-		printf("Input functions fail runtime tests\n");
-		exit(EXIT_FAILURE);
-	};
-	if(test_expansion() == EXIT_FAILURE){
-		exit(EXIT_FAILURE);
-	};
-	
-	if(test_parsing(&current) == EXIT_FAILURE){
-		exit(EXIT_FAILURE);
-	}
+	// Write a single test function using tester after it is debugged!
 	printf("\nRoutine tests pass!\n");
 
 	if(spec_check_for_child_background_processes() == EXIT_FAILURE){

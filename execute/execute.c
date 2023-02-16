@@ -6,7 +6,6 @@
 # include <stdlib.h>
 # include <stdio.h>
 # include <signal.h>
-# include "../constants/constants.h"
 # include "../builtins/builtins.h"
 # include <string.h>
 # include "../parsing/parsing.h"
