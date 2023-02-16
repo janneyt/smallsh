@@ -9,6 +9,7 @@
 # include "../constants/constants.h"
 # endif
 
+int heap_size = 0;
 
 /**
  * @brief Swaps the values of two child_process objects.
@@ -39,12 +40,12 @@ int up_heap(int index, ProgArgs* heap[NUMCHILDREN]) {
 
     int parent = (index - 1) / 2;
 
-    if (parent < 0 || parent >= heap_size) {
+    if (parent < 0 || parent >= NUMCHILDREN) {
         fprintf(stderr, "Error: parent index is out of range\n");
         return EXIT_FAILURE;
     }
 
-    if (index < 0 || index >= heap_size) {
+    if (index < 0 || index >= NUMCHILDREN) {
         fprintf(stderr, "Error: index is out of range\n");
         return EXIT_FAILURE;
     }
@@ -69,7 +70,7 @@ int down_heap(int index, ProgArgs* heap[NUMCHILDREN]) {
     int right = 2 * index + 2;
     int minimum = index;
     
-    if (left < heap_size) {
+    if (left < NUMCHILDREN) {
         if (heap[left]->timestamp < heap[minimum]->timestamp) {
             minimum = left;
         }
@@ -77,7 +78,7 @@ int down_heap(int index, ProgArgs* heap[NUMCHILDREN]) {
 	return EXIT_FAILURE;
     }
     
-    if (right < heap_size) {
+    if (right < NUMCHILDREN) {
         if (heap[right]->timestamp < heap[minimum]->timestamp) {
             minimum = right;
         }
@@ -86,7 +87,7 @@ int down_heap(int index, ProgArgs* heap[NUMCHILDREN]) {
     }
     
     if (minimum != index) {
-        if (index >= heap_size || minimum >= heap_size) {
+        if (index >= NUMCHILDREN || minimum >= heap_size) {
             return EXIT_FAILURE;
         }
         
@@ -109,19 +110,19 @@ int down_heap(int index, ProgArgs* heap[NUMCHILDREN]) {
  * @return 0 if the process was added successfully, or -1 if the heap is full.
  */
 int add_to_heap(pid_t pid, ProgArgs* heap[NUMCHILDREN]) {
-    if (heap_size == NUMCHILDREN) {
+    if (NUMCHILDREN == NUMCHILDREN) {
         fprintf(stderr, "Error: Heap is full\n");
         return EXIT_FAILURE;
-    } else if (heap_size < 0){
+    } else if (NUMCHILDREN < 0){
 	fprintf(stderr, "Error: heap size cannot be zero\n");
 	exit(EXIT_FAILURE);
     }
     time_t timestamp = time(NULL);
-    heap[heap_size]->pid = pid;
-    heap[heap_size]->status = 0;
-    heap[heap_size]->timestamp = timestamp;
+    heap[NUMCHILDREN]->pid = pid;
+    heap[NUMCHILDREN]->status = 0;
+    heap[NUMCHILDREN]->timestamp = timestamp;
     heap_size++;
-    up_heap(heap_size - 1, heap);
+    up_heap(NUMCHILDREN - 1, heap);
 
     return EXIT_SUCCESS;
 }
@@ -140,7 +141,7 @@ int find_in_heap(pid_t pid, ProgArgs* heap[NUMCHILDREN]){
         return -1;
     }
 
-    for (int index = 0; index < heap_size; index++) {
+    for (int index = 0; index < NUMCHILDREN; index++) {
         if (index >= NUMCHILDREN) {
             return -1;
         }
@@ -159,12 +160,12 @@ int find_in_heap(pid_t pid, ProgArgs* heap[NUMCHILDREN]){
  * @return EXIT_SUCCESS if successful, EXIT_FAILURE otherwise.
  */
 int remove_from_heap(int index, ProgArgs* heap[NUMCHILDREN]){
-    if (index < 0 || index >= heap_size) {
+    if (index < 0 || index >= NUMCHILDREN) {
         fprintf(stderr, "Error: Index out of range\n");
         return EXIT_FAILURE;
     }
     heap_size--;
-    heap[index] = heap[heap_size];
+    heap[index] = heap[NUMCHILDREN];
     down_heap(index, heap);
     return EXIT_SUCCESS;
 }

@@ -12,9 +12,11 @@
 # include <stdlib.h>
 # include <assert.h>
 # include <stdint.h>
+# ifndef  util_int_to_string
 # include "../utilities/utilities.h"
+# endif
 # include "../error/error.h"
-# include "../tester/tester.h"
+
 # ifndef LINESIZE
 # include "../constants/constants.h"
 # endif

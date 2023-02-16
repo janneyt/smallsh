@@ -6,7 +6,7 @@
 # include <ctype.h>
 # include <unistd.h>
 # include <sys/types.h>
-# include "../signal-project/signal-project.h"
+
 
 void signal_handler_exit(void){
 	// Just ignoring this...

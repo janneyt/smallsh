@@ -12,15 +12,16 @@
 #ifndef LINESIZE
 # include "../constants/constants.h"
 #endif
-# ifndef  reset_signals
+# ifndef  handle_signal_exit
 # include "../execute/execute.h"
+# include "../signal-project/signal-project.h"
 # endif
 # include <stdlib.h>
 # include <errno.h>
+# ifndef  heap_size
 # include "../heap/heap.h"
-# ifndef  handle_signal_exit
-# include "../signal-project/signal-project.c"
 # endif
+
 /**
  * @brief Checks for un-waited-for background processes in the same process group ID as smallsh.
  * Prints informative message to stderr for each process and returns EXIT_SUCCESS or EXIT_FAILURE.
@@ -28,7 +29,7 @@
  * @return Returns EXIT_SUCCESS if there are no un-waited-for background processes,
  * and EXIT_FAILURE if any child process exited or was signaled.
  */
-int check_background_processes(struct ParentStruct *parent) {
+int spec_check_for_child_background_processes(ParentStruct *parent) {
 	pid_t pid;
 	int status;
 	int exit_status;

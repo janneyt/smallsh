@@ -12,12 +12,15 @@
 # include <stdlib.h>
 # include <assert.h>
 # include <stdint.h>
+# ifndef  handle_signal_exit
 # include "utilities/utilities.h"
 # include "error/error.h"
 # include "input/input.h"
 # include "expansion/expansion.h"
 # include "parsing/parsing.h"
+
 # include "execute/execute.h"
+# endif
 # ifndef  LINESIZE
 # include "constants/constants.h"
 # endif

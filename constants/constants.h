@@ -7,8 +7,6 @@
 
 typedef int make_iso_compilers_happy;
 
-int heap_size = 0;
-
 typedef struct {
 	char command[STRINGSIZE];
 	char input[STRINGSIZE];

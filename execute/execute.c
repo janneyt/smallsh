@@ -1,6 +1,7 @@
 
 # ifndef  LINESIZE
 # include "../constants/constants.h"
+# include "../utilities/utilities.h"
 # endif
 # include <stdbool.h>
 # include <stdlib.h>
@@ -10,7 +11,9 @@
 # include <string.h>
 # include "../parsing/parsing.h"
 # include "../expansion/expansion.h"
+# ifndef  handle_signal_exit
 # include "../input/input.h"
+# endif
 # include <fcntl.h>
 
 /**
