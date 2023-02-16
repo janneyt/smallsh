@@ -22,10 +22,6 @@
 # include <stdlib.h>
 # include <errno.h>
 
-# define STRINGSIZE 100
-/** LINESIZE has to support 512 whitespace/character pairs */
-# define DELIMITER  " \t\n"
-
 int spec_expansion(char arg[LINESIZE], char substring[3], int control_code){
 	/**
 	 * \brief Expands four variables based on the specifications

@@ -3,6 +3,7 @@
 # define STRINGSIZE 		100
 # define NUMCHILDREN		6
 # include 			<time.h>
+# include			<stdint.h>
 
 typedef int make_iso_compilers_happy;
 
@@ -14,12 +15,16 @@ typedef struct {
 	char output[STRINGSIZE];
 	int background;
 	time_t timestamp;
+	pid_t pid;
+	int status;
 } ProgArgs;
 
 
 struct ParentStruct {
 	int pid_counter;
 	int pid;
-	struct ProgArgs *array[NUMCHILDREN];
+	ProgArgs* heap[NUMCHILDREN];
+	pid_t last_foreground;
+	pid_t last_background;
 };
 

@@ -11,6 +11,7 @@
 # endif
 # include "../expansion/expansion.h"
 # include "../input/input.h"
+# include "../builtins/builtins.h"
 
 int spec_parsing(char string[LINESIZE], ProgArgs *current){
 	/**

@@ -59,7 +59,7 @@ void spec_signal_handler(struct ProgArgs *current) {
 	sigfillset(&SIGINT_action.sa_mask);
 	sigfillset(&SIGTSTP_action.sa_mask);
 
-	SIGIN_action.sa_flags = SA_RESTART;
+	SIGINT_action.sa_flags = SA_RESTART;
 	SIGTSTP_action.sa_flags = 0;
 
 	sigaction(SIGINT, &SIGINT_action, NULL);

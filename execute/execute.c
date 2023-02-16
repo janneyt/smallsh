@@ -1,15 +1,18 @@
-# include <stdlib.h>
+
 # ifndef  LINESIZE
 # include "../constants/constants.h"
 # endif
+# include <stdbool.h>
+# include <stdlib.h>
+# include <stdio.h>
+# include <signal.h>
+# include "../constants/constants.h"
 # include "../builtins/builtins.h"
 # include <string.h>
-# include "../expansion/expansion.h"
 # include "../parsing/parsing.h"
+# include "../expansion/expansion.h"
 # include "../input/input.h"
-# include <stdbool.h>
 # include <fcntl.h>
-
 
 /**
  * @brief Resets all signals to their default disposition.
@@ -40,10 +43,11 @@ int reset_signals() {
  * @param args The command arguments.
  * @return EXIT_SUCCESS if redirection was successful, EXIT_FAILURE otherwise.
  */
-int handle_redirection(ProgArgs* current) {
+
+int handle_redirection(ProgArgs *current) {
     int input_fd = STDIN_FILENO;
     int output_fd = STDOUT_FILENO;
-    if (current->input != NULL) {
+    if (strcpy(current->input, "") != 0) {
         input_fd = open(current->input, O_RDONLY);
         if (input_fd == -1) {
             fprintf(stderr, "Failed to open input file %s: %s\n", current->input, strerror(errno));
@@ -51,11 +55,11 @@ int handle_redirection(ProgArgs* current) {
         }
     }
 
-    if (current->output != NULL) {
+    if (strcpy(current->output, "") != 0) {
         output_fd = open(current->output, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
         if (output_fd == -1) {
             fprintf(stderr, "Failed to open output file %s: %s\n", current->output, strerror(errno));
-            if (current->input != NULL) {
+            if (strcpy(current->input, "") == 0) {
                 close(input_fd);
             }
             return EXIT_FAILURE;
@@ -64,10 +68,10 @@ int handle_redirection(ProgArgs* current) {
 
     if (dup2(input_fd, STDIN_FILENO) == -1) {
         fprintf(stderr, "Failed to redirect input: %s\n", strerror(errno));
-        if (current->input != NULL) {
+        if (strcpy(current->input, "") == 0) {
             close(input_fd);
         }
-        if (current->output != NULL) {
+        if (strcpy(current->output, "") == 0) {
             close(output_fd);
         }
         return EXIT_FAILURE;
@@ -75,10 +79,10 @@ int handle_redirection(ProgArgs* current) {
 
     if (dup2(output_fd, STDOUT_FILENO) == -1) {
         fprintf(stderr, "Failed to redirect output: %s\n", strerror(errno));
-        if (current->input != NULL) {
+        if (strcpy(current->input, "") != 0) {
             close(input_fd);
         }
-        if (current->output != NULL) {
+        if (strcpy(current->output,"") != 0) {
             close(output_fd);
         }
         return EXIT_FAILURE;
@@ -87,11 +91,11 @@ int handle_redirection(ProgArgs* current) {
     // Execute must be called here to make sure input and output files are closed
 
 
-    if (current->input != NULL) {
+    if (strcpy(current->input,"") == 0) {
         close(input_fd);
     }
 
-    if (current->output != NULL) {
+    if (strcpy(current->output, "") == 0) {
         close(output_fd);
     }
 
@@ -106,7 +110,8 @@ int handle_redirection(ProgArgs* current) {
  * @param cmd The command to execute.
  * @return EXIT_SUCCESS if the command was executed successfully, EXIT_FAILURE otherwise.
  */
-int other_commands(ProgArgs* current) {
+int other_commands(ProgArgs *current) {
+
     pid_t pid = fork();
     if (pid == -1) {
         perror("fork");
@@ -147,7 +152,7 @@ int other_commands(ProgArgs* current) {
     return EXIT_FAILURE;
 }
 
-int spec_execute(ProgArgs* current){
+int spec_execute(ProgArgs *current){
 	char input[LINESIZE];
 
 	strcpy(current->command, "");
@@ -180,7 +185,10 @@ int spec_execute(ProgArgs* current){
 
 	// command is "cd"
 	else if(current->command[0] == 'c' && current->command[1] == 'd'){
-		execute_cd(&current->command[3]);
+		if(execute_cd(&current->command[3]) == EXIT_FAILURE){
+			perror("");
+			return EXIT_FAILURE;
+		}
 		return EXIT_SUCCESS;
 	}
 
@@ -188,8 +196,7 @@ int spec_execute(ProgArgs* current){
 	else {
 		return other_commands(current);
 	}
-	
-	return EXIT_SUCCESS;
 
+	return EXIT_SUCCESS;
 }
 
