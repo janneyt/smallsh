@@ -49,15 +49,17 @@ int reset_signals() {
 int handle_redirection(ProgArgs *current) {
     int input_fd = STDIN_FILENO;
     int output_fd = STDOUT_FILENO;
-    if (strcpy(current->input, "") != 0) {
+    if (strcmp(current->input, "") != 0) {
         input_fd = open(current->input, O_RDONLY);
         if (input_fd == -1) {
             fprintf(stderr, "Failed to open input file %s: %s\n", current->input, strerror(errno));
             return EXIT_FAILURE;
         }
+    } else {
+	return EXIT_SUCCESS;
     }
 
-    if (strcpy(current->output, "") != 0) {
+    if (strcmp(current->output, "") != 0) {
         output_fd = open(current->output, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
         if (output_fd == -1) {
             fprintf(stderr, "Failed to open output file %s: %s\n", current->output, strerror(errno));
@@ -66,7 +68,10 @@ int handle_redirection(ProgArgs *current) {
             }
             return EXIT_FAILURE;
         }
+    } else {
+	return EXIT_SUCCESS;
     }
+    
 
     if (dup2(input_fd, STDIN_FILENO) == -1) {
         fprintf(stderr, "Failed to redirect input: %s\n", strerror(errno));
@@ -116,10 +121,12 @@ int other_commands(ProgArgs *current) {
 
     pid_t pid = fork();
     if (pid == -1) {
-        perror("fork");
+        perror("Fork failed. Reason for failure:");
         return EXIT_FAILURE;
     } else if (pid == 0) { // child process 
-
+	printf("In child process\n");
+	fflush(stdout);
+	fflush(stderr);
 	if(reset_signals() == EXIT_FAILURE){
 		perror("Could not reset signals to smallsh's original signal set");
 		return EXIT_FAILURE;
@@ -129,7 +136,7 @@ int other_commands(ProgArgs *current) {
 		perror("Redirection not possible");
 		return EXIT_FAILURE;
 	};
-
+	
         // Execute command
 	char** args = {0};
 	char* arg = strtok(current->command, " ");
@@ -138,18 +145,28 @@ int other_commands(ProgArgs *current) {
 		args[index] = strtok(current->command, " ");
 		index++;
 	}
+	printf("Heading into execution!\n");
+	fflush(stdout);
+	fflush(stderr);
         if(execvp(args[0], args) < 0){
         	perror("");
 		fprintf(stderr, "Failed to execute command %s: %s\n", args[0], strerror(errno));
         	exit(EXIT_FAILURE);
 	};
+	printf("Executed!\n");
+	fflush(stdout);
+	fflush(stderr);
     } else { // parent process
         int status;
         if (waitpid(pid, &status, 0) == -1) {
             perror("waitpid");
             return EXIT_FAILURE;
         }
-        return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_FAILURE;
+	perror("\n");
+	printf("status: %d\n", status);
+	fflush(stdout);
+	fflush(stderr);
+        return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_SUCCESS;
     }
     return EXIT_FAILURE;
 }

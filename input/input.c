@@ -38,7 +38,7 @@ int spec_check_for_child_background_processes(ParentStruct *parent) {
 
     	for(;;) {
         	pid = waitpid(-getpid(), &status, WNOHANG | WUNTRACED | WCONTINUED);
-        	if (pid != -1 || pid != 0) {
+        	if (pid != -1 && pid != 0) {
         
 
         		if (WIFEXITED(status)) {
@@ -66,7 +66,21 @@ int spec_check_for_child_background_processes(ParentStruct *parent) {
 				parent->last_foreground = exit_status;
 			}
 		}
-
+	if(pid == -1 && errno != 10){
+		clearerr(stdin);
+		clearerr(stdout);
+		clearerr(stderr);
+		printf("errno: %d", errno);
+		return EXIT_FAILURE;
+	} else if(pid == -1 && errno == 10){
+		clearerr(stdin);
+		clearerr(stdout);
+		clearerr(stderr);
+		return EXIT_SUCCESS;
+	}
+	if(pid == 0){
+		return EXIT_SUCCESS;
+	}
 	}
 	return EXIT_SUCCESS;
 }
