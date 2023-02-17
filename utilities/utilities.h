@@ -9,15 +9,15 @@
 # include <stdlib.h>
 # include <assert.h>
 # include <stdint.h>
-
-# include <stdlib.h>
 # include <errno.h>
-
+# include <stdbool.h>
 # ifndef LINESIZE
 # include "../constants/constants.h"
 # endif
 
-int util_env_var_to_fixed_array(char env_var[], char fixed_array[]);
+bool util_check_environ(char string[LINESIZE]);
+
+int util_env_var_to_fixed_array(char env_var[LINESIZE], char fixed_array[LINESIZE]);
 	/**
 	 * \brief Takes a environment variable and sets it in a fixed array after error checking
 	 *

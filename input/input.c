@@ -21,6 +21,10 @@
 # ifndef  heap_size
 # include "../heap/heap.h"
 # endif
+# ifndef  util_check_environ
+# include "../utilities/utilities.h"
+# endif
+
 
 /**
  * @brief Checks for un-waited-for background processes in the same process group ID as smallsh.
@@ -140,19 +144,19 @@ char** help_split_line(char** storage, char* line){
 	int 	bufsize = LINESIZE;
 	int 	position = 0;
 	char*	token;
-	char*	delim = getenv("IFS");
+	char*	delim = DELIMITER;
+	char    ifs[LINESIZE] = "IFS";
+	if(util_check_environ(ifs)){
+		delim = getenv("IFS");
+	}
 	int	token_bufsize = 64;
 	char**  array_of_tokens = storage;
 
-	if(delim == 0x0 || delim == NULL || strcmp(delim, "NULL") == 0){
-		delim = strdup(DELIMITER);
-	} 	
+		
 	if(bufsize < 1){
 		printf("A buffer of 1 or more is needed for tokenization");
 		exit(EXIT_FAILURE);
 	};
-
-	// TODO: variable expansion needed here
 	
 	token = strtok(line, delim);
 	while(token != NULL){

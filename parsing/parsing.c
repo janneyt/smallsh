@@ -22,15 +22,15 @@ int spec_parsing(char string[LINESIZE], ProgArgs *current){
 	 * @return EXIT_SUCCESS if every step completes, else EXIT_FAILURE for any step failing
 	 * */
 	char* storage[LINESIZE];
+	printf("in spec_parsing 1\n");
+	fflush(stdout);
+	fflush(stderr);
+	getenv("IFS");
 	int storagelength = 0;
-	char  command[LINESIZE];
-	strcpy(command, "");
 	spec_word_splitting(storage, string);
 	int index = 0;
-	strcpy(current->command, "");
-	strcpy(current->input, "");
-	strcpy(current->output, "");
-	current->background = false;
+	int command_index = 0;
+        current->background = false;
 
 	if(storage[0] == 0x0){
 		fprintf(stderr, "Input is equal to null, which is invalid");
@@ -87,7 +87,9 @@ int spec_parsing(char string[LINESIZE], ProgArgs *current){
 				current->background = true;
 				
 			} else {
-				strcat(command, storage[index]);
+				strcat(storage[index], "");
+				current->command[command_index] = storage[index];
+				command_index++;
 
 			}
 		}
@@ -155,17 +157,15 @@ int spec_parsing(char string[LINESIZE], ProgArgs *current){
 			if(storage[index] == 0x0){
 				return EXIT_FAILURE;
 			}
-			strcat(command, storage[index]);
-
-			if(index != storagelength-1){
-				strcat(command, " ");
-			}
+			strcat(storage[index], "");
+			current->command[command_index] = storage[index];
+			command_index++;
+	
 		}
 
 		index++;
 	}
 
-	strcpy(current->command, command);
 
 	return EXIT_SUCCESS;
 }

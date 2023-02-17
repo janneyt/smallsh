@@ -43,7 +43,8 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code){
 
 	} else if(control_code == 2){
 		// Substring == ~/, replace with the HOME environment variable
-		util_env_var_to_fixed_array("HOME", str_pid); 
+		char pwd[LINESIZE] = "PWD";
+		util_env_var_to_fixed_array(pwd, str_pid); 
 
 	};
 	char *discovery = strstr(arg, substring);

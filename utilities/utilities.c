@@ -12,9 +12,8 @@
 # include <stdlib.h>
 # include <assert.h>
 # include <stdint.h>
-
-# include <stdlib.h>
 # include <errno.h>
+# include <stdbool.h>
 
 # define STRINGSIZE 100
 # ifndef LINESIZE
@@ -23,32 +22,44 @@
 
 /* Utility functions */
 
-int util_env_var_to_fixed_array(char env_var[LINESIZE], char fixed_array[LINESIZE]){
+bool util_check_environ(const char* string){
+	if(string == NULL || (strlen(string) == 0)){
+		return false;
+	}
+	char** env = environ;
+	for(; (*env != 0x0 && *env != NULL); env++){
+		int length = strlen(string);
+		if(strncmp(*env, string, length) == 0){
+			return true;
+			
+		}
+	}
+	return false;
+}
+
+int util_env_var_to_fixed_array(const char env_var[LINESIZE], char fixed_array[LINESIZE]){
 	/**
 	 * \brief Takes an environment variable and sets it in a fixed array after error checking
 	 *
-	 * @param env_var is the environment variable
+a	 * @param env_var is the environment variable
 	 * @param fixed_array is the fixed array
-	 *
+8	 *
 	 * @return EXIT_FAILURE if either an error is returned from getenv or the returned value does not fit into fixed_array, EXIT_SUCCESS if both getenv returns not null and the returned value fits into fixed_array
 	 * */
-	char* temp = "";
-	strcpy(fixed_array, "");
-	if(env_var != NULL && strlen(env_var) > 0){
-		temp = getenv(env_var);
-		if(strcmp(temp, "") == 0){
-			return EXIT_FAILURE;
-		};
-		if(strlen(temp) > LINESIZE){
-			return EXIT_FAILURE;
-		};
-		strcpy(fixed_array, temp);
-		fixed_array[strlen(temp)] = '\0';
 
+	if(!util_check_environ(env_var)){
+		return EXIT_FAILURE;
+	}
+	const char* temp = getenv(env_var);
+	if(temp == NULL){
+		return EXIT_FAILURE;
+	} else {
+		strcpy(fixed_array, temp);
+		strcat(fixed_array, "");
 		return EXIT_SUCCESS;
-		
-	};
+	}
 	return EXIT_FAILURE;
+
 }
 
 char* util_setenv(char* env_var, char* new_val){

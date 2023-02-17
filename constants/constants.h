@@ -8,7 +8,7 @@
 typedef int make_iso_compilers_happy;
 
 typedef struct {
-	char command[STRINGSIZE];
+	char* command[STRINGSIZE];
 	char input[STRINGSIZE];
 	char output[STRINGSIZE];
 	int background;

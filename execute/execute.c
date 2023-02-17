@@ -118,15 +118,17 @@ int handle_redirection(ProgArgs *current) {
  * @return EXIT_SUCCESS if the command was executed successfully, EXIT_FAILURE otherwise.
  */
 int other_commands(ProgArgs *current) {
-
+	printf("in other commans 1\n");
+	fflush(stdout);
+	fflush(stderr);
     pid_t pid = fork();
     if (pid == -1) {
         perror("Fork failed. Reason for failure:");
         return EXIT_FAILURE;
     } else if (pid == 0) { // child process 
-	printf("In child process\n");
-	fflush(stdout);
-	fflush(stderr);
+	perror("");
+	clearerr(stdout);
+	clearerr(stderr);
 	if(reset_signals() == EXIT_FAILURE){
 		perror("Could not reset signals to smallsh's original signal set");
 		return EXIT_FAILURE;
@@ -137,35 +139,24 @@ int other_commands(ProgArgs *current) {
 		return EXIT_FAILURE;
 	};
 	
-        // Execute command
-	char** args = {0};
-	char* arg = strtok(current->command, " ");
-	int index = 0;
-	while(arg != NULL){
-		args[index] = strtok(current->command, " ");
-		index++;
-	}
-	printf("Heading into execution!\n");
-	fflush(stdout);
-	fflush(stderr);
-        if(execvp(args[0], args) < 0){
+        
+        if(execvp(current->command[0], current->command) < 0){
         	perror("");
-		fprintf(stderr, "Failed to execute command %s: %s\n", args[0], strerror(errno));
+		fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
         	exit(EXIT_FAILURE);
 	};
 	printf("Executed!\n");
 	fflush(stdout);
 	fflush(stderr);
+	clearerr(stdout);
+	clearerr(stderr);
     } else { // parent process
         int status;
         if (waitpid(pid, &status, 0) == -1) {
             perror("waitpid");
             return EXIT_FAILURE;
         }
-	perror("\n");
-	printf("status: %d\n", status);
-	fflush(stdout);
-	fflush(stderr);
+	perror("status: \n");
         return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_SUCCESS;
     }
     return EXIT_FAILURE;
@@ -173,23 +164,32 @@ int other_commands(ProgArgs *current) {
 
 int spec_execute(ProgArgs *current){
 	char input[LINESIZE];
-
-	strcpy(current->command, "");
 	strcpy(current->input, "");
 	strcpy(current->output, "");
 	current->background = false;
-
+	printf("in spec_execute 1\n");
+	fflush(stdout);
+	fflush(stderr);
+	getenv("IFS");
 	// command is NULL
 	if(spec_get_line(input, LINESIZE, stdin) == EXIT_FAILURE){
 		perror("");
 		return EXIT_FAILURE;
 	};
-
+	printf("in spec_execute 2\n");
+	fflush(stdout);
+	fflush(stderr);
+	getenv("IFS");
 	// command is NULL, but input *something* for command
 	if(spec_expansion(input, "$$", 1) == EXIT_FAILURE){
 		perror("");
 		return EXIT_FAILURE;
 	};
+
+	printf("in spec_execute 3\n");
+	fflush(stdout);
+	fflush(stderr);
+	getenv("IFS");
 
 	// command is NULL, but now it is being loaded.
 	if(spec_parsing(input, current) == EXIT_FAILURE){
@@ -197,22 +197,49 @@ int spec_execute(ProgArgs *current){
 		return EXIT_FAILURE;
 	};
 
+
+	printf("in spec_execute 4\n");
+	fflush(stdout);
+	fflush(stderr);
+	getenv("IFS");
+
+
+
 	// command is "exit"
-	if(strcmp(current->command, "exit") == 0){
+	if(strcmp(current->command[0], "exit") == 0){
 		handle_exit();
+		
+	printf("in spec_execute 5\n");
+	fflush(stdout);
+	fflush(stderr);
+	getenv("IFS");
+
+
 	}
 
+
 	// command is "cd"
-	else if(current->command[0] == 'c' && current->command[1] == 'd'){
-		if(execute_cd(&current->command[3]) == EXIT_FAILURE){
+	else if(current->command[0][0] == 'c' && current->command[0][1] == 'd'){
+		if(execute_cd(current->command[3]) == EXIT_FAILURE){
 			perror("");
 			return EXIT_FAILURE;
 		}
+		
+	printf("in spec_execute 6\n");
+	fflush(stdout);
+	fflush(stderr);
+	getenv("IFS");
+
+
 		return EXIT_SUCCESS;
 	}
 
+
 	// all other commands
 	else {
+		printf("in spec_execute before other commands \n");
+		fflush(stdout);
+		fflush(stderr);
 		return other_commands(current);
 	}
 

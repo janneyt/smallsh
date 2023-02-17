@@ -39,10 +39,9 @@ int main(void){
 	 *
 	 * @return Exits to EXIT_FAILURE if utility functions such as print fails, otherwise exits to EXIT_SUCCESS when appropriate signal is sent
 	 */
-
-	ProgArgs current;
+	getenv("IFS");
+	ProgArgs current = {{NULL},.input = "", .output = ""};
 	ParentStruct parent = {.heap = {0}, .last_background = -1, .last_foreground = -1 }; 
-	strcpy(current.command, "");
 	strcpy(current.input, "");
 	strcpy(current.output, "");
 	current.background = false;
