@@ -22,10 +22,7 @@ int spec_parsing(char string[LINESIZE], ProgArgs *current){
 	 * @return EXIT_SUCCESS if every step completes, else EXIT_FAILURE for any step failing
 	 * */
 	char* storage[LINESIZE];
-	printf("in spec_parsing 1\n");
-	fflush(stdout);
-	fflush(stderr);
-	getenv("IFS");
+
 	int storagelength = 0;
 	spec_word_splitting(storage, string);
 	int index = 0;

@@ -39,12 +39,10 @@ int main(void){
 	 *
 	 * @return Exits to EXIT_FAILURE if utility functions such as print fails, otherwise exits to EXIT_SUCCESS when appropriate signal is sent
 	 */
-	getenv("IFS");
-	ProgArgs current = {{NULL},.input = "", .output = ""};
+
+	ProgArgs current = {{NULL},.input = "", .output = "", .background = false};
 	ParentStruct parent = {.heap = {0}, .last_background = -1, .last_foreground = -1 }; 
-	strcpy(current.input, "");
-	strcpy(current.output, "");
-	current.background = false;
+
 
 	// Write a single test function using tester after it is debugged!
 	printf("\nRoutine tests pass!\n");
