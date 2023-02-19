@@ -107,6 +107,10 @@ int handle_redirection(ProgArgs *current) {
         return EXIT_FAILURE;
     }
 
+    // Since handle_redirection is controlled by whether there is anything in the output or input data members, these must be cleared to prevent an infinite loop
+    strcpy(current->input, "");
+    strcpy(current->output, "");
+
     if(run_commands(current) == EXIT_FAILURE){
 	perror("Could not execute redirected input");
 	dup(STDIN_FILENO);
@@ -154,17 +158,19 @@ int run_commands(ProgArgs *current){
 
 	} else { // parent process
 		int status;
-		int hang = -1;
+		int hang = 0;
 		if(current->background){
 			hang = WNOHANG;
 		}
-		if (waitpid(0, &status, -1 || hang) == -1) {
+		if (waitpid(0, &status, hang) == -1) {
             		perror("Waiting error: ");
 	    		return EXIT_FAILURE;
         	}
 		if(!current->background){
 			sleep(1);
 		}
+		strcpy(current->command[0], "");
+		current->background = false;
         	return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_SUCCESS;
     	}
     	return EXIT_FAILURE;
@@ -194,19 +200,19 @@ int spec_execute(ProgArgs *current, FILE* stream){
 
 	// command is NULL
 	if(spec_get_line(input, LINESIZE, stream) == EXIT_FAILURE){
-		perror("");
+		perror("Spec get line errored:");
 		return EXIT_FAILURE;
 	};
 	// command is NULL, but input *something* for command
 	if(spec_expansion(input, "$$", 1) == EXIT_FAILURE){
-		perror("");
+		perror("Spec expansion errored:");
 		return EXIT_FAILURE;
 	};
 
 
 	// command is NULL, but now it is being loaded.
 	if(spec_parsing(input, current) == EXIT_FAILURE){
-		perror("");
+		perror("Spec parsing errored:");
 		return EXIT_FAILURE;
 	};
 
