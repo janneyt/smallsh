@@ -15,6 +15,10 @@
 # include "../input/input.h"
 # endif
 # include <fcntl.h>
+# include <sys/stat.h>
+
+int spec_execute(ProgArgs* current, FILE* stream);
+int run_commands(ProgArgs* current);
 
 /**
  * @brief Resets all signals to their default disposition.
@@ -49,77 +53,123 @@ int reset_signals() {
  */
 
 int handle_redirection(ProgArgs *current) {
-    int input_fd = STDIN_FILENO;
-    int output_fd = STDOUT_FILENO;
+    FILE* input_fd = stdin;
+    FILE* output_fd = stdout;
+    int input_int = STDIN_FILENO;
+    int output_int = STDOUT_FILENO;
     if (strcmp(current->input, "") != 0) {
-        input_fd = open(current->input, O_RDONLY);
-        if (input_fd == -1) {
-            fprintf(stderr, "Failed to open input file %s: %s\n", current->input, strerror(errno));
+        input_fd = fopen(current->input, "r+");
+        if (input_fd == NULL) {
+            fprintf(stderr, "Failed to fopen input file %s: %s\n", current->input, strerror(errno));
             return EXIT_FAILURE;
         }
-    } else {
-	return EXIT_SUCCESS;
-    }
+	if(strcmp(current->output, "") != 0){
+		fclose(output_fd);
+	}
+	input_int = STDIN_FILENO;
+    } 
 
     if (strcmp(current->output, "") != 0) {
-        output_fd = open(current->output, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
-        if (output_fd == -1) {
-            fprintf(stderr, "Failed to open output file %s: %s\n", current->output, strerror(errno));
-            if (strcpy(current->input, "") == 0) {
-                close(input_fd);
+        output_fd = fopen(current->output, "w+");
+        if (output_fd == NULL) {
+            fprintf(stderr, "Failed to fopen output file %s: %s\n", current->output, strerror(errno));
+            if (strcmp(current->input, "") != 0) {
+                fclose(input_fd);
             }
             return EXIT_FAILURE;
         }
-    } else {
+	output_int = fileno(output_fd);
+    } 
+
+    if(strcmp(current->output, "") == 0 && strcmp(current->input, "") == 0){
 	return EXIT_SUCCESS;
     }
-    
 
-    if (dup2(input_fd, STDIN_FILENO) == -1) {
+    if (dup2(STDIN_FILENO, input_int) == -1) {
         fprintf(stderr, "Failed to redirect input: %s\n", strerror(errno));
         if (strcpy(current->input, "") == 0) {
-            close(input_fd);
+            fclose(input_fd);
         }
         if (strcpy(current->output, "") == 0) {
-            close(output_fd);
+            fclose(output_fd);
         }
         return EXIT_FAILURE;
     }
 
-    if (dup2(output_fd, STDOUT_FILENO) == -1) {
+    if (dup2(STDOUT_FILENO, output_int) == -1) {
         fprintf(stderr, "Failed to redirect output: %s\n", strerror(errno));
         if (strcpy(current->input, "") != 0) {
-            close(input_fd);
+            fclose(input_fd);
         }
         if (strcpy(current->output,"") != 0) {
-            close(output_fd);
+            fclose(output_fd);
         }
         return EXIT_FAILURE;
     }
 
-    // Execute must be called here to make sure input and output files are closed
-
-    if(strcpy(current->input, "") != 0 && strcpy(current->output, "") != 0){
-	perror("Error:");
-	close(input_fd);
-	close(output_fd);
+    if(run_commands(current) == EXIT_FAILURE){
+	perror("Could not execute redirected input");
+	dup(STDIN_FILENO);
+	dup(STDOUT_FILENO);
 	return EXIT_FAILURE;
+    }
+    // Execute must be called here to make sure input and output files are fclosed
+    if(strcmp(current->input, "") != 0){
+    	fclose(input_fd);
+    }
+    if(strcmp(current->output, "") != 0){
+    	fclose(output_fd);
+    }
+    if(dup(STDIN_FILENO) < 0){
+	perror("redirecting to stdin failed");
+	exit(EXIT_FAILURE);
+    };
+    if(dup(STDOUT_FILENO) < 0){
+	perror("redirecting to stdout failed");
+	exit(EXIT_FAILURE);
     };
 
-
-
-    if (strcpy(current->input,"") == 0) {
-        close(input_fd);
-    }
-
-    if (strcpy(current->output, "") == 0) {
-        close(output_fd);
-    }
-
+    strcpy(current->input, "");
+    strcpy(current->output, "");
     return EXIT_SUCCESS;
 }
 
+int run_commands(ProgArgs *current){
+	pid_t pid = fork();
+    	if (pid == -1) {
+        	perror("Fork failed. Reason for failure:");
+        	return EXIT_FAILURE;
+    	} else if (pid == 0) { // child process 
 
+		if(reset_signals() == EXIT_FAILURE){
+			perror("Could not reset signals to smallsh's original signal set");
+			return EXIT_FAILURE;
+		};
+        
+        	if(execvp(current->command[0], current->command) < 0){
+        		perror("");
+			fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
+        		return EXIT_FAILURE;
+		};
+
+	} else { // parent process
+		int status;
+		int hang = -1;
+		if(current->background){
+			hang = WNOHANG;
+		}
+		if (waitpid(0, &status, -1 || hang) == -1) {
+            		perror("Waiting error: ");
+	    		return EXIT_FAILURE;
+        	}
+		if(!current->background){
+			sleep(1);
+		}
+        	return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_SUCCESS;
+    	}
+    	return EXIT_FAILURE;
+
+}
 
 /**
  * @brief Executes a command using fork and execvp.
@@ -128,53 +178,22 @@ int handle_redirection(ProgArgs *current) {
  * @return EXIT_SUCCESS if the command was executed successfully, EXIT_FAILURE otherwise.
  */
 int other_commands(ProgArgs *current) {
+	if(strcmp(current->input, "") != 0 || strcmp(current->output, "") != 0){
+		if(handle_redirection(current) == EXIT_FAILURE){
+			perror("Redirection not possible");
+			return EXIT_FAILURE;
+		};
+		return EXIT_SUCCESS;
+    	}
+	return run_commands(current);
 
-    pid_t pid = fork();
-    if (pid == -1) {
-        perror("Fork failed. Reason for failure:");
-        return EXIT_FAILURE;
-    } else if (pid == 0) { // child process 
-
-	if(reset_signals() == EXIT_FAILURE){
-		perror("Could not reset signals to smallsh's original signal set");
-		return EXIT_FAILURE;
-	};
-
-	if(handle_redirection(current) == EXIT_FAILURE){
-		perror("Redirection not possible");
-		return EXIT_FAILURE;
-	};
-	
-        
-        if(execvp(current->command[0], current->command) < 0){
-        	perror("");
-		fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
-        	exit(EXIT_FAILURE);
-	};
-
-    } else { // parent process
-        int status;
-	int hang = -1;
-	if(current->background){
-		hang = WNOHANG;
-	}
-	if (waitpid(0, &status, -1 || hang) == -1) {
-            perror("waitpid");
-            return EXIT_FAILURE;
-        }
-	if(!current->background){
-		sleep(1);
-	}
-        return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_SUCCESS;
-    }
-    return EXIT_FAILURE;
 }
 
-int spec_execute(ProgArgs *current){
+int spec_execute(ProgArgs *current, FILE* stream){
 	char input[LINESIZE];
 
 	// command is NULL
-	if(spec_get_line(input, LINESIZE, stdin) == EXIT_FAILURE){
+	if(spec_get_line(input, LINESIZE, stream) == EXIT_FAILURE){
 		perror("");
 		return EXIT_FAILURE;
 	};

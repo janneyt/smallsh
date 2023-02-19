@@ -40,8 +40,8 @@ int main(void){
 	 * @return Exits to EXIT_FAILURE if utility functions such as print fails, otherwise exits to EXIT_SUCCESS when appropriate signal is sent
 	 */
 
-	ProgArgs current = {{NULL},.input = "", .output = "", .background = false};
-	ParentStruct parent = {.heap = {0}, .last_background = -1, .last_foreground = -1 }; 
+	ProgArgs current = {.command = {NULL}, .input = "", .output = ""};
+
 
 
 	// Write a single test function using tester after it is debugged!
@@ -53,8 +53,8 @@ int main(void){
 	}
 	for(;;){
 
-		if(spec_execute(&current, &parent) == EXIT_FAILURE){
-			perror("");
+		if(spec_execute(&current, stdin) == EXIT_FAILURE){
+			perror("\n");
 		};		
 	}
 

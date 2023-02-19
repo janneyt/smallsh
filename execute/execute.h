@@ -4,4 +4,4 @@
 
 int reset_signals();
 
-int spec_execute(ProgArgs *current, ParentStruct *parent);
+int spec_execute(ProgArgs *current, FILE* stream);
