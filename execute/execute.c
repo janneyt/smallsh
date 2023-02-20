@@ -98,7 +98,7 @@ int handle_redirection(ProgArgs *current) {
 
 	// The newly acquired input from the non-stdin file has to be processed
 	char file_input[LINESIZE];
-	if(spec_get_line(file_input, LINESIZE, input_fd) == EXIT_FAILURE || 
+	if(spec_get_line(file_input, LINESIZE, input_fd, 1) == EXIT_FAILURE || 
 			spec_expansion(file_input, "$$", 1) == EXIT_FAILURE ||
 			spec_parsing(file_input, current) == EXIT_FAILURE){
 		perror("Could not access a line from the redirected input");
@@ -255,7 +255,7 @@ int spec_execute(ProgArgs *current, FILE* stream){
 	char input[LINESIZE];
 
 	// command is NULL
-	if(spec_get_line(input, LINESIZE, stream) == EXIT_FAILURE){
+	if(spec_get_line(input, LINESIZE, stream, 0) == EXIT_FAILURE){
 		perror("Spec get line errored:");
 		return EXIT_FAILURE;
 	};

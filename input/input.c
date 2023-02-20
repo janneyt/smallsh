@@ -85,7 +85,7 @@ int spec_check_for_child_background_processes(ParentStruct *parent) {
 }
 
 
-int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
+int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int control_code){
 	/**
 	 * \brief Gets the input and returns it. Has it's own signal handling.
 	 * 
@@ -115,7 +115,7 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
 	sigaction(SIGINT, &sa, NULL);
 
 	// PS1 print
-	if(fileno(stream) == STDIN_FILENO){
+	if(control_code == 0){
 		printf("$");
 	}
 	if(( input_length = getline(&input, &input_size, stream)) < 0){
