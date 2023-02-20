@@ -21,7 +21,15 @@ void handle_exit(void) {
  	* @param args The command arguments (not used).
  	*/
 
-	spec_check_for_child_background_processes();
+	int status;
+	pid_t pid;
+	while((pid = waitpid(-getpid(), &status, WNOHANG | WUNTRACED | WCONTINUED) != -1)){
+		printf("Pid: %d has status: %d but is ending artificially", pid, status);
+		if(kill(pid, SIGINT) == -1){
+			perror("Could not kill all child processes");
+			exit(EXIT_FAILURE);
+		}
+	}
 
   	if(kill(0, SIGINT) == -1){
 		perror("Could not kill all child processes");

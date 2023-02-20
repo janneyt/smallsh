@@ -190,32 +190,32 @@ int run_commands(ProgArgs *current){
 		if(strcmp(current->command[0], "") == 0 && 
 				(strcmp(current->input, "") != 0 ||
 				 strcmp(current->output, "") != 0)){
-			return handle_redirection(current);
+			exit(handle_redirection(current));
 		} else if(strcmp(current->command[0], "") == 0){
-			return EXIT_FAILURE;
+			exit(EXIT_FAILURE);
 		}
 
 		if(reset_signals() == EXIT_FAILURE){
 			perror("Could not reset signals to smallsh's original signal set");
-			return EXIT_FAILURE;
+			exit(EXIT_FAILURE);
 		};
 
 		// The big difference is that this assumes there's a command, while earlier we dealt with the edge case where there wasn't.
 		if(strcmp(current->input, "") != 0 || strcmp(current->output, "") != 0){
 			if(handle_redirection(current) == EXIT_FAILURE){
 				perror("Redirection not possible");
-				return EXIT_FAILURE;
+				exit(EXIT_FAILURE);
 			};
 			
-			return EXIT_SUCCESS;
+			exit(EXIT_SUCCESS);
     		}
         
         	if(execvp(current->command[0], current->command) < 0){
         		perror("");
 			fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
-        		return EXIT_FAILURE;
+        		exit(EXIT_FAILURE);
 		};
-		return EXIT_SUCCESS;
+		exit(EXIT_SUCCESS);
 
 	} else { // parent process
 		int status;
@@ -232,7 +232,9 @@ int run_commands(ProgArgs *current){
 
 
 		// Resetting the other options (for the next loop of the parent) is more straightforward
-		strcpy(current->command[0], "");
+		if(strcmp(current->command[0], "") != 0){
+			strcpy(current->command[0], "");
+		}
 		strcpy(current->input, "");
 		strcpy(current->output, "");
 		current->background = false;

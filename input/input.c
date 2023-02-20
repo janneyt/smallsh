@@ -113,7 +113,7 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 	sa.sa_handler = handle_signal_exit;
 	sigemptyset(&sa.sa_mask);
 	sigaction(SIGINT, &sa, NULL);
-	printf("%d\n", fileno(stream) == STDIN_FILENO);
+
 	// PS1 print
 	if(control_code == 0){
 		printf("$");

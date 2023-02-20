@@ -42,18 +42,18 @@ int main(void){
 
 	ProgArgs current = {.command = {""}, .input = "", .output = ""};
 
-
-
-	// Write a single test function using tester after it is debugged!
-	printf("\nRoutine tests pass!\n");
-
-
 	for(;;){
 
 		if(spec_check_for_child_background_processes() == EXIT_FAILURE){
 			perror("Had trouble waiting for child process");
 			exit(EXIT_FAILURE);
 		}
+		if(strcmp(current.command[0], "") != 0){
+			strcpy(current.command[0], "");
+		}
+		strcpy(current.input, "");
+		strcpy(current.output, "");
+		current.background = false;
 
 		if(spec_execute(&current, stdin) == EXIT_FAILURE){
 			perror("\n**Error executing commands**\n\n");
