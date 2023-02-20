@@ -40,7 +40,7 @@ int main(void){
 	 * @return Exits to EXIT_FAILURE if utility functions such as print fails, otherwise exits to EXIT_SUCCESS when appropriate signal is sent
 	 */
 
-	ProgArgs current = {.command = {NULL}, .input = "", .output = ""};
+	ProgArgs current = {.command = {""}, .input = "", .output = ""};
 
 
 
@@ -54,7 +54,7 @@ int main(void){
 	for(;;){
 
 		if(spec_execute(&current, stdin) == EXIT_FAILURE){
-			perror("\n");
+			perror("\n**Error executing commands**\n\n");
 		};		
 	}
 

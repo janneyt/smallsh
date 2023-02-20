@@ -117,13 +117,34 @@ int handle_redirection(ProgArgs *current) {
         return EXIT_FAILURE;
     }
 
-    
-  
+
     // Handle redirection only occurs in a child process, so execute the process here
-    if(execvp(current->command[0], current->command) < 0){
-        		perror("");
-			fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
-        		return EXIT_FAILURE;
+    if(strcmp(current->command[0], "") != 0 && execvp(current->command[0], current->command) < 0){
+	    
+	perror("\n");
+	fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
+	strcpy(current->command[0], "");
+	strcpy(current->input, "");
+	strcpy(current->output, "");
+	current->background = false;
+        if(dup2(STDIN_FILENO, input_int) < 0){
+		perror("Can't redirect back to stdin");
+		return EXIT_FAILURE;
+    	}
+    	if(dup2(STDOUT_FILENO, output_int) < 0){
+		perror("Can't redirect back to stdout");
+		return EXIT_FAILURE;
+    	};
+
+    	if(fileno(input_fd) != STDIN_FILENO){
+		fclose(input_fd);
+    	};
+    	if(fileno(output_fd) != STDOUT_FILENO){
+		fclose(output_fd);
+    	};
+    	strcpy(current->input, "");
+    	strcpy(current->output, "");
+	return EXIT_FAILURE;
     };
 
 
@@ -149,17 +170,34 @@ int handle_redirection(ProgArgs *current) {
 }
 
 int run_commands(ProgArgs *current){
+
+
+
+	// Processing with a current->command that is not ""
 	pid_t pid = fork();
     	if (pid == -1) {
         	perror("Fork failed. Reason for failure:");
         	return EXIT_FAILURE;
     	} else if (pid == 0) { // child process 
 
+		// So far, I've tolerated a missing command, but only because both
+		// redirection options have a pseudo command built in. However, all 
+		// other alternatives must be discarded
+
+		if(strcmp(current->command[0], "") == 0 && 
+				(strcmp(current->input, "") != 0 ||
+				 strcmp(current->output, "") != 0)){
+			return handle_redirection(current);
+		} else if(strcmp(current->command[0], "") == 0){
+			return EXIT_FAILURE;
+		}
+
 		if(reset_signals() == EXIT_FAILURE){
 			perror("Could not reset signals to smallsh's original signal set");
 			return EXIT_FAILURE;
 		};
 
+		// The big difference is that this assumes there's a command, while earlier we dealt with the edge case where there wasn't.
 		if(strcmp(current->input, "") != 0 || strcmp(current->output, "") != 0){
 			if(handle_redirection(current) == EXIT_FAILURE){
 				perror("Redirection not possible");
@@ -189,12 +227,9 @@ int run_commands(ProgArgs *current){
 	    		return EXIT_FAILURE;
         	}
 
-		// current->command doesn't exist in the case of input redirection only
-		if(current->command[0] != NULL){	
-			strcpy(current->command[0], "");
-		}
 
 		// Resetting the other options (for the next loop of the parent) is more straightforward
+		strcpy(current->command[0], "");
 		strcpy(current->input, "");
 		strcpy(current->output, "");
 		current->background = false;
@@ -239,7 +274,7 @@ int spec_execute(ProgArgs *current, FILE* stream){
 
 	// Built in commands are only possible when the command function is loaded, but if only input redirection is listed then 
 	// there is no command on the first run through
-	if(current->command[0] != NULL){
+	if(strcmp(current->command[0], "") != 0){
 		// command is "exit"
 		if(strcmp(current->command[0], "exit") == 0){
 			handle_exit();
@@ -261,7 +296,7 @@ int spec_execute(ProgArgs *current, FILE* stream){
 		return other_commands(current);
 	}
 	// if there's no command specified BUT input is redirected, still run other_commands in the hope there's a command in the redirected file
-	else if(strcmp(current->input, "") != 0){
+	else if(strcmp(current->input, "") != 0 || strcmp(current->output, "") != 0){
 		return other_commands(current);
 	} else {
 		return EXIT_FAILURE;

@@ -115,11 +115,9 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
 	sigaction(SIGINT, &sa, NULL);
 
 	// PS1 print
-	printf("$");
-	if(fileno(stream) != STDIN_FILENO){
-		printf("The problem is with the stream. It isn't stdin");
+	if(fileno(stream) == STDIN_FILENO){
+		printf("$");
 	}
-	printf("Input: %s", input);
 	if(( input_length = getline(&input, &input_size, stream)) < 0){
 		perror("Cannot fetch line from input");
 		clearerr(stream);
