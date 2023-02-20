@@ -94,7 +94,7 @@ int handle_redirection(ProgArgs *current) {
             fclose(output_fd);
         }
         return EXIT_FAILURE;
-    } else if(strcmp(current->input,"") == 0) {
+    } else if(strcmp(current->input,"") != 0) {
 
 	// Only choose this option if input is redirected
 	// The newly acquired input from the non-stdin file has to be processed
@@ -155,15 +155,17 @@ int handle_redirection(ProgArgs *current) {
 	return EXIT_FAILURE;
     }
     if(dup2(STDOUT_FILENO, output_int) < 0){
-	perror("Canot' redirect back to stdout");
+	perror("Can't redirect back to stdout");
 	return EXIT_FAILURE;
     };
 
-    if(fileno(input_fd) != STDIN_FILENO){
-	    fclose(input_fd);
+    if(fileno(input_fd) != STDIN_FILENO && fclose(input_fd) == EOF){
+	    perror("Could not close input_fd");
+	    return EXIT_FAILURE;
     };
-    if(fileno(output_fd) != STDOUT_FILENO){
-	    fclose(output_fd);
+    if(fileno(output_fd) != STDOUT_FILENO && fclose(output_fd) == EOF){
+	    perror("Could not close output_fd");
+	    return EXIT_FAILURE;
     };
     strcpy(current->input, "");
     strcpy(current->output, "");
