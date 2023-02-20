@@ -1,10 +1,10 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -Werror -g
 TARGET = smallsh
-SRCDIR = smallsh
+SRCDIR = .
 
 # Source files
-SRCS = $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*/*.c) 
+SRCS = $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*/*.c) smallsh.c 
 
 # Object files
 OBJS = $(SRCS:.c=.o)
