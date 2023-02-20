@@ -85,54 +85,52 @@ int handle_redirection(ProgArgs *current) {
 	return EXIT_SUCCESS;
     }
 
-    if (dup2(STDIN_FILENO, input_int) == -1) {
+    if (dup2(input_int, STDIN_FILENO) == -1) {
         fprintf(stderr, "Failed to redirect input: %s\n", strerror(errno));
-        if (strcpy(current->input, "") == 0) {
+        if (strcmp(current->input, "") == 0) {
             fclose(input_fd);
         }
-        if (strcpy(current->output, "") == 0) {
+        if (strcmp(current->output, "") == 0) {
             fclose(output_fd);
         }
         return EXIT_FAILURE;
     }
 
-    if (dup2(STDOUT_FILENO, output_int) == -1) {
+    if (dup2(output_int, STDOUT_FILENO) == -1) {
         fprintf(stderr, "Failed to redirect output: %s\n", strerror(errno));
-        if (strcpy(current->input, "") != 0) {
+        if (strcmp(current->input, "") == 0) {
             fclose(input_fd);
         }
-        if (strcpy(current->output,"") != 0) {
+        if (strcmp(current->output,"") == 0) {
             fclose(output_fd);
         }
         return EXIT_FAILURE;
     }
+  
+    // Handle redirection only occurs in a child process, so execute the process here
+    if(execvp(current->command[0], current->command) < 0){
+        		perror("");
+			fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
+        		return EXIT_FAILURE;
+    };
 
-    // Since handle_redirection is controlled by whether there is anything in the output or input data members, these must be cleared to prevent an infinite loop
-    strcpy(current->input, "");
-    strcpy(current->output, "");
 
-    if(run_commands(current) == EXIT_FAILURE){
-	perror("Could not execute redirected input");
-	dup(STDIN_FILENO);
-	dup(STDOUT_FILENO);
+
+    if(dup2(STDIN_FILENO, input_int) < 0){
+	perror("Can't redirect back to stdin");
 	return EXIT_FAILURE;
     }
-    // Execute must be called here to make sure input and output files are fclosed
-    if(strcmp(current->input, "") != 0){
-    	fclose(input_fd);
-    }
-    if(strcmp(current->output, "") != 0){
-    	fclose(output_fd);
-    }
-    if(dup(STDIN_FILENO) < 0){
-	perror("redirecting to stdin failed");
-	exit(EXIT_FAILURE);
-    };
-    if(dup(STDOUT_FILENO) < 0){
-	perror("redirecting to stdout failed");
-	exit(EXIT_FAILURE);
+    if(dup2(STDOUT_FILENO, output_int) < 0){
+	perror("Canot' redirect back to stdout");
+	return EXIT_FAILURE;
     };
 
+    if(fileno(input_fd) != STDIN_FILENO){
+	    fclose(input_fd);
+    };
+    if(fileno(output_fd) != STDOUT_FILENO){
+	    fclose(output_fd);
+    };
     strcpy(current->input, "");
     strcpy(current->output, "");
     return EXIT_SUCCESS;
@@ -149,16 +147,28 @@ int run_commands(ProgArgs *current){
 			perror("Could not reset signals to smallsh's original signal set");
 			return EXIT_FAILURE;
 		};
+
+		if(strcmp(current->input, "") != 0 || strcmp(current->output, "") != 0){
+			if(handle_redirection(current) == EXIT_FAILURE){
+				perror("Redirection not possible");
+				return EXIT_FAILURE;
+			};
+			
+			return EXIT_SUCCESS;
+    		}
         
         	if(execvp(current->command[0], current->command) < 0){
         		perror("");
 			fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
         		return EXIT_FAILURE;
 		};
+		return EXIT_SUCCESS;
 
 	} else { // parent process
 		int status;
 		int hang = 0;
+		
+		// The WNOHANG option sends a process to the background.
 		if(current->background){
 			hang = WNOHANG;
 		}
@@ -166,9 +176,7 @@ int run_commands(ProgArgs *current){
             		perror("Waiting error: ");
 	    		return EXIT_FAILURE;
         	}
-		if(!current->background){
-			sleep(1);
-		}
+	
 		strcpy(current->command[0], "");
 		current->background = false;
         	return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_SUCCESS;
@@ -184,13 +192,7 @@ int run_commands(ProgArgs *current){
  * @return EXIT_SUCCESS if the command was executed successfully, EXIT_FAILURE otherwise.
  */
 int other_commands(ProgArgs *current) {
-	if(strcmp(current->input, "") != 0 || strcmp(current->output, "") != 0){
-		if(handle_redirection(current) == EXIT_FAILURE){
-			perror("Redirection not possible");
-			return EXIT_FAILURE;
-		};
-		return EXIT_SUCCESS;
-    	}
+
 	return run_commands(current);
 
 }
