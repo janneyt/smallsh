@@ -4,7 +4,7 @@ TARGET = smallsh
 SRCDIR = .
 
 # Source files
-SRCS = $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*/*.c)
+SRCS = $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*/*.c) $(filter-out $(SRCDIR)/tester $(SRCDIR)/old_code)
 
 # Object files
 OBJS = $(SRCS:.c=.o)
