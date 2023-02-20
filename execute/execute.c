@@ -94,6 +94,16 @@ int handle_redirection(ProgArgs *current) {
             fclose(output_fd);
         }
         return EXIT_FAILURE;
+    } else {
+
+	// The newly acquired input from the non-stdin file has to be processed
+	char file_input[LINESIZE];
+	if(spec_get_line(file_input, LINESIZE, input_fd) == EXIT_FAILURE || 
+			spec_expansion(file_input, "$$", 1) == EXIT_FAILURE ||
+			spec_parsing(file_input, current) == EXIT_FAILURE){
+		perror("Could not access a line from the redirected input");
+		
+	}
     }
 
     if (dup2(output_int, STDOUT_FILENO) == -1) {
@@ -106,6 +116,8 @@ int handle_redirection(ProgArgs *current) {
         }
         return EXIT_FAILURE;
     }
+
+    
   
     // Handle redirection only occurs in a child process, so execute the process here
     if(execvp(current->command[0], current->command) < 0){
@@ -176,8 +188,15 @@ int run_commands(ProgArgs *current){
             		perror("Waiting error: ");
 	    		return EXIT_FAILURE;
         	}
-	
-		strcpy(current->command[0], "");
+
+		// current->command doesn't exist in the case of input redirection only
+		if(current->command[0] != NULL){	
+			strcpy(current->command[0], "");
+		}
+
+		// Resetting the other options (for the next loop of the parent) is more straightforward
+		strcpy(current->input, "");
+		strcpy(current->output, "");
 		current->background = false;
         	return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_SUCCESS;
     	}
@@ -218,30 +237,34 @@ int spec_execute(ProgArgs *current, FILE* stream){
 		return EXIT_FAILURE;
 	};
 
-
-	// command is "exit"
-	if(strcmp(current->command[0], "exit") == 0){
-		handle_exit();
+	// Built in commands are only possible when the command function is loaded, but if only input redirection is listed then 
+	// there is no command on the first run through
+	if(current->command[0] != NULL){
+		// command is "exit"
+		if(strcmp(current->command[0], "exit") == 0){
+			handle_exit();
 		
 
-	}
-
-
-	// command is "cd"
-	else if(current->command[0][0] == 'c' && current->command[0][1] == 'd'){
-		if(execute_cd(current->command[3]) == EXIT_FAILURE){
-			perror("");
-			return EXIT_FAILURE;
 		}
+
+
+		// command is "cd"
+		else if(current->command[0][0] == 'c' && current->command[0][1] == 'd'){
+			if(execute_cd(current->command[3]) == EXIT_FAILURE){
+				perror("");
+				return EXIT_FAILURE;
+			}
 		
 
-		return EXIT_SUCCESS;
-	}
-
-
-	// all other commands
-	else {
+			return EXIT_SUCCESS;
+		}
 		return other_commands(current);
+	}
+	// if there's no command specified BUT input is redirected, still run other_commands in the hope there's a command in the redirected file
+	else if(strcmp(current->input, "") != 0){
+		return other_commands(current);
+	} else {
+		return EXIT_FAILURE;
 	}
 
 	return EXIT_SUCCESS;

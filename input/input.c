@@ -71,15 +71,10 @@ int spec_check_for_child_background_processes(ParentStruct *parent) {
 			}
 		}
 	if(pid == -1 && errno != 10){
-		clearerr(stdin);
-		clearerr(stdout);
-		clearerr(stderr);
-		printf("errno: %d", errno);
+
 		return EXIT_FAILURE;
 	} else if(pid == -1 && errno == 10){
-		clearerr(stdin);
-		clearerr(stdout);
-		clearerr(stderr);
+
 		return EXIT_SUCCESS;
 	}
 	if(pid == 0){
@@ -121,6 +116,10 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream){
 
 	// PS1 print
 	printf("$");
+	if(fileno(stream) != STDIN_FILENO){
+		printf("The problem is with the stream. It isn't stdin");
+	}
+	printf("Input: %s", input);
 	if(( input_length = getline(&input, &input_size, stream)) < 0){
 		perror("Cannot fetch line from input");
 		clearerr(stream);
