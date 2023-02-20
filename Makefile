@@ -1,16 +1,16 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -Werror -g
 TARGET = smallsh
-SRCDIR = .
+SRCDIR = smallsh
 
 # Source files
-SRCS = $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*/*.c) $(filter-out $(tester old_code),  $(SRCDIR))
+SRCS = $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*/*.c) 
 
 # Object files
 OBJS = $(SRCS:.c=.o)
 
 # Include directories
-INCDIRS = heap execute utilities constants input builtins error expansion parsing signal-project
+INCDIRS = execute utilities constants input builtins error expansion parsing signal-project
 
 # Libraries
 LIBS =
