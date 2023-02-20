@@ -94,8 +94,9 @@ int handle_redirection(ProgArgs *current) {
             fclose(output_fd);
         }
         return EXIT_FAILURE;
-    } else {
+    } else if(strcmp(current->input,"") == 0) {
 
+	// Only choose this option if input is redirected
 	// The newly acquired input from the non-stdin file has to be processed
 	char file_input[LINESIZE];
 	if(spec_get_line(file_input, LINESIZE, input_fd, 1) == EXIT_FAILURE || 

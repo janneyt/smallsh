@@ -6,6 +6,7 @@
 # include <ctype.h>
 # include <unistd.h>
 # include <sys/types.h>
+# include "../input/input.h"
 
 
 void signal_handler_exit(void){
@@ -19,6 +20,8 @@ void handle_exit(void) {
  	* 
  	* @param args The command arguments (not used).
  	*/
+
+	spec_check_for_child_background_processes();
 
   	if(kill(0, SIGINT) == -1){
 		perror("Could not kill all child processes");
