@@ -286,7 +286,13 @@ int other_commands(ProgArgs *current) {
 int spec_execute(ProgArgs *current, FILE* stream){
 	char input[LINESIZE];
 
-	
+        if(current->command[0] == NULL){
+		current->command[0] = '\0';
+		strcpy(current->command[0], "");
+	}	
+	strcpy(current->input, "");
+	strcpy(current->output, "");
+	current->background = false;
 	// command is NULL
 	if(spec_get_line(input, LINESIZE, stream, 0) == EXIT_FAILURE){
 		perror("Spec get line errored:");

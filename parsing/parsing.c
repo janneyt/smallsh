@@ -160,8 +160,9 @@ int spec_parsing(char string[LINESIZE], ProgArgs *current){
 
 		index++;
 	}
-
-	current->command[command_index] = 0x0;
+	if(strcmp(current->command[0], "") != 0 && command_index != 0){
+		current->command[command_index] = 0x0;
+	}
 
 	return EXIT_SUCCESS;
 }
