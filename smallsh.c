@@ -40,9 +40,11 @@ int main(void){
 	 * @return Exits to EXIT_FAILURE if utility functions such as print fails, otherwise exits to EXIT_SUCCESS when appropriate signal is sent
 	 */
 
-	ProgArgs current = {.command = {""}, .input = "", .output = ""};
+
 
 	for(;;){
+
+		ProgArgs current = {.command = {""}, .input = "", .output = "", .background = false};
 
 		if(spec_check_for_child_background_processes() == EXIT_FAILURE){
 			perror("Had trouble waiting for child process");

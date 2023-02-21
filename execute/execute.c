@@ -235,7 +235,7 @@ int run_commands(ProgArgs *current){
 			exit(EXIT_FAILURE);
 		};
 
-	        
+	         
         	if(execvp(current->command[0], current->command) < 0){
         		perror("");
 			fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
