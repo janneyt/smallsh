@@ -66,7 +66,7 @@ int handle_redirection(ProgArgs *current) {
 	if(strcmp(current->output, "") != 0){
 		fclose(output_fd);
 	}
-	input_int = STDIN_FILENO;
+	input_int = fileno(input_fd);
     } 
 
     if (strcmp(current->output, "") != 0) {
@@ -87,11 +87,11 @@ int handle_redirection(ProgArgs *current) {
 
     if (dup2(input_int, STDIN_FILENO) == -1) {
         fprintf(stderr, "Failed to redirect input: %s\n", strerror(errno));
-        if (strcmp(current->input, "") == 0) {
-            fclose(input_fd);
+        if (strcmp(current->input, "") == 0 || fclose(input_fd) == EOF){
+		return EXIT_FAILURE;
         }
-        if (strcmp(current->output, "") == 0) {
-            fclose(output_fd);
+        if (strcmp(current->output, "") == 0 || fclose(output_fd) == EOF){
+		return EXIT_FAILURE;
         }
         return EXIT_FAILURE;
     } else if(strcmp(current->input,"") != 0) {
@@ -103,17 +103,17 @@ int handle_redirection(ProgArgs *current) {
 			spec_expansion(file_input, "$$", 1) == EXIT_FAILURE ||
 			spec_parsing(file_input, current) == EXIT_FAILURE){
 		perror("Could not access a line from the redirected input");
-		
+		return EXIT_FAILURE;
 	}
     }
 
     if (dup2(output_int, STDOUT_FILENO) == -1) {
         fprintf(stderr, "Failed to redirect output: %s\n", strerror(errno));
-        if (strcmp(current->input, "") == 0) {
-            fclose(input_fd);
+        if (strcmp(current->input, "") == 0 || fclose(input_fd) == EOF){
+		return EXIT_FAILURE;
         }
-        if (strcmp(current->output,"") == 0) {
-            fclose(output_fd);
+        if (strcmp(current->output,"") == 0 || fclose(output_fd) == EOF){
+		return EXIT_FAILURE;
         }
         return EXIT_FAILURE;
     }
@@ -130,34 +130,48 @@ int handle_redirection(ProgArgs *current) {
 	current->background = false;
         if(dup2(STDIN_FILENO, input_int) < 0){
 		perror("Can't redirect back to stdin");
+		if( output_int != STDOUT_FILENO || fclose(output_fd) == EOF){
+			return EXIT_FAILURE;
+		}
 		return EXIT_FAILURE;
     	}
     	if(dup2(STDOUT_FILENO, output_int) < 0){
 		perror("Can't redirect back to stdout");
+		if(input_int != STDIN_FILENO || fclose(output_fd) == EOF){
+			return EXIT_FAILURE;
+		}
 		return EXIT_FAILURE;
     	};
 
-    	if(fileno(input_fd) != STDIN_FILENO){
-		fclose(input_fd);
+    	if(input_int != STDIN_FILENO && fclose(input_fd) == EOF){
+		return EXIT_FAILURE;
     	};
-    	if(fileno(output_fd) != STDOUT_FILENO){
-		fclose(output_fd);
+    	if(output_int != STDOUT_FILENO && fclose(output_fd) == EOF){
+		return EXIT_FAILURE;
     	};
     	strcpy(current->input, "");
     	strcpy(current->output, "");
 	return EXIT_FAILURE;
     };
 
-
-
-    if(dup2(STDIN_FILENO, input_int) < 0){
-	perror("Can't redirect back to stdin");
-	return EXIT_FAILURE;
-    }
-    if(dup2(STDOUT_FILENO, output_int) < 0){
-	perror("Can't redirect back to stdout");
-	return EXIT_FAILURE;
-    };
+	strcpy(current->command[0], "");
+	strcpy(current->input, "");
+	strcpy(current->output, "");
+	current->background = false;
+        if(dup2(STDIN_FILENO, input_int) < 0){
+		perror("Can't redirect back to stdin");
+		if( output_int != STDOUT_FILENO || fclose(output_fd) == EOF){
+			return EXIT_FAILURE;
+		}
+		return EXIT_FAILURE;
+    	}
+    	if(dup2(STDOUT_FILENO, output_int) < 0){
+		perror("Can't redirect back to stdout");
+		if(input_int != STDIN_FILENO || fclose(output_fd) == EOF){
+			return EXIT_FAILURE;
+		}
+		return EXIT_FAILURE;
+    	};
 
     if(fileno(input_fd) != STDIN_FILENO && fclose(input_fd) == EOF){
 	    perror("Could not close input_fd");
@@ -187,12 +201,33 @@ int run_commands(ProgArgs *current){
 		// redirection options have a pseudo command built in. However, all 
 		// other alternatives must be discarded
 
-		if(strcmp(current->command[0], "") == 0 && 
-				(strcmp(current->input, "") != 0 ||
-				 strcmp(current->output, "") != 0)){
-			exit(handle_redirection(current));
-		} else if(strcmp(current->command[0], "") == 0){
+		if( strcmp(current->command[0], "") == 0 && (strcmp(current->input, "") != 0 || strcmp(current->output, "") != 0)){
+			if(handle_redirection(current) == EXIT_FAILURE){
+				
+				perror("Redirection problem");
+				if(strcmp(current->command[0], "") != 0){
+					strcpy(current->command[0], "");
+				}
+				strcpy(current->input, "");
+				strcpy(current->output, "");
+				current->background = false;
+				
+				exit(EXIT_FAILURE);
+			}
+			exit(EXIT_SUCCESS);
+		} else if(strcmp(current->command[0], "") == 0){ 
 			exit(EXIT_FAILURE);
+		} else if(strcmp(current->input, "") != 0 || strcmp(current->output, "") != 0){
+			if(handle_redirection(current) == EXIT_FAILURE){
+				perror("Redirection problem");
+				if(strcmp(current->command[0], "") != 0){
+					strcpy(current->command[0], "");
+				}
+				strcpy(current->input, "");
+				strcpy(current->output, "");
+				current->background = false;
+				exit(EXIT_FAILURE);
+			}
 		}
 
 		if(reset_signals() == EXIT_FAILURE){
@@ -200,16 +235,7 @@ int run_commands(ProgArgs *current){
 			exit(EXIT_FAILURE);
 		};
 
-		// The big difference is that this assumes there's a command, while earlier we dealt with the edge case where there wasn't.
-		if(strcmp(current->input, "") != 0 || strcmp(current->output, "") != 0){
-			if(handle_redirection(current) == EXIT_FAILURE){
-				perror("Redirection not possible");
-				exit(EXIT_FAILURE);
-			};
-			
-			exit(EXIT_SUCCESS);
-    		}
-        
+	        
         	if(execvp(current->command[0], current->command) < 0){
         		perror("");
 			fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
@@ -240,6 +266,7 @@ int run_commands(ProgArgs *current){
 		current->background = false;
         	return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_SUCCESS;
     	}
+	perror("\n");
     	return EXIT_FAILURE;
 
 }
@@ -259,11 +286,14 @@ int other_commands(ProgArgs *current) {
 int spec_execute(ProgArgs *current, FILE* stream){
 	char input[LINESIZE];
 
+	
 	// command is NULL
 	if(spec_get_line(input, LINESIZE, stream, 0) == EXIT_FAILURE){
 		perror("Spec get line errored:");
 		return EXIT_FAILURE;
 	};
+
+
 	// command is NULL, but input *something* for command
 	if(spec_expansion(input, "$$", 1) == EXIT_FAILURE){
 		perror("Spec expansion errored:");

@@ -56,7 +56,7 @@ int main(void){
 		current.background = false;
 
 		if(spec_execute(&current, stdin) == EXIT_FAILURE){
-			perror("\n**Error executing commands**\n\n");
+			perror("\n**Error executing commands**");
 		};		
 	}
 

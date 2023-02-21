@@ -134,7 +134,7 @@ int spec_parsing(char string[LINESIZE], ProgArgs *current){
 			}
 
 			strcpy(current->output, storage[index + 1]);
-			
+
 			index++;
 		}
 
@@ -161,6 +161,7 @@ int spec_parsing(char string[LINESIZE], ProgArgs *current){
 		index++;
 	}
 
+	current->command[command_index] = 0x0;
 
 	return EXIT_SUCCESS;
 }

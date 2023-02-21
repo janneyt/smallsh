@@ -130,7 +130,6 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 	reset_signals();
 	return EXIT_SUCCESS;
 }
-
 char** help_split_line(char** storage, char* line){
 	/**
 	 * \brief Helper function that tokenizes a line into an array of words
