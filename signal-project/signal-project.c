@@ -21,4 +21,6 @@ void spec_signal_handler(void) {
 	sigaddset(&smallsh_signals, SIGINT);
 	sigaddset(&smallsh_signals, SIGTSTP);
 
+
+
 }

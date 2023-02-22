@@ -37,7 +37,7 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
 	int stopped;
 
     	for(;;) {
-        	pid = waitpid(-getpid(), &status, WNOHANG | WUNTRACED | WCONTINUED);
+        	pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED);
         	if (pid != -1 && pid != 0) {
         
 
@@ -67,6 +67,10 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
 					} else {
 						parent->last_foreground = exit_status;
 					}
+					parent->heap[index] = NULL;
+					if(parent->heap_size > -1){
+						parent->heap_size--;
+					}
 				}
 			}
 				}
@@ -82,6 +86,13 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
 	}
 	}
 	return EXIT_SUCCESS;
+}
+
+void get_line_signal_handler(int signo){
+	if(signo == 2){
+		return;
+	}
+	
 }
 
 
@@ -111,7 +122,7 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 	assert(errno == 0);
 	struct sigaction sa;
 	struct sigaction oldaction;
-	sa.sa_handler = SIG_IGN;
+	sa.sa_handler = get_line_signal_handler;
 	sigemptyset(&sa.sa_mask);
 	sigaction(SIGINT, &sa, &oldaction);
 
@@ -121,11 +132,18 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 	}
 	
 	if(( input_length = getline(&input, &input_size, stream)) < 0){
+
 		perror("Cannot fetch line from input");
 		clearerr(stream);
 		errno = 0;
 		return EXIT_FAILURE;
 	};
+
+
+	if(input_length > LINESIZE-1){
+		perror("Input is too large for LINESIZE");
+		return EXIT_FAILURE;
+	}
 
 	assert(input_length >= 0);
 	sigaction(SIGINT, &oldaction, NULL);

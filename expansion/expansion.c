@@ -22,7 +22,7 @@
 # include <stdlib.h>
 # include <errno.h>
 
-int spec_expansion(char arg[LINESIZE], char substring[3], int control_code){
+int spec_expansion(char arg[LINESIZE], char substring[3], int control_code, ParentStruct *parent){
 	/**
 	 * \brief Expands four variables based on the specifications
 	 *
@@ -40,11 +40,31 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code){
 		util_int_to_string(getpid(), str_pid, LINESIZE);
 
 	} else if(control_code == 2){
+		strcpy(str_pid, "");
 		// Substring == ~/, replace with the HOME environment variable
-		char pwd[LINESIZE] = "PWD";
-		util_env_var_to_fixed_array(pwd, str_pid); 
+		char home[LINESIZE] = "HOME";
+		util_env_var_to_fixed_array(home, str_pid); 
 
-	};
+	} else if(control_code == 3){
+		strcpy(str_pid, "");
+		// Substring == $?, replace with parent.last_foreground
+		if(parent->last_foreground != 0){
+
+			util_int_to_string(parent->last_foreground, str_pid, 9);
+		} else {
+			strcpy(str_pid, "0");
+		}
+		
+	} else if(control_code == 4){
+		strcpy(str_pid, "");
+		// Substring == $!, replace with parent.last_background
+		if(parent->last_background != 0){
+			util_int_to_string(parent->last_background, str_pid, 9);
+		} else {
+			strcpy(str_pid, "");
+		}
+	}
+	;
 	char *discovery = strstr(arg, substring);
 	char* temporary = "";
 
@@ -58,9 +78,11 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code){
 	// No need to process if current substring hasn't been found
 	if(discovery == NULL){
 		if(strcmp(substring, "$$") == 0){
-			return spec_expansion(arg, "~/", 2);
+			return spec_expansion(arg, "~/", 2, parent);
 		} else if(strcmp(substring, "~/") == 0){
-			return EXIT_SUCCESS;
+			return spec_expansion(arg, "$?", 3, parent);
+		} else if(strcmp(substring, "$$") == 0){
+			return spec_expansion(arg, "$!", 4, parent);
 		}
 			
 	};
@@ -94,17 +116,16 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code){
 
 			strcat(arg, str_pid);
 			strcat(arg, temporary);
-		} else if (control_code != 2){
+		} else {
 			*discovery = '\0';
-			discovery++;
-			*discovery = '\0';
-
+			if(control_code != 2){
+			
+				discovery++;
+				*discovery = '\0';
+			}
 			strcat(arg, str_pid);
 			strcat(arg, temporary);
-		} else if (control_code == 2){
-			arg[length] = '\0';
-			return EXIT_SUCCESS;
-		}
+		} 
 		discovery = strstr(arg, substring);
 		
 	};
@@ -112,7 +133,11 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code){
 	strcat(arg, "");
 	
 	if(control_code == 1){
-		return spec_expansion(arg, "~/", 2);
+		return spec_expansion(arg, "~/", 2, parent);
+	} else if (control_code == 2){
+		return spec_expansion(arg, "$?", 3, parent);
+	} else if (control_code == 3){
+		return spec_expansion(arg, "$!", 4, parent);
 	}
 	return EXIT_SUCCESS;
 

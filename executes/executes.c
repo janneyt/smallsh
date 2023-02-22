@@ -25,7 +25,7 @@ int run_commands(ProgArgs* current, ParentStruct* parent);
  * @return EXIT_SUCCESS if redirection was successful, EXIT_FAILURE otherwise.
  */
 
-int handle_redirection(ProgArgs *current) {
+int handle_redirection(ProgArgs *current, ParentStruct *parent) {
 
     FILE* input_fd = stdin;
     FILE* output_fd = stdout;
@@ -74,7 +74,7 @@ int handle_redirection(ProgArgs *current) {
 	// The newly acquired input from the non-stdin file has to be processed
 	char file_input[LINESIZE];
 	if(spec_get_line(file_input, LINESIZE, input_fd, 1) == EXIT_FAILURE || 
-			spec_expansion(file_input, "$$", 1) == EXIT_FAILURE ||
+			spec_expansion(file_input, "$$", 1, parent) == EXIT_FAILURE ||
 			spec_parsing(file_input, current) == EXIT_FAILURE){
 		perror("Could not access a line from the redirected input");
 		return EXIT_FAILURE;
@@ -147,6 +147,22 @@ int handle_redirection(ProgArgs *current) {
 		return EXIT_FAILURE;
     	};
 
+    if(dup2(STDIN_FILENO, input_int) < 0){
+		perror("Can't redirect back to stdin");
+	if( output_int != STDOUT_FILENO || fclose(output_fd) == EOF){
+        	return EXIT_FAILURE;
+	}
+        return EXIT_FAILURE;
+    }
+    if(dup2(STDOUT_FILENO, output_int) < 0){
+	perror("Can't redirect back to stdout");
+	if(input_int != STDIN_FILENO || fclose(output_fd) == EOF){
+		return EXIT_FAILURE;
+	}
+	return EXIT_FAILURE;
+    };
+
+
     if(fileno(input_fd) != STDIN_FILENO && fclose(input_fd) == EOF){
 	    perror("Could not close input_fd");
 	    return EXIT_FAILURE;
@@ -163,21 +179,19 @@ int handle_redirection(ProgArgs *current) {
 int run_commands(ProgArgs *current, ParentStruct* parent){
 
 	// Processing with a current->command that is not ""
+	pid_t wpid = -1;
 	pid_t pid = fork();
     	if (pid == -1) {
         	perror("Fork failed. Reason for failure:");
         	return EXIT_FAILURE;
     	} else if (pid == 0) { // child process
-		parent->heap[parent->heap_size] = current;
-		parent->heap[parent->heap_size]->pid = getpid();
-		parent->heap_size++;
 
 		// So far, I've tolerated a missing command, but only because both
 		// redirection options have a pseudo command built in. However, all 
 		// other alternatives must be discarded
 
 		if( strcmp(current->command[0], "") == 0 && (strcmp(current->input, "") != 0 || strcmp(current->output, "") != 0)){
-			if(handle_redirection(current) == EXIT_FAILURE){
+			if(handle_redirection(current, parent) == EXIT_FAILURE){
 				
 				perror("Redirection problem");
 				if(strcmp(current->command[0], "") != 0){
@@ -193,7 +207,7 @@ int run_commands(ProgArgs *current, ParentStruct* parent){
 		} else if(strcmp(current->command[0], "") == 0){ 
 			exit(EXIT_FAILURE);
 		} else if(strcmp(current->input, "") != 0 || strcmp(current->output, "") != 0){
-			if(handle_redirection(current) == EXIT_FAILURE){
+			if(handle_redirection(current, parent) == EXIT_FAILURE){
 				perror("Redirection problem");
 				if(strcmp(current->command[0], "") != 0){
 					strcpy(current->command[0], "");
@@ -217,16 +231,26 @@ int run_commands(ProgArgs *current, ParentStruct* parent){
 	} else { // parent process
 		int status;
 		int hang = 0;
+
+		parent->heap[parent->heap_size] = current;
+		parent->heap[parent->heap_size]->pid = pid;
+		parent->heap_size++;
 		
 		// The WNOHANG option sends a process to the background.
 		if(current->background){
 			hang = WNOHANG;
 		}
-		if (waitpid(0, &status, hang) == -1) {
+		if ((wpid = waitpid(0, &status, hang)) == -1) {
             		perror("Waiting error: ");
 	    		return EXIT_FAILURE;
         	}
 
+		
+		if(wpid > 0){
+			parent->last_background = pid;
+			parent->heap[parent->heap_size-1] = NULL;
+			parent->heap_size--;
+		} 
 
 		// Resetting the other options (for the next loop of the parent) is more straightforward
 		if(strcmp(current->command[0], "") != 0){
@@ -235,6 +259,10 @@ int run_commands(ProgArgs *current, ParentStruct* parent){
 		strcpy(current->input, "");
 		strcpy(current->output, "");
 		current->background = false;
+		clearerr(stdin);
+		clearerr(stdout);
+		clearerr(stderr);
+		sleep(1);
         	return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_SUCCESS;
     	}
 	perror("\n");
@@ -255,13 +283,12 @@ int spec_execute(ProgArgs *current, FILE* stream, ParentStruct* parent){
 	current->background = false;
 	// command is NULL
 	if(spec_get_line(input, LINESIZE, stream, 0) == EXIT_FAILURE){
-		perror("Spec get line errored:");
 		return EXIT_FAILURE;
 	};
 
 
 	// command is NULL, but input *something* for command
-	if(spec_expansion(input, "$$", 1) == EXIT_FAILURE){
+	if(spec_expansion(input, "$$", 1, parent) == EXIT_FAILURE){
 		perror("Spec expansion errored:");
 		return EXIT_FAILURE;
 	};
@@ -278,11 +305,8 @@ int spec_execute(ProgArgs *current, FILE* stream, ParentStruct* parent){
 	if(strcmp(current->command[0], "") != 0){
 		// command is "exit"
 		if(strcmp(current->command[0], "exit") == 0){
-			handle_exit();
-		
-
+			handle_exit();		
 		}
-
 
 		// command is "cd"
 		else if(current->command[0][0] == 'c' && current->command[0][1] == 'd'){

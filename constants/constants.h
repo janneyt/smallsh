@@ -22,8 +22,8 @@ typedef struct {
 	int pid_counter;
 	int pid;
 	ProgArgs* heap[NUMCHILDREN];
-	pid_t last_foreground;
-	pid_t last_background;
+	int last_foreground;
+	int last_background;
 	int heap_size;
 } ParentStruct;
 

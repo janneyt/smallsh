@@ -12,4 +12,4 @@
 # endif
 # include <stdlib.h>
 # include <errno.h>
-int spec_expansion(char string[LINESIZE], char substring[3], int control_code);
+int spec_expansion(char string[LINESIZE], char substring[3], int control_code, ParentStruct *parent);

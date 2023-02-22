@@ -19,7 +19,7 @@
 
 # include <stdlib.h>
 # include <errno.h>
-
+# include "../signal-project/signal-project.h"
 
 int main(void){
 	/**
@@ -27,21 +27,26 @@ int main(void){
 	 *
 	 * @return Exits to EXIT_FAILURE if utility functions such as print fails, otherwise exits to EXIT_SUCCESS when appropriate signal is sent
 	 */
-
+	
+	spec_signal_handler();
 	ParentStruct parent = {
-	.pid = 0,
-	.pid_counter = 0,
-	.heap = {NULL},
-	.last_foreground = 0,
-	.last_background = 0,
-	.heap_size = 0
+		.pid = 0,
+		.pid_counter = 0,
+		.heap = {NULL},
+		.last_foreground = 0,
+		.last_background = 0,
+		.heap_size = 0
 	};
 	for(;;){
-
+		fflush(stdout);
+		fflush(stderr);
+		fflush(stdin);
+		clearerr(stdin);
+		clearerr(stdout);
+		clearerr(stderr);
 		ProgArgs current = {.command = {""}, .input = "", .output = "", .background = false};
 
 		if(spec_check_for_child_background_processes(&parent) == EXIT_FAILURE){
-			perror("Had trouble waiting for child process");
 			exit(EXIT_FAILURE);
 		}
 		if(strcmp(current.command[0], "") != 0){
@@ -52,7 +57,6 @@ int main(void){
 		current.background = false;
 
 		if(spec_execute(&current, stdin, &parent) == EXIT_FAILURE){
-			perror("\n**Error executing commands**");
 		};		
 	}
 
