@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -Werror -g
+CFLAGS = -Wall -Wextra -Wpedantic -Werror -g -no-pie
 TARGET = smallsh
 SRCDIR = .
 
