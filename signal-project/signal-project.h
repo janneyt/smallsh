@@ -7,7 +7,7 @@
 # include "../constants/constants.h"
 # endif
 
-
+int reset_signals(void);
 void handle_signal_exit(int signo);
 
 void handle_SIGSTOP(int signo);

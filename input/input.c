@@ -9,18 +9,14 @@
 # include <stdlib.h>
 # include <assert.h>
 # include <stdint.h>
-#ifndef LINESIZE
+# ifndef  LINESIZE
 # include "../constants/constants.h"
-#endif
-# ifndef  handle_signal_exit
-# include "../execute/execute.h"
+
 # include "../signal-project/signal-project.h"
 # endif
 # include <stdlib.h>
 # include <errno.h>
-# ifndef  heap_size
-# include "../heap/heap.h"
-# endif
+
 # ifndef  util_check_environ
 # include "../utilities/utilities.h"
 # endif
@@ -33,7 +29,7 @@
  * @return Returns EXIT_SUCCESS if there are no un-waited-for background processes,
  * and EXIT_FAILURE if any child process exited or was signaled.
  */
-int spec_check_for_child_background_processes(ParentStruct *parent) {
+int spec_check_for_child_background_processes(ParentStruct* parent) {
 	pid_t pid;
 	int status;
 	int exit_status;
@@ -62,14 +58,18 @@ int spec_check_for_child_background_processes(ParentStruct *parent) {
             			}
 			}
 
-			ProgArgs* current = parent->heap[find_in_heap(pid, parent->heap)];
-			// The specifcations require us to track the latest exited process for both background and foreground	
-			if(current->background){
-				parent->last_background = exit_status;
-			} else {
-				parent->last_foreground = exit_status;
+			for(int index = 0; index < parent->heap_size; index++){
+				if(parent->heap[index]->pid == pid){
+					ProgArgs* current = parent->heap[index];
+
+					if(current->background){
+						parent->last_background = exit_status;
+					} else {
+						parent->last_foreground = exit_status;
+					}
+				}
 			}
-		}
+				}
 	if(pid == -1 && errno != 10){
 
 		return EXIT_FAILURE;
@@ -110,9 +110,10 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 	};
 	assert(errno == 0);
 	struct sigaction sa;
-	sa.sa_handler = handle_signal_exit;
+	struct sigaction oldaction;
+	sa.sa_handler = SIG_IGN;
 	sigemptyset(&sa.sa_mask);
-	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGINT, &sa, &oldaction);
 
 	// PS1 print
 	if(control_code == 0){
@@ -127,7 +128,7 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 	};
 
 	assert(input_length >= 0);
-	reset_signals();
+	sigaction(SIGINT, &oldaction, NULL);
 	return EXIT_SUCCESS;
 }
 char** help_split_line(char** storage, char* line){

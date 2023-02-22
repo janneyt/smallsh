@@ -8,10 +8,10 @@
 # include <stdbool.h>
 # ifndef  LINESIZE
 # include "../constants/constants.h"
-# endif
 # include "../expansion/expansion.h"
 # include "../input/input.h"
 # include "../builtins/builtins.h"
+# endif
 
 int spec_parsing(char string[LINESIZE], ProgArgs *current){
 	/**
@@ -22,7 +22,6 @@ int spec_parsing(char string[LINESIZE], ProgArgs *current){
 	 * @return EXIT_SUCCESS if every step completes, else EXIT_FAILURE for any step failing
 	 * */
 	char* storage[LINESIZE];
-
 	int storagelength = 0;
 	spec_word_splitting(storage, string);
 	int index = 0;

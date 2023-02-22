@@ -24,5 +24,6 @@ typedef struct {
 	ProgArgs* heap[NUMCHILDREN];
 	pid_t last_foreground;
 	pid_t last_background;
+	int heap_size;
 } ParentStruct;
 

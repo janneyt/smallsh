@@ -6,8 +6,10 @@
 # include <ctype.h>
 # include <unistd.h>
 # include <sys/types.h>
-# include "../input/input.h"
 
+# ifndef  LINESIZE
+# include "../input/input.h"
+# endif
 
 void signal_handler_exit(void){
 	// Just ignoring this...

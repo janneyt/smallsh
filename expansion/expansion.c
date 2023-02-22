@@ -3,6 +3,9 @@
 # define _GNU_SOURCE
 # define _POSIC_C_SOURCE >= 200112L
 
+# ifndef LINESIZE
+# include "../constants/constants.h"
+# endif
 # include <stdio.h>
 # include <sys/types.h>
 # include <signal.h>
@@ -14,11 +17,6 @@
 # include <stdint.h>
 # ifndef  util_int_to_string
 # include "../utilities/utilities.h"
-# endif
-# include "../error/error.h"
-
-# ifndef LINESIZE
-# include "../constants/constants.h"
 # endif
 
 # include <stdlib.h>

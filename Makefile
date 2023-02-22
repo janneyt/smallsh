@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -Werror -g -no-pie
+CFLAGS = -Wall -Wextra -Wpedantic -Werror -g
 TARGET = smallsh
 SRCDIR = .
 
@@ -10,7 +10,7 @@ SRCS = $(wildcard $(SRCDIR)/*/*.c) smallsh.c
 OBJS = $(SRCS:.c=.o)
 
 # Include directories
-INCDIRS = execute utilities constants input builtins error expansion parsing signal-project
+INCDIRS = execute utilities constants input builtins expansion parsing signal-project
 
 # Libraries
 LIBS =
