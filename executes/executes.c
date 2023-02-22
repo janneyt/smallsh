@@ -286,7 +286,7 @@ int spec_execute(ProgArgs *current, FILE* stream, ParentStruct* parent){
 
 		// command is "cd"
 		else if(current->command[0][0] == 'c' && current->command[0][1] == 'd'){
-			if(execute_cd(current->command[3]) == EXIT_FAILURE){
+			if(execute_cd(current->command[1]) == EXIT_FAILURE){
 				perror("");
 				return EXIT_FAILURE;
 			}
