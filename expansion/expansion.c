@@ -63,8 +63,7 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code, Pare
 		} else {
 			strcpy(str_pid, "");
 		}
-	}
-	;
+	} ;
 	char *discovery = strstr(arg, substring);
 	char* temporary = "";
 
@@ -81,10 +80,9 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code, Pare
 			return spec_expansion(arg, "~/", 2, parent);
 		} else if(strcmp(substring, "~/") == 0){
 			return spec_expansion(arg, "$?", 3, parent);
-		} else if(strcmp(substring, "$$") == 0){
+		} else if(strcmp(substring, "$?") == 0){
 			return spec_expansion(arg, "$!", 4, parent);
-		}
-			
+		}			
 	};
 	
 
@@ -92,12 +90,15 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code, Pare
 
 	// This exhaustively searches for the substrings
 	while(discovery != NULL){
-
-
+		
 		// -2 because length-1 indexes the final character and thus the substring with size 2 needs an offset of 2
 		if(&discovery[0] != &(arg[length - 2])){
 			temporary = strdup(discovery);
-			temporary += 2;
+			if(control_code == 2){
+				temporary += 1;
+			} else {
+				temporary += 2;
+			}
 		} 
 		if( &arg[0] == &discovery[0] && control_code == 2){
 			*discovery = '\0';
@@ -122,9 +123,15 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code, Pare
 			
 				discovery++;
 				*discovery = '\0';
+				strcat(arg, str_pid);
+				strcat(arg, temporary);
 			}
-			strcat(arg, str_pid);
-			strcat(arg, temporary);
+			if(control_code == 2){
+				strcat(arg, str_pid);
+				
+				strcat(arg, temporary);
+			}
+		
 		} 
 		discovery = strstr(arg, substring);
 		
@@ -138,7 +145,7 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code, Pare
 		return spec_expansion(arg, "$?", 3, parent);
 	} else if (control_code == 3){
 		return spec_expansion(arg, "$!", 4, parent);
-	}
+	} 
 	return EXIT_SUCCESS;
 
 }

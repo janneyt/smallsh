@@ -22,6 +22,7 @@ int spec_parsing(char string[LINESIZE], ProgArgs *current){
 	 * @return EXIT_SUCCESS if every step completes, else EXIT_FAILURE for any step failing
 	 * */
 	char* storage[LINESIZE];
+
 	int storagelength = 0;
 	spec_word_splitting(storage, string);
 	int index = 0;

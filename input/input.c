@@ -187,14 +187,27 @@ char** help_split_line(char** storage, char* line){
 	int	token_bufsize = 64;
 	char**  array_of_tokens = storage;
 
+	char*   old_delim = (strcmp(delim, DELIMITER) == 0) ? DELIMITER : getenv("IFS");
 		
 	if(bufsize < 1){
 		printf("A buffer of 1 or more is needed for tokenization");
 		exit(EXIT_FAILURE);
 	};
-	
+ 	
 	token = strtok(line, delim);
+	
 	while(token != NULL){
+
+		// For bash -c 'exit 166' processing
+		if(token[0] == '\''){
+			delim = "\'\n\t";
+			token += 1;
+		} 
+		if(token[strlen(token) - 1] == '\''){
+			delim = old_delim;
+			token[strlen(token) - 2] = '\0';
+		}
+		
 		array_of_tokens[position] = token;
 		position++;
 		if(position >= bufsize){

@@ -231,12 +231,11 @@ int run_commands(ProgArgs *current, ParentStruct* parent){
 		if(current->background){
 			hang = WNOHANG;
 		}
-		if ((wpid = waitpid(0, &status, hang)) == -1) {
+		if ((wpid = waitpid(-getpid(), &status, hang)) == -1) {
             		
-			if(errno != 10){
+			if(errno != 10 || errno != 11){
 				return EXIT_SUCCESS;
 			}
-			
 	    		return EXIT_FAILURE;
         	}
 
