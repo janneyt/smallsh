@@ -37,9 +37,8 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
 	int stopped;
 
     	for(;;) {
-        	pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED);
+        	pid = waitpid(0, &status, WNOHANG | WUNTRACED | WCONTINUED);
         	if (pid != -1 && pid != 0) {
-        
 
         		if (WIFEXITED(status)) {
             			exit_status = WEXITSTATUS(status);
@@ -49,7 +48,8 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
         			fprintf(stderr, "Child process %d done. Signaled %d.\n", pid, signaled);
         		} else if (WIFSTOPPED(status)) {
         			stopped = WSTOPSIG(status);
-        			if (stopped == SIGSTOP) {
+
+        			if (stopped == SIGTSTP) {
         				if (kill(pid, SIGCONT) == -1) {
                 				perror("kill couldn't send a signal");
                     				return EXIT_FAILURE;
@@ -73,17 +73,18 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
 					}
 				}
 			}
-				}
-	if(pid == -1 && errno != 10){
+		}
+		
+		if(pid == -1 && errno != 10){
 
-		return EXIT_FAILURE;
-	} else if(pid == -1 && errno == 10){
+			return EXIT_FAILURE;
+		} else if(pid == -1 && errno == 10){
 
-		return EXIT_SUCCESS;
-	}
-	if(pid == 0){
-		return EXIT_SUCCESS;
-	}
+			return EXIT_SUCCESS;
+		}
+		if(pid == 0){
+			return EXIT_SUCCESS;
+		}
 	}
 	return EXIT_SUCCESS;
 }
@@ -120,26 +121,43 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 		errno = 0;
 	};
 	assert(errno == 0);
-	struct sigaction sa;
-	struct sigaction oldaction;
+	struct sigaction sa = {0};
+	struct sigaction oldaction = {0};
+	struct sigaction child = {0};
+	struct sigaction child_old = {0};
 	sa.sa_handler = get_line_signal_handler;
+	sa.sa_flags = SA_RESTART;
+	child.sa_handler = SIG_IGN;
+	child.sa_flags = SA_RESTART;
 	sigemptyset(&sa.sa_mask);
 	sigaction(SIGINT, &sa, &oldaction);
+	sigaction(SIGCHLD, &sa, &child_old);
 
 	// PS1 print
 	if(control_code == 0){
 		printf("$");
 	}
+
+	clearerr(stdin);
+	clearerr(stdout);
+	clearerr(stderr);
 	
 	if(( input_length = getline(&input, &input_size, stream)) < 0){
-
+		if(errno == 11){
+			return EXIT_SUCCESS;
+		}
 		perror("Cannot fetch line from input");
 		clearerr(stream);
+		clearerr(stdin);
+		clearerr(stdout);
 		errno = 0;
+		
 		return EXIT_FAILURE;
 	};
 
-
+	clearerr(stream);
+	clearerr(stdin);
+	clearerr(stdout);
 	if(input_length > LINESIZE-1){
 		perror("Input is too large for LINESIZE");
 		return EXIT_FAILURE;
@@ -147,6 +165,7 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 
 	assert(input_length >= 0);
 	sigaction(SIGINT, &oldaction, NULL);
+	sigaction(SIGCHLD, &child, NULL);
 	return EXIT_SUCCESS;
 }
 char** help_split_line(char** storage, char* line){

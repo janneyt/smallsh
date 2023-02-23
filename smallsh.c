@@ -27,7 +27,7 @@ int main(void){
 	 *
 	 * @return Exits to EXIT_FAILURE if utility functions such as print fails, otherwise exits to EXIT_SUCCESS when appropriate signal is sent
 	 */
-	
+	printf("%d", SIGTSTP);	
 	spec_signal_handler();
 	ParentStruct parent = {
 		.pid = 0,

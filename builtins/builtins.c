@@ -25,18 +25,15 @@ void handle_exit(void) {
 
 	int status;
 	pid_t pid;
-	while((pid = waitpid(-getpid(), &status, WNOHANG | WUNTRACED | WCONTINUED) != -1)){
+	while((pid = waitpid(getpid(), &status, WNOHANG | WUNTRACED | WCONTINUED) != -1)){
 		printf("Pid: %d has status: %d but is ending artificially", pid, status);
-		if(kill(pid, SIGINT) == -1){
+		if(kill(SIGKILL, pid) == -1){
 			perror("Could not kill all child processes");
 			exit(EXIT_FAILURE);
 		}
 	}
 
-  	if(kill(0, SIGINT) == -1){
-		perror("Could not kill all child processes");
-		exit(EXIT_FAILURE);
-	};
+
 
   	// Print the exit message and exit
   	fprintf(stderr, "\nexit\n");

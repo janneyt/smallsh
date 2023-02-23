@@ -25,7 +25,7 @@ int run_commands(ProgArgs* current, ParentStruct* parent);
  * @return EXIT_SUCCESS if redirection was successful, EXIT_FAILURE otherwise.
  */
 
-int handle_redirection(ProgArgs *current, ParentStruct *parent) {
+int handle_redirection(ProgArgs *current) {
 
     FILE* input_fd = stdin;
     FILE* output_fd = stdout;
@@ -68,18 +68,7 @@ int handle_redirection(ProgArgs *current, ParentStruct *parent) {
 		return EXIT_FAILURE;
         }
         return EXIT_FAILURE;
-    } else if(strcmp(current->input,"") != 0) {
-
-	// Only choose this option if input is redirected
-	// The newly acquired input from the non-stdin file has to be processed
-	char file_input[LINESIZE];
-	if(spec_get_line(file_input, LINESIZE, input_fd, 1) == EXIT_FAILURE || 
-			spec_expansion(file_input, "$$", 1, parent) == EXIT_FAILURE ||
-			spec_parsing(file_input, current) == EXIT_FAILURE){
-		perror("Could not access a line from the redirected input");
-		return EXIT_FAILURE;
-	}
-    }
+    } 
 
     if (dup2(output_int, STDOUT_FILENO) == -1) {
         fprintf(stderr, "Failed to redirect output: %s\n", strerror(errno));
@@ -181,6 +170,7 @@ int run_commands(ProgArgs *current, ParentStruct* parent){
 	// Processing with a current->command that is not ""
 	pid_t wpid = -1;
 	pid_t pid = fork();
+	int stopped;
     	if (pid == -1) {
         	perror("Fork failed. Reason for failure:");
         	return EXIT_FAILURE;
@@ -191,7 +181,7 @@ int run_commands(ProgArgs *current, ParentStruct* parent){
 		// other alternatives must be discarded
 
 		if( strcmp(current->command[0], "") == 0 && (strcmp(current->input, "") != 0 || strcmp(current->output, "") != 0)){
-			if(handle_redirection(current, parent) == EXIT_FAILURE){
+			if(handle_redirection(current) == EXIT_FAILURE){
 				
 				perror("Redirection problem");
 				if(strcmp(current->command[0], "") != 0){
@@ -207,7 +197,7 @@ int run_commands(ProgArgs *current, ParentStruct* parent){
 		} else if(strcmp(current->command[0], "") == 0){ 
 			exit(EXIT_FAILURE);
 		} else if(strcmp(current->input, "") != 0 || strcmp(current->output, "") != 0){
-			if(handle_redirection(current, parent) == EXIT_FAILURE){
+			if(handle_redirection(current) == EXIT_FAILURE){
 				perror("Redirection problem");
 				if(strcmp(current->command[0], "") != 0){
 					strcpy(current->command[0], "");
@@ -219,9 +209,10 @@ int run_commands(ProgArgs *current, ParentStruct* parent){
 			}
 		}
 
-		// TODO: Reset signals here (but need to identify where to store into oldact elsewhere
+		
 	         
         	if(execvp(current->command[0], current->command) < 0){
+			
         		perror("");
 			fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
         		exit(EXIT_FAILURE);
@@ -241,13 +232,28 @@ int run_commands(ProgArgs *current, ParentStruct* parent){
 			hang = WNOHANG;
 		}
 		if ((wpid = waitpid(0, &status, hang)) == -1) {
-            		perror("Waiting error: ");
+            		
+			if(errno != 10){
+				return EXIT_SUCCESS;
+			}
+			
 	    		return EXIT_FAILURE;
         	}
 
 		
 		if(wpid > 0){
-			parent->last_background = pid;
+			
+			if(WIFSTOPPED(status)){
+				stopped = WSTOPSIG(status) + 128;
+				if(kill(wpid, SIGCONT) == -1){
+					return EXIT_FAILURE;
+				}
+				parent->last_background = stopped;
+
+			} else {
+				parent->last_foreground = WEXITSTATUS(status);
+			}
+			
 			parent->heap[parent->heap_size-1] = NULL;
 			parent->heap_size--;
 		} 
@@ -259,13 +265,8 @@ int run_commands(ProgArgs *current, ParentStruct* parent){
 		strcpy(current->input, "");
 		strcpy(current->output, "");
 		current->background = false;
-		clearerr(stdin);
-		clearerr(stdout);
-		clearerr(stderr);
-		sleep(1);
         	return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_SUCCESS;
     	}
-	perror("\n");
     	return EXIT_FAILURE;
 
 }
@@ -273,7 +274,7 @@ int run_commands(ProgArgs *current, ParentStruct* parent){
 
 int spec_execute(ProgArgs *current, FILE* stream, ParentStruct* parent){
 	char input[LINESIZE];
-
+	
         if(current->command[0] == NULL){
 		current->command[0] = '\0';
 		strcpy(current->command[0], "");
