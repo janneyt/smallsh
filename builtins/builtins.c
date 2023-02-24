@@ -15,7 +15,7 @@ void signal_handler_exit(void){
 	// Just ignoring this...
 }
 
-void handle_exit(void) {	
+void handle_exit(ProgArgs* current, ParentStruct* parent) {	
 
   	/**
  	* @brief Handles the exit command.
@@ -24,6 +24,7 @@ void handle_exit(void) {
  	*/
 
 	int status;
+	
 	pid_t pid;
 	while((pid = waitpid(getpid(), &status, WNOHANG | WUNTRACED | WCONTINUED) != -1)){
 		printf("Pid: %d has status: %d but is ending artificially", pid, status);
@@ -37,7 +38,8 @@ void handle_exit(void) {
 
   	// Print the exit message and exit
   	fprintf(stderr, "\nexit\n");
-  	exit(EXIT_SUCCESS);
+	status = current->command[1] != NULL ? atoi(current->command[1]) : parent->last_foreground;
+  	exit(status);
 }
 
 int execute_cd(char *path) {

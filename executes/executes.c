@@ -165,12 +165,12 @@ int handle_redirection(ProgArgs *current) {
     return EXIT_SUCCESS;
 }
 
-int run_commands(ProgArgs *current, ParentStruct* parent){
+int run_commands(ProgArgs *current, ParentStruct *parent){
 
 	// Processing with a current->command that is not ""
 	pid_t wpid = -1;
 	pid_t pid = fork();
-	int stopped;
+	
     	if (pid == -1) {
         	perror("Fork failed. Reason for failure:");
         	return EXIT_FAILURE;
@@ -217,53 +217,32 @@ int run_commands(ProgArgs *current, ParentStruct* parent){
 			fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
         		exit(EXIT_FAILURE);
 		};
+
 		exit(EXIT_SUCCESS);
 
 	} else { // parent process
 		int status;
 		int hang = 0;
 
-		parent->heap[parent->heap_size] = current;
-		parent->heap[parent->heap_size]->pid = pid;
-		parent->heap_size++;
 		
 		// The WNOHANG option sends a process to the background.
 		if(current->background){
 			hang = WNOHANG;
 		}
-		if ((wpid = waitpid(-getpid(), &status, hang)) == -1) {
+		if ((wpid = waitpid(0, &status, hang)) == -1) {
             		
-			if(errno != 10 || errno != 11){
+			if(errno != 10){
 				return EXIT_SUCCESS;
 			}
+			
 	    		return EXIT_FAILURE;
         	}
-
-		
-		if(wpid > 0){
-			
-			if(WIFSTOPPED(status)){
-				stopped = WSTOPSIG(status) + 128;
-				if(kill(wpid, SIGCONT) == -1){
-					return EXIT_FAILURE;
-				}
-				parent->last_background = stopped;
-
-			} else {
-				parent->last_foreground = WEXITSTATUS(status);
-			}
-			
-			parent->heap[parent->heap_size-1] = NULL;
-			parent->heap_size--;
+		if(WIFEXITED(status)){
+			parent->last_foreground = WEXITSTATUS(status);
 		} 
 
-		// Resetting the other options (for the next loop of the parent) is more straightforward
-		if(strcmp(current->command[0], "") != 0){
-			strcpy(current->command[0], "");
-		}
-		strcpy(current->input, "");
-		strcpy(current->output, "");
-		current->background = false;
+		
+	
         	return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_SUCCESS;
     	}
     	return EXIT_FAILURE;
@@ -289,14 +268,14 @@ int spec_execute(ProgArgs *current, FILE* stream, ParentStruct* parent){
 
 	// command is NULL, but input *something* for command
 	if(spec_expansion(input, "$$", 1, parent) == EXIT_FAILURE){
-		perror("Spec expansion errored:");
+	
 		return EXIT_FAILURE;
 	};
 
 
 	// command is NULL, but now it is being loaded.
 	if(spec_parsing(input, current) == EXIT_FAILURE){
-		perror("Spec parsing errored:");
+		
 		return EXIT_FAILURE;
 	};
 
@@ -305,7 +284,7 @@ int spec_execute(ProgArgs *current, FILE* stream, ParentStruct* parent){
 	if(strcmp(current->command[0], "") != 0){
 		// command is "exit"
 		if(strcmp(current->command[0], "exit") == 0){
-			handle_exit();		
+			handle_exit(current, parent);		
 		}
 
 		// command is "cd"

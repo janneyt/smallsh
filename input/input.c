@@ -58,21 +58,7 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
             			}
 			}
 
-			for(int index = 0; index < parent->heap_size; index++){
-				if(parent->heap[index]->pid == pid){
-					ProgArgs* current = parent->heap[index];
-
-					if(current->background){
-						parent->last_background = exit_status;
-					} else {
-						parent->last_foreground = exit_status;
-					}
-					parent->heap[index] = NULL;
-					if(parent->heap_size > -1){
-						parent->heap_size--;
-					}
-				}
-			}
+			parent->last_background = status;
 		}
 		
 		if(pid == -1 && errno != 10){
@@ -163,7 +149,6 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 		return EXIT_FAILURE;
 	}
 
-	assert(input_length >= 0);
 	sigaction(SIGINT, &oldaction, NULL);
 	sigaction(SIGCHLD, &child, NULL);
 	return EXIT_SUCCESS;
@@ -189,6 +174,7 @@ char** help_split_line(char** storage, char* line){
 
 	char*   old_delim = (strcmp(delim, DELIMITER) == 0) ? DELIMITER : getenv("IFS");
 		
+
 	if(bufsize < 1){
 		printf("A buffer of 1 or more is needed for tokenization");
 		exit(EXIT_FAILURE);
@@ -200,25 +186,40 @@ char** help_split_line(char** storage, char* line){
 
 		// For bash -c 'exit 166' processing
 		if(token[0] == '\''){
-			delim = "\'\n\t";
-			token += 1;
-		} 
-		if(token[strlen(token) - 1] == '\''){
-			delim = old_delim;
-			token[strlen(token) - 2] = '\0';
-		}
-		
-		array_of_tokens[position] = token;
-		position++;
-		if(position >= bufsize){
-			bufsize += token_bufsize;
-			if((array_of_tokens = realloc(array_of_tokens, bufsize * sizeof(char*))) == NULL){
-				perror("Cannot reallocate memory for array of tokens");
-				exit(EXIT_FAILURE);
-			};
+			delim = "\n\t";
+			token++;			
+ 			
+			char quote_string[LINESIZE] = "";
+			strcpy(quote_string, token);
+			while(token != NULL && token[strlen(token) -1] != '\''){
+				token = strtok(NULL, delim);		
+				strcat(quote_string, " ");
+				strcat(quote_string, token);
+				
+			}
+			quote_string[strlen(quote_string) -1] = '\0';
 			
+			delim = old_delim;
+			array_of_tokens[position] = quote_string;
+			position++;
+			if(token != NULL){
+				token = strtok(NULL, delim);
+			}
+
+		} else {
+		
+			array_of_tokens[position] = token;
+			position++;
+			if(position >= bufsize){
+				bufsize += token_bufsize;
+				if((array_of_tokens = realloc(array_of_tokens, bufsize * sizeof(char*))) == NULL){
+					perror("Cannot reallocate memory for array of tokens");
+					exit(EXIT_FAILURE);
+				};
+				
+			}
+			token = strtok(NULL, delim);
 		}
-		token = strtok(NULL, delim);
 	};
 
 	array_of_tokens[position] = NULL;

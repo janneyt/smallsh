@@ -117,10 +117,10 @@ int util_int_to_string(int num, char str[LINESIZE], int size){
 		return EXIT_FAILURE;
 	};
 	strcat(temp, "");
-	assert(atoi(temp) == num);
+
 
 	strcat(str, "");
 	strncpy(str, temp, size);
-	assert(atoi(str) == num);
+
 	return EXIT_SUCCESS;
 }
