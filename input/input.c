@@ -35,17 +35,21 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
 	int exit_status;
 	int signaled;
 	int stopped;
+	char hold_pid[LINESIZE];
 
     	for(;;) {
-        	pid = waitpid(0, &status, WNOHANG | WUNTRACED | WCONTINUED);
-        	if (pid != -1 && pid != 0) {
-
+        	pid = waitpid(0, &status, WNOHANG | WUNTRACED );
+        	if (pid > 0 ) {
+			util_int_to_string(pid, hold_pid, 9);
+			strcpy(parent->last_background, hold_pid);
         		if (WIFEXITED(status)) {
             			exit_status = WEXITSTATUS(status);
             			fprintf(stderr, "Child process %d done. Exit status %d.\n", pid, exit_status);
-        		} else if (WIFSIGNALED(status)) {
+				
+			} else if (WIFSIGNALED(status)) {
         			signaled = WTERMSIG(status);
         			fprintf(stderr, "Child process %d done. Signaled %d.\n", pid, signaled);
+
         		} else if (WIFSTOPPED(status)) {
         			stopped = WSTOPSIG(status);
 
@@ -58,11 +62,11 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
             			}
 			}
 
-			parent->last_background = status;
+			
 		}
 		
 		if(pid == -1 && errno != 10){
-
+			perror("");
 			return EXIT_FAILURE;
 		} else if(pid == -1 && errno == 10){
 
@@ -79,6 +83,7 @@ void get_line_signal_handler(int signo){
 	if(signo == 2){
 		return;
 	}
+	
 	
 }
 
@@ -106,18 +111,18 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 	if(errno != 0){
 		errno = 0;
 	};
-	assert(errno == 0);
+
 	struct sigaction sa = {0};
 	struct sigaction oldaction = {0};
-	struct sigaction child = {0};
-	struct sigaction child_old = {0};
+
 	sa.sa_handler = get_line_signal_handler;
+
 	sa.sa_flags = SA_RESTART;
-	child.sa_handler = SIG_IGN;
-	child.sa_flags = SA_RESTART;
+
 	sigemptyset(&sa.sa_mask);
+
 	sigaction(SIGINT, &sa, &oldaction);
-	sigaction(SIGCHLD, &sa, &child_old);
+
 
 	// PS1 print
 	if(control_code == 0){
@@ -125,32 +130,29 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 	}
 
 	clearerr(stdin);
-	clearerr(stdout);
-	clearerr(stderr);
-	
-	if(( input_length = getline(&input, &input_size, stream)) < 0){
+	clearerr(stream);
+	if(( input_length = getline(&input, &input_size, stream)) < 0){				sigaction(SIGINT, &oldaction, NULL);
+		
+		clearerr(stdin);
 		if(errno == 11){
+
 			return EXIT_SUCCESS;
 		}
 		perror("Cannot fetch line from input");
-		clearerr(stream);
-		clearerr(stdin);
-		clearerr(stdout);
+
 		errno = 0;
 		
 		return EXIT_FAILURE;
 	};
-
-	clearerr(stream);
 	clearerr(stdin);
-	clearerr(stdout);
+
+
+
 	if(input_length > LINESIZE-1){
 		perror("Input is too large for LINESIZE");
 		return EXIT_FAILURE;
 	}
 
-	sigaction(SIGINT, &oldaction, NULL);
-	sigaction(SIGCHLD, &child, NULL);
 	return EXIT_SUCCESS;
 }
 char** help_split_line(char** storage, char* line){
@@ -166,6 +168,7 @@ char** help_split_line(char** storage, char* line){
 	char*	token;
 	char*	delim = DELIMITER;
 	char    ifs[LINESIZE] = "IFS";
+
 	if(util_check_environ(ifs)){
 		delim = getenv("IFS");
 	}
@@ -181,11 +184,15 @@ char** help_split_line(char** storage, char* line){
 	};
  	
 	token = strtok(line, delim);
-	
+
+
+
 	while(token != NULL){
 
 		// For bash -c 'exit 166' processing
 		if(token[0] == '\''){
+                        //sigaction(SIGCHLD, &oldaction, NULL);
+
 			delim = "\n\t";
 			token++;			
  			
@@ -221,6 +228,8 @@ char** help_split_line(char** storage, char* line){
 			token = strtok(NULL, delim);
 		}
 	};
+
+//		        sigaction(SIGCHLD, &oldaction, NULL);
 
 	array_of_tokens[position] = NULL;
 	return array_of_tokens;

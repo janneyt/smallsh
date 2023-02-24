@@ -34,23 +34,31 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code, Pare
 	// Maximum pid size for 64 bit systems is 9 digits long
 	char str_pid[LINESIZE];
 
-	// For some reason, getenv("HOME") is overwriting pointers so I'm saving the value before I declare anything
 	// Substring == $$, to be replaced with the pid		
 	if(control_code == 1){
+		if(strstr(arg, substring) == NULL){
+			return spec_expansion(arg, "~/", 2, parent);
+		}
 		util_int_to_string(getpid(), str_pid, LINESIZE);
 
 	} else if(control_code == 2){
+		if(strstr(arg, substring) == NULL){
+			return spec_expansion(arg, "$?", 3, parent);
+		}
 		strcpy(str_pid, "");
 		// Substring == ~/, replace with the HOME environment variable
 		char home[LINESIZE] = "HOME";
 		util_env_var_to_fixed_array(home, str_pid); 
 
 	} else if(control_code == 3){
+		if(strstr(arg, substring) == NULL){
+			return spec_expansion(arg, "$!", 4, parent);
+		}
 		strcpy(str_pid, "");
 		// Substring == $?, replace with parent.last_foreground
-		if(parent->last_foreground != 0){
+		if(strcmp(parent->last_foreground, "0" ) != 0){
 
-			util_int_to_string(parent->last_foreground, str_pid, 9);
+			strcpy(str_pid, parent->last_foreground);
 		} else {
 			strcpy(str_pid, "0");
 		}
@@ -58,8 +66,8 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code, Pare
 	} else if(control_code == 4){
 		strcpy(str_pid, "");
 		// Substring == $!, replace with parent.last_background
-		if(parent->last_background != 0){
-			util_int_to_string(parent->last_background, str_pid, 9);
+		if(strcmp(parent->last_background, "") != 0){
+			strcpy(str_pid, parent->last_background);
 		} else {
 			strcpy(str_pid, "");
 		}

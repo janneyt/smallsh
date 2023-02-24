@@ -168,13 +168,13 @@ int handle_redirection(ProgArgs *current) {
 int run_commands(ProgArgs *current, ParentStruct *parent){
 
 	// Processing with a current->command that is not ""
-	pid_t wpid = -1;
 	pid_t pid = fork();
 	
     	if (pid == -1) {
         	perror("Fork failed. Reason for failure:");
         	return EXIT_FAILURE;
     	} else if (pid == 0) { // child process
+
 
 		// So far, I've tolerated a missing command, but only because both
 		// redirection options have a pseudo command built in. However, all 
@@ -202,9 +202,7 @@ int run_commands(ProgArgs *current, ParentStruct *parent){
 				if(strcmp(current->command[0], "") != 0){
 					strcpy(current->command[0], "");
 				}
-				strcpy(current->input, "");
-				strcpy(current->output, "");
-				current->background = false;
+
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -215,36 +213,42 @@ int run_commands(ProgArgs *current, ParentStruct *parent){
 			
         		perror("");
 			fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
+
         		exit(EXIT_FAILURE);
 		};
 
 		exit(EXIT_SUCCESS);
 
 	} else { // parent process
+		
 		int status;
 		int hang = 0;
+		pid_t wpid = 0;
 
-		
-		// The WNOHANG option sends a process to the background.
+		// Background commands need WNOHANG
 		if(current->background){
 			hang = WNOHANG;
 		}
-		if ((wpid = waitpid(0, &status, hang)) == -1) {
-            		
-			if(errno != 10){
+
+
+
+		if((wpid = waitpid(0, &status, hang)) < 0){
+			
+			if(errno == 10){
+				perror("");	
 				return EXIT_SUCCESS;
 			}
-			
-	    		return EXIT_FAILURE;
-        	}
+			return EXIT_FAILURE;
+		}
 		if(WIFEXITED(status)){
-			parent->last_foreground = WEXITSTATUS(status);
-		} 
-
-		
-	
-        	return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_SUCCESS;
-    	}
+			char hold_status[LINESIZE] = {0};
+			util_int_to_string(WEXITSTATUS(status), hold_status, 9);
+			strcpy(parent->last_foreground, hold_status);
+			return EXIT_SUCCESS;
+		}
+		printf("status: %d", status);
+		return EXIT_SUCCESS;
+	}
     	return EXIT_FAILURE;
 
 }
@@ -252,7 +256,6 @@ int run_commands(ProgArgs *current, ParentStruct *parent){
 
 int spec_execute(ProgArgs *current, FILE* stream, ParentStruct* parent){
 	char input[LINESIZE];
-	
         if(current->command[0] == NULL){
 		current->command[0] = '\0';
 		strcpy(current->command[0], "");
@@ -266,18 +269,25 @@ int spec_execute(ProgArgs *current, FILE* stream, ParentStruct* parent){
 	};
 
 
+
 	// command is NULL, but input *something* for command
 	if(spec_expansion(input, "$$", 1, parent) == EXIT_FAILURE){
 	
 		return EXIT_FAILURE;
 	};
 
-
+	//struct sigaction sa = {0}, oldaction = {0};
+	//sa.sa_handler = SIG_IGN;
+	//oldaction.sa_handler = SIG_DFL;
+	//sigfillset(&sa.sa_mask);
+	//sigfillset(&sa.sa_mask);
+	//sigaction(SIGCHLD, &sa, &oldaction);
 	// command is NULL, but now it is being loaded.
 	if(spec_parsing(input, current) == EXIT_FAILURE){
 		
 		return EXIT_FAILURE;
 	};
+	//sigaction(SIGCHLD, &oldaction, NULL);
 
 	// Built in commands are only possible when the command function is loaded, but if only input redirection is listed then 
 	// there is no command on the first run through

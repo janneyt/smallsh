@@ -21,18 +21,22 @@ int spec_parsing(char string[LINESIZE], ProgArgs *current){
 	 *
 	 * @return EXIT_SUCCESS if every step completes, else EXIT_FAILURE for any step failing
 	 * */
+
 	char* storage[LINESIZE];
 
 	int storagelength = 0;
-	spec_word_splitting(storage, string);
+	if(spec_word_splitting(storage, string) == EXIT_FAILURE){
+		return EXIT_FAILURE;
+	};
 	int index = 0;
 	int command_index = 0;
         current->background = false;
 
 	if(storage[0] == 0x0){
-		fprintf(stderr, "Input is equal to null, which is invalid");
 		return EXIT_FAILURE;
 	}
+
+
 
 	// Find the length of the char**
 	while(index < LINESIZE){
@@ -163,6 +167,5 @@ int spec_parsing(char string[LINESIZE], ProgArgs *current){
 	if(strcmp(current->command[0], "") != 0 && command_index != 0){
 		current->command[command_index] = 0x0;
 	}
-
 	return EXIT_SUCCESS;
 }

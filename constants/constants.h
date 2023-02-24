@@ -12,18 +12,11 @@ typedef struct {
 	char input[STRINGSIZE];
 	char output[STRINGSIZE];
 	int background;
-	time_t timestamp;
-	pid_t pid;
-	int status;
 } ProgArgs;
 
 
 typedef struct {
-	int pid_counter;
-	int pid;
-	ProgArgs* heap[NUMCHILDREN];
-	int last_foreground;
-	int last_background;
-	int heap_size;
+	char last_foreground[STRINGSIZE];
+	char last_background[STRINGSIZE];
 } ParentStruct;
 

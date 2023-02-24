@@ -30,12 +30,10 @@ int main(void){
 
 	spec_signal_handler();
 	ParentStruct parent = {
-		.pid = 0,
-		.pid_counter = 0,
-		.heap = {NULL},
-		.last_foreground = 0,
-		.last_background = 0,
-		.heap_size = 0
+
+		.last_foreground = {0},
+		.last_background = {0},
+
 	};
 	for(;;){
 		fflush(stdout);
@@ -57,6 +55,8 @@ int main(void){
 		current.background = false;
 
 		if(spec_execute(&current, stdin, &parent) == EXIT_FAILURE){
+			perror("");
+			
 		};		
 	}
 
