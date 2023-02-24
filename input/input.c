@@ -190,21 +190,18 @@ char** help_split_line(char** storage, char* line){
 	while(token != NULL){
 
 		// For bash -c 'exit 166' processing
-		if(token[0] == '\''){
+		if(token[0] == '\'' || token[0] == '\"'){
                         //sigaction(SIGCHLD, &oldaction, NULL);
 
-			delim = "\n\t";
+			// Change delim to look for the closing quote
+			delim = "\n\t\'\"";
 			token++;			
  			
 			char quote_string[LINESIZE] = "";
 			strcpy(quote_string, token);
-			while(token != NULL && token[strlen(token) -1] != '\''){
-				token = strtok(NULL, delim);		
-				strcat(quote_string, " ");
-				strcat(quote_string, token);
-				
-			}
-			quote_string[strlen(quote_string) -1] = '\0';
+			strcat(quote_string, " ");
+			token = strtok(NULL, delim);
+			strcat(quote_string, token);
 			
 			delim = old_delim;
 			array_of_tokens[position] = quote_string;
