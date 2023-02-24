@@ -85,7 +85,7 @@ int handle_redirection(ProgArgs *current) {
     // Handle redirection only occurs in a child process, so execute the process here
     if(strcmp(current->command[0], "") != 0 && execvp(current->command[0], current->command) < 0){
 	    
-	perror("\n");
+	perror("in redirection");
 	fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
 	strcpy(current->command[0], "");
 	strcpy(current->input, "");
@@ -211,7 +211,7 @@ int run_commands(ProgArgs *current, ParentStruct *parent){
 	         
         	if(execvp(current->command[0], current->command) < 0){
 			
-        		perror("");
+        		perror("Command failed");
 			fprintf(stderr, "Failed to execute command %s: %s\n", current->command[0], strerror(errno));
 
         		exit(EXIT_FAILURE);
@@ -224,10 +224,13 @@ int run_commands(ProgArgs *current, ParentStruct *parent){
 		int status;
 		int hang = 0;
 		pid_t wpid = 0;
-
+		char hold_str[LINESIZE] = {0};
+	
 		// Background commands need WNOHANG
 		if(current->background){
 			hang = WNOHANG;
+			util_int_to_string(pid, hold_str, 9);
+			strcpy(parent->last_background, hold_str);
 		}
 
 
@@ -235,27 +238,19 @@ int run_commands(ProgArgs *current, ParentStruct *parent){
 		if((wpid = waitpid(0, &status, hang)) < 0){
 			
 			if(errno == 10){
-				perror("");	
+				perror("Errno is 10 while waiting");	
 				return EXIT_SUCCESS;
 			}
 			return EXIT_FAILURE;
-		}
-		if(WIFEXITED(status)){
-			char hold_status[LINESIZE] = {0};
-			util_int_to_string(WEXITSTATUS(status), hold_status, 9);
-			strcpy(parent->last_foreground, hold_status);
-			return EXIT_SUCCESS;
-		}
-		printf("status: %d", status);
-		return EXIT_SUCCESS;
-	}
-    	return EXIT_FAILURE;
 
+		}
+    	return EXIT_SUCCESS;
+	
+    	}
 }
 
-
 int spec_execute(ProgArgs *current, FILE* stream, ParentStruct* parent){
-	char input[LINESIZE];
+	char input[LINESIZE] = {0};
         if(current->command[0] == NULL){
 		current->command[0] = '\0';
 		strcpy(current->command[0], "");
@@ -264,7 +259,8 @@ int spec_execute(ProgArgs *current, FILE* stream, ParentStruct* parent){
 	strcpy(current->output, "");
 	current->background = false;
 	// command is NULL
-	if(spec_get_line(input, LINESIZE, stream, 0) == EXIT_FAILURE){
+	if(spec_get_line(input, LINESIZE, stream, 0, parent) == EXIT_FAILURE){
+		perror("Spec get line failed");
 		return EXIT_FAILURE;
 	};
 
@@ -276,18 +272,12 @@ int spec_execute(ProgArgs *current, FILE* stream, ParentStruct* parent){
 		return EXIT_FAILURE;
 	};
 
-	//struct sigaction sa = {0}, oldaction = {0};
-	//sa.sa_handler = SIG_IGN;
-	//oldaction.sa_handler = SIG_DFL;
-	//sigfillset(&sa.sa_mask);
-	//sigfillset(&sa.sa_mask);
-	//sigaction(SIGCHLD, &sa, &oldaction);
-	// command is NULL, but now it is being loaded.
+
 	if(spec_parsing(input, current) == EXIT_FAILURE){
 		
 		return EXIT_FAILURE;
 	};
-	//sigaction(SIGCHLD, &oldaction, NULL);
+
 
 	// Built in commands are only possible when the command function is loaded, but if only input redirection is listed then 
 	// there is no command on the first run through
@@ -300,7 +290,7 @@ int spec_execute(ProgArgs *current, FILE* stream, ParentStruct* parent){
 		// command is "cd"
 		else if(current->command[0][0] == 'c' && current->command[0][1] == 'd'){
 			if(execute_cd(current->command[1]) == EXIT_FAILURE){
-				perror("");
+				perror("Cd command failed");
 				return EXIT_FAILURE;
 			}
 		

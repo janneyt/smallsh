@@ -14,7 +14,7 @@
 # include <errno.h>
 
 int spec_check_for_child_background_processes(ParentStruct* parent);
-int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int control_code);
+int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int control_code, ParentStruct* parent);
 char** help_split_line(char** storage, char* line);
 int spec_word_splitting(char* storage[LINESIZE], char input[LINESIZE]);
 

@@ -45,7 +45,11 @@ int main(void){
 		ProgArgs current = {.command = {""}, .input = "", .output = "", .background = false};
 
 		if(spec_check_for_child_background_processes(&parent) == EXIT_FAILURE){
-			exit(EXIT_FAILURE);
+			clearerr(stdout);
+			clearerr(stderr);
+			clearerr(stdin);
+			
+			printf("\n");
 		}
 		if(strcmp(current.command[0], "") != 0){
 			strcpy(current.command[0], "");
@@ -55,7 +59,11 @@ int main(void){
 		current.background = false;
 
 		if(spec_execute(&current, stdin, &parent) == EXIT_FAILURE){
-			perror("");
+			clearerr(stderr);
+			clearerr(stdout);
+			clearerr(stdin);
+			errno = 0;
+			printf("\n");
 			
 		};		
 	}

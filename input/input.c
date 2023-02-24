@@ -9,18 +9,26 @@
 # include <stdlib.h>
 # include <assert.h>
 # include <stdint.h>
-# ifndef  LINESIZE
+# ifndef  ParentStruct
 # include "../constants/constants.h"
 
 # include "../signal-project/signal-project.h"
 # endif
 # include <stdlib.h>
 # include <errno.h>
-
+# ifndef  spec_execute
+# include "../executes/executes.h"
+# endif
 # ifndef  util_check_environ
 # include "../utilities/utilities.h"
 # endif
 
+char passed_input[LINESIZE] = {0};
+ssize_t passed_size = 0;
+int  passed_control_code = 0;
+FILE* passed_stream;
+int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int control_code, ParentStruct* parent);
+ParentStruct* passed_parent;
 
 /**
  * @brief Checks for un-waited-for background processes in the same process group ID as smallsh.
@@ -34,45 +42,50 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
 	int status;
 	int exit_status;
 	int signaled;
-	int stopped;
-	char hold_pid[LINESIZE];
 
+	char hold_pid[LINESIZE];
+	int stopped = 0;
+	clearerr(stdin);
+	clearerr(stdout);
+	clearerr(stderr);
     	for(;;) {
-        	pid = waitpid(0, &status, WNOHANG | WUNTRACED );
+        	pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED);
         	if (pid > 0 ) {
 			util_int_to_string(pid, hold_pid, 9);
 			strcpy(parent->last_background, hold_pid);
         		if (WIFEXITED(status)) {
             			exit_status = WEXITSTATUS(status);
-            			fprintf(stderr, "Child process %d done. Exit status %d.\n", pid, exit_status);
-				
+            			fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) pid, exit_status);
+				fflush(stderr);
+				fflush(stdout);
+				fflush(stdin);
 			} else if (WIFSIGNALED(status)) {
         			signaled = WTERMSIG(status);
-        			fprintf(stderr, "Child process %d done. Signaled %d.\n", pid, signaled);
+        			fprintf(stderr, "Child process %jd done. Signaled %d.\n", (intmax_t) pid, signaled);
+				fflush(stderr);
+				fflush(stdout);
+				fflush(stdin);
 
         		} else if (WIFSTOPPED(status)) {
-        			stopped = WSTOPSIG(status);
+				stopped = WSTOPSIG(status);
+				if(stopped == SIGSTOP){
+            			if (kill(pid, SIGCONT) == -1) {
+                			perror("kill couldn't send a signal");
+                    			return EXIT_FAILURE;
+                		}
+        			fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t) pid);
 
-        			if (stopped == SIGTSTP) {
-        				if (kill(pid, SIGCONT) == -1) {
-                				perror("kill couldn't send a signal");
-                    				return EXIT_FAILURE;
-                			}
-                			fprintf(stderr, "Child process %d stopped. Continuing.\n", pid);
-            			}
+				}
 			}
 
-			
+
+			return EXIT_SUCCESS;	
 		}
 		
 		if(pid == -1 && errno != 10){
-			perror("");
+			perror("pid is -1");
 			return EXIT_FAILURE;
-		} else if(pid == -1 && errno == 10){
-
-			return EXIT_SUCCESS;
-		}
-		if(pid == 0){
+		} else {
 			return EXIT_SUCCESS;
 		}
 	}
@@ -80,7 +93,11 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
 }
 
 void get_line_signal_handler(int signo){
-	if(signo == 2){
+	if(signo != SIGTSTP){
+		fprintf(stderr, "\n");
+		spec_check_for_child_background_processes(passed_parent);
+		fprintf(stderr, "$");
+
 		return;
 	}
 	
@@ -88,7 +105,7 @@ void get_line_signal_handler(int signo){
 }
 
 
-int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int control_code){
+int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int control_code, ParentStruct* parent){
 	/**
 	 * \brief Gets the input and returns it. Has it's own signal handling.
 	 * 
@@ -103,7 +120,11 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 	 * in the passed input parameter
 	 *
 	 * */
-	
+	strcpy(passed_input, input);
+	passed_parent = parent;
+	passed_size = input_size;
+	passed_stream = stream;
+	passed_control_code = control_code;
 	// input_length currently is zero, as nothing is entered. This would be the same as entering an empty string, so be careful
 	ssize_t input_length = 0;
 
@@ -114,38 +135,68 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 
 	struct sigaction sa = {0};
 	struct sigaction oldaction = {0};
-
+	struct sigaction child = {0};
+	struct sigaction old_child = {0};
 	sa.sa_handler = get_line_signal_handler;
-
+	child.sa_handler = SIG_DFL;
 	sa.sa_flags = SA_RESTART;
+	child.sa_flags = SA_RESTART;
 
 	sigemptyset(&sa.sa_mask);
+	sigemptyset(&child.sa_mask);
 
 	sigaction(SIGINT, &sa, &oldaction);
-
+        sigaction(SIGCHLD, &child, &old_child);
 
 	// PS1 print
 	if(control_code == 0){
-		printf("$");
+		fprintf(stderr, "$");
 	}
 
 	clearerr(stdin);
 	clearerr(stream);
-	if(( input_length = getline(&input, &input_size, stream)) < 0){				sigaction(SIGINT, &oldaction, NULL);
-		
-		clearerr(stdin);
+	clearerr(stderr);
+	clearerr(stdout);
+	errno = 0;
+	strcpy(input, "");
+	if(( input_length = getline(&input, &input_size, stream)) < 0){				
+		sigaction(SIGINT, &oldaction, NULL);
+		sigaction(SIGCHLD, &old_child, NULL);
+		perror("Problem with errno");
+		printf("Input length: %lu\n", input_length);
+		fflush(stderr);
+		fflush(stdout);
+		fflush(stdin);
+		if(errno == 10){
+			clearerr(stderr);
+			clearerr(stdout);
+			clearerr(stream);
+			clearerr(stdin);
+			perror("Inside errno == 10");
+			errno = 0;
+			return EXIT_SUCCESS;
+
+		}
 		if(errno == 11){
+			perror("Inside errno == 11");
+			clearerr(stderr);
+			clearerr(stdout);
+			clearerr(stream);
+			clearerr(stdin);
+
+			errno = 0;
 
 			return EXIT_SUCCESS;
 		}
-		perror("Cannot fetch line from input");
+		perror("other than errno 11 or 10");
 
 		errno = 0;
 		
-		return EXIT_FAILURE;
+		return EXIT_SUCCESS;
 	};
 	clearerr(stdin);
-
+	sigaction(SIGINT, &oldaction, NULL);
+	sigaction(SIGCHLD, &old_child, NULL);
 
 
 	if(input_length > LINESIZE-1){
