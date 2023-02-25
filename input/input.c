@@ -28,7 +28,7 @@ ssize_t passed_size = 0;
 int  passed_control_code = 0;
 FILE* passed_stream;
 int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int control_code, ParentStruct* parent);
-ParentStruct* passed_parent;
+ParentStruct pass_parent;
 
 /**
  * @brief Checks for un-waited-for background processes in the same process group ID as smallsh.
@@ -49,10 +49,11 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
 	clearerr(stdout);
 	clearerr(stderr);
     	for(;;) {
-        	pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED);
+        	pid = waitpid(-getpid(), &status, WNOHANG | WUNTRACED | WCONTINUED);
         	if (pid > 0 ) {
 			util_int_to_string(pid, hold_pid, 9);
 			strcpy(parent->last_background, hold_pid);
+
         		if (WIFEXITED(status)) {
             			exit_status = WEXITSTATUS(status);
             			fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) pid, exit_status);
@@ -74,7 +75,9 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
                     			return EXIT_FAILURE;
                 		}
         			fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t) pid);
-
+				fflush(stderr);
+				fflush(stdout);
+				fflush(stdin);
 				}
 			}
 
@@ -90,18 +93,6 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
 		}
 	}
 	return EXIT_SUCCESS;
-}
-
-void get_line_signal_handler(int signo){
-	if(signo != SIGTSTP){
-		fprintf(stderr, "\n");
-		spec_check_for_child_background_processes(passed_parent);
-		fprintf(stderr, "$");
-
-		return;
-	}
-	
-	
 }
 
 
@@ -120,8 +111,9 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 	 * in the passed input parameter
 	 *
 	 * */
+	strcpy(input, "");
 	strcpy(passed_input, input);
-	passed_parent = parent;
+	pass_parent = *parent;
 	passed_size = input_size;
 	passed_stream = stream;
 	passed_control_code = control_code;
@@ -133,20 +125,7 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 		errno = 0;
 	};
 
-	struct sigaction sa = {0};
-	struct sigaction oldaction = {0};
-	struct sigaction child = {0};
-	struct sigaction old_child = {0};
-	sa.sa_handler = get_line_signal_handler;
-	child.sa_handler = SIG_DFL;
-	sa.sa_flags = SA_RESTART;
-	child.sa_flags = SA_RESTART;
 
-	sigemptyset(&sa.sa_mask);
-	sigemptyset(&child.sa_mask);
-
-	sigaction(SIGINT, &sa, &oldaction);
-        sigaction(SIGCHLD, &child, &old_child);
 
 	// PS1 print
 	if(control_code == 0){
@@ -159,9 +138,9 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 	clearerr(stdout);
 	errno = 0;
 	strcpy(input, "");
-	if(( input_length = getline(&input, &input_size, stream)) < 0){				
-		sigaction(SIGINT, &oldaction, NULL);
-		sigaction(SIGCHLD, &old_child, NULL);
+
+	if(( input_length = getline(&input, &input_size, stdin)) < 0){				
+
 		perror("Problem with errno");
 		printf("Input length: %lu\n", input_length);
 		fflush(stderr);
@@ -194,9 +173,7 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 		
 		return EXIT_SUCCESS;
 	};
-	clearerr(stdin);
-	sigaction(SIGINT, &oldaction, NULL);
-	sigaction(SIGCHLD, &old_child, NULL);
+
 
 
 	if(input_length > LINESIZE-1){

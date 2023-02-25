@@ -7,21 +7,27 @@
 
 # include "../constants/constants.h"
 # endif
+# ifndef  spec_check_for_child_background_processes
+# include "../input/input.h"
+# endif
 
-void ignore_signal(int signo){
-	if(signo == 2 || signo == 9){
-		return;
-	}
-}
+ParentStruct passed_parent;
 
-void spec_signal_handler(void) {
+void spec_signal_handler(ParentStruct* parent) {
+	passed_parent = *parent;
 	struct sigaction act;
-
-	act.sa_handler = ignore_signal;
-
+	struct sigaction handle_sigtstp;
+	struct sigaction oldaction;
+	handle_sigtstp.sa_handler = SIG_IGN;
+	act.sa_handler = SIG_IGN;
+	sigfillset(&handle_sigtstp.sa_mask);
+	sigfillset(&act.sa_mask);
+	handle_sigtstp.sa_flags = 0;
+	act.sa_flags = 0;
+	
 	 
-	sigaction(SIGINT, &act, NULL);
-	sigaction(SIGTSTP, &act, NULL);
+	sigaction(SIGINT, &act, &oldaction);
+	sigaction(SIGTSTP, &handle_sigtstp, &oldaction);
 
 	sigset_t smallsh_signals;
 

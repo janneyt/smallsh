@@ -26,9 +26,8 @@ void handle_exit(ProgArgs* current, ParentStruct* parent) {
 	int status;
 	
 	pid_t pid;
-	while((pid = waitpid(getpid(), &status, WNOHANG | WUNTRACED | WCONTINUED) != -1)){
-		printf("Pid: %d has status: %d but is ending artificially", pid, status);
-		if(kill(SIGKILL, pid) == -1){
+	while((pid = waitpid(-getpid(), &status, WNOHANG | WUNTRACED | WCONTINUED) > 0)){
+		if(kill(SIGSTOP, pid) == -1){
 			perror("Could not kill all child processes");
 			exit(EXIT_FAILURE);
 		}
@@ -38,7 +37,7 @@ void handle_exit(ProgArgs* current, ParentStruct* parent) {
 
   	// Print the exit message and exit
   	fprintf(stderr, "\nexit\n");
-	status = current->command[1] != NULL ? atoi(current->command[1]) : parent->last_foreground;
+	status = current->command[1] != NULL ? atoi(current->command[1]) : atoi(parent->last_foreground);
   	exit(status);
 }
 

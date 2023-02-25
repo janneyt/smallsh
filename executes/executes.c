@@ -16,7 +16,8 @@
 
 int spec_execute(ProgArgs* current, FILE* stream, ParentStruct* parent);
 int run_commands(ProgArgs* current, ParentStruct* parent);
-
+ParentStruct temp_parent;
+char input[LINESIZE] = {0};
 
 /**
  * @brief Handles input and output redirection.
@@ -175,7 +176,6 @@ int run_commands(ProgArgs *current, ParentStruct *parent){
         	return EXIT_FAILURE;
     	} else if (pid == 0) { // child process
 
-
 		// So far, I've tolerated a missing command, but only because both
 		// redirection options have a pseudo command built in. However, all 
 		// other alternatives must be discarded
@@ -244,26 +244,58 @@ int run_commands(ProgArgs *current, ParentStruct *parent){
 			return EXIT_FAILURE;
 
 		}
+		strcpy(hold_str, "");
+		if(WIFEXITED(status)){
+			util_int_to_string(WEXITSTATUS(status), hold_str, 9);
+			strcpy(parent->last_foreground, hold_str);
+		} else if (WIFSIGNALED(status)){
+
+			util_int_to_string(128+WEXITSTATUS(status), hold_str, 9);
+
+			strcpy(parent->last_foreground, hold_str);
+		}
+
     	return EXIT_SUCCESS;
 	
     	}
 }
 
+void handle_input_sigint(int signo){
+	fprintf(stderr, "input handler\n");
+	if(signo != SIGTSTP){
+		strcpy(input, "");
+		spec_check_for_child_background_processes(&temp_parent);
+		fprintf(stderr, "\n$");
+	
+	}
+
+}
+
 int spec_execute(ProgArgs *current, FILE* stream, ParentStruct* parent){
-	char input[LINESIZE] = {0};
+	temp_parent = *parent;
         if(current->command[0] == NULL){
 		current->command[0] = '\0';
+
 		strcpy(current->command[0], "");
 	}	
 	strcpy(current->input, "");
 	strcpy(current->output, "");
 	current->background = false;
+
+	struct sigaction input_SIGINT = {0};
+	struct sigaction old = {0};
+	input_SIGINT.sa_handler = handle_input_sigint;
+	input_SIGINT.sa_flags = SA_RESTART;
+	sigemptyset(&input_SIGINT.sa_mask);
+	sigaction(SIGINT, &input_SIGINT, &old);
+	sigaction(SIGCHLD, &input_SIGINT, &old);
 	// command is NULL
 	if(spec_get_line(input, LINESIZE, stream, 0, parent) == EXIT_FAILURE){
 		perror("Spec get line failed");
 		return EXIT_FAILURE;
 	};
-
+	sigaction(SIGINT, &old, NULL);
+	sigaction(SIGCHLD, &old, NULL);
 
 
 	// command is NULL, but input *something* for command

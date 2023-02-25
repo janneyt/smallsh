@@ -28,13 +28,14 @@ int main(void){
 	 * @return Exits to EXIT_FAILURE if utility functions such as print fails, otherwise exits to EXIT_SUCCESS when appropriate signal is sent
 	 */
 
-	spec_signal_handler();
 	ParentStruct parent = {
 
 		.last_foreground = {0},
 		.last_background = {0},
 
 	};
+
+	spec_signal_handler(&parent);
 	for(;;){
 		fflush(stdout);
 		fflush(stderr);
@@ -65,7 +66,8 @@ int main(void){
 			errno = 0;
 			printf("\n");
 			
-		};		
+		};
+
 	}
 
 

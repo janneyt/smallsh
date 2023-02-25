@@ -7,4 +7,4 @@
 # include "../constants/constants.h"
 # endif
 
-void spec_signal_handler(void);
+void spec_signal_handler(ParentStruct* parent);
