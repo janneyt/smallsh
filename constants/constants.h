@@ -4,6 +4,8 @@
 # define NUMCHILDREN		6
 # include 			<time.h>
 # include			<stdint.h>
+# include			<signal.h>
+
 
 typedef int make_iso_compilers_happy;
 
@@ -18,5 +20,6 @@ typedef struct {
 typedef struct {
 	char last_foreground[STRINGSIZE];
 	char last_background[STRINGSIZE];
+	struct sigaction oldaction;
 } ParentStruct;
 

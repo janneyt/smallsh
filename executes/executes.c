@@ -175,6 +175,12 @@ int run_commands(ProgArgs *current, ParentStruct *parent){
         	perror("Fork failed. Reason for failure:");
         	return EXIT_FAILURE;
     	} else if (pid == 0) { // child process
+		struct sigaction restore_sigaction = parent->oldaction;
+		sigaction(SIGINT, &restore_sigaction, NULL);
+		sigaction(SIGTSTP, &restore_sigaction, NULL);
+		sigset_t restored_signals;
+		sigaddset(&restored_signals, SIGINT);
+		sigaddset(&restored_signals, SIGTSTP);
 
 		// So far, I've tolerated a missing command, but only because both
 		// redirection options have a pseudo command built in. However, all 
@@ -235,7 +241,7 @@ int run_commands(ProgArgs *current, ParentStruct *parent){
 
 
 
-		if((wpid = waitpid(0, &status, hang)) < 0){
+		if((wpid = waitpid(-getpid(), &status, hang)) < 0){
 			
 			if(errno == 10){
 				perror("Errno is 10 while waiting");	
@@ -248,11 +254,13 @@ int run_commands(ProgArgs *current, ParentStruct *parent){
 		if(WIFEXITED(status)){
 			util_int_to_string(WEXITSTATUS(status), hold_str, 9);
 			strcpy(parent->last_foreground, hold_str);
+			fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) wpid, WEXITSTATUS(status));
 		} else if (WIFSIGNALED(status)){
 
 			util_int_to_string(128+WEXITSTATUS(status), hold_str, 9);
 
 			strcpy(parent->last_foreground, hold_str);
+			fprintf(stderr, "Child process %jd done. Signaled %d.\n", (intmax_t) wpid, WTERMSIG(status));
 		}
 
     	return EXIT_SUCCESS;
@@ -261,11 +269,9 @@ int run_commands(ProgArgs *current, ParentStruct *parent){
 }
 
 void handle_input_sigint(int signo){
-	fprintf(stderr, "input handler\n");
 	if(signo != SIGTSTP){
-		strcpy(input, "");
 		spec_check_for_child_background_processes(&temp_parent);
-		fprintf(stderr, "\n$");
+		fprintf(stderr, "$");
 	
 	}
 

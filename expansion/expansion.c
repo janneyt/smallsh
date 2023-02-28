@@ -78,7 +78,6 @@ int spec_expansion(char arg[LINESIZE], char substring[3], int control_code, Pare
 	int length = strlen(arg);
 
 	if(length < 1 || length > LINESIZE){
-		fprintf(stderr, "The length of the passed string is not in the range of 1 and %d inclusive", LINESIZE);
 		exit(EXIT_FAILURE);
 	}
 

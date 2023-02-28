@@ -49,11 +49,10 @@ int spec_check_for_child_background_processes(ParentStruct* parent) {
 	clearerr(stdout);
 	clearerr(stderr);
     	for(;;) {
-        	pid = waitpid(-getpid(), &status, WNOHANG | WUNTRACED | WCONTINUED);
+        	pid = waitpid(0, &status, WNOHANG | WUNTRACED | WCONTINUED);
         	if (pid > 0 ) {
 			util_int_to_string(pid, hold_pid, 9);
 			strcpy(parent->last_background, hold_pid);
-
         		if (WIFEXITED(status)) {
             			exit_status = WEXITSTATUS(status);
             			fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) pid, exit_status);
@@ -138,11 +137,11 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 	clearerr(stdout);
 	errno = 0;
 	strcpy(input, "");
-
+	fflush(stdin);
+	fflush(stdout);
+	fflush(stderr);
 	if(( input_length = getline(&input, &input_size, stdin)) < 0){				
 
-		perror("Problem with errno");
-		printf("Input length: %lu\n", input_length);
 		fflush(stderr);
 		fflush(stdout);
 		fflush(stdin);
@@ -167,8 +166,6 @@ int spec_get_line(char input[LINESIZE], size_t input_size, FILE* stream, int con
 
 			return EXIT_SUCCESS;
 		}
-		perror("other than errno 11 or 10");
-
 		errno = 0;
 		
 		return EXIT_SUCCESS;
@@ -219,7 +216,7 @@ char** help_split_line(char** storage, char* line){
 
 		// For bash -c 'exit 166' processing
 		if(token[0] == '\'' || token[0] == '\"'){
-                        //sigaction(SIGCHLD, &oldaction, NULL);
+                
 
 			// Change delim to look for the closing quote
 			delim = "\n\t\'\"";
@@ -254,7 +251,7 @@ char** help_split_line(char** storage, char* line){
 		}
 	};
 
-//		        sigaction(SIGCHLD, &oldaction, NULL);
+
 
 	array_of_tokens[position] = NULL;
 	return array_of_tokens;
